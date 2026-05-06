@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market News | NEPSE HUB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/themes.css">
+</head>
+<body>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+        <main class="main-content">
+            <div id="app">
+                <div class="fade-in">
+                    <div class="section-header">
+                        <h2>Market News & Updates</h2>
+                    </div>
+                    <div id="news-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+                        <div class="loading-placeholder">Loading news...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import globalState from '../js/state.js';
+        import { Layout } from '../js/layout.js';
+
+        async function init() {
+            globalState.setState({ activePage: 'news' });
+            await Layout.init();
+            
+            globalState.subscribe((state) => {
+                if (state.news.length > 0) {
+                    renderNews(state.news);
+                }
+            });
+        }
+
+        function renderNews(news) {
+            const grid = document.getElementById('news-grid');
+            if (!grid) return;
+            grid.innerHTML = news.map(item => `
+                <div class="glass" style="padding: 1.5rem; border-radius: 16px; transition: var(--transition-fast);">
+                    <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase;">
+                        ${item.date}
+                    </div>
+                    <h3 style="margin-bottom: 1rem; line-height: 1.4;">${item.title}</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                        ${item.summary}
+                    </p>
+                    <a href="#" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">Read More</a>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

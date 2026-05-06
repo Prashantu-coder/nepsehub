@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dividend Yield Calculator | NEPSE HUB</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/themes.css" />
+    <style>
+      .split-bar {
+        height: 12px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        display: flex;
+        margin: 1.5rem 0;
+      }
+      .income-segment {
+        background: var(--secondary);
+        height: 100%;
+        transition: width 0.5s ease;
+      }
+      .growth-segment {
+        background: var(--primary);
+        height: 100%;
+        transition: width 0.5s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+      <div id="sidebar-container"></div>
+      <main class="main-content">
+        <div id="app">
+          <div class="fade-in">
+            <div class="section-header">
+              <h2>Dividend Yield & Total Return</h2>
+            </div>
+
+            <div
+              class="tools-grid"
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                gap: 1.5rem;
+              "
+            >
+              <!-- Input Section -->
+              <div
+                class="glass"
+                style="
+                  padding: 2rem;
+                  border-radius: 20px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 2rem;
+                  "
+                >
+                  <div
+                    style="
+                      background: var(--secondary);
+                      color: white;
+                      width: 45px;
+                      height: 45px;
+                      border-radius: 12px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 1.2rem;
+                    "
+                  >
+                    <i class="fas fa-hand-holding-usd"></i>
+                  </div>
+                  <h3 style="font-weight: 700">Stock Details</h3>
+                </div>
+
+                <div class="form-group">
+                  <label>Current Market Price (NPR)</label>
+                  <input
+                    type="number"
+                    id="currentPrice"
+                    placeholder="e.g. 500"
+                    value=""
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Annual Cash Dividend (NPR)</label>
+                  <input
+                    type="number"
+                    id="annualDividend"
+                    placeholder="e.g. 25"
+                    value=""
+                  />
+                </div>
+
+                <div
+                  class="form-group"
+                  style="
+                    margin-top: 1.5rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--surface-border);
+                  "
+                >
+                  <label>Your Buy Price (Optional)</label>
+                  <input type="number" id="buyPrice" placeholder="e.g. 400" />
+                </div>
+              </div>
+
+              <!-- Result Section -->
+              <div
+                class="glass"
+                style="
+                  padding: 2rem;
+                  border-radius: 20px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 2rem;
+                  "
+                >
+                  <div
+                    style="
+                      background: var(--primary);
+                      color: white;
+                      width: 45px;
+                      height: 45px;
+                      border-radius: 12px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 1.2rem;
+                    "
+                  >
+                    <i class="fas fa-chart-line"></i>
+                  </div>
+                  <h3 style="font-weight: 700">Return Analysis</h3>
+                </div>
+
+                <div id="divResults" class="calculator-results">
+                  <!-- Results here -->
+                </div>
+
+                <div id="returnSummary" style="margin-top: 1.5rem">
+                  <!-- Income vs Growth split here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module">
+      import globalState from "../../js/state.js";
+      import { Layout } from "../../js/layout.js";
+
+      const DivLogic = {
+        calculate() {
+          const current =
+            parseFloat(document.getElementById("currentPrice").value) || 0;
+          const dividend =
+            parseFloat(document.getElementById("annualDividend").value) || 0;
+          const buy =
+            parseFloat(document.getElementById("buyPrice").value) || 0;
+
+          if (current <= 0) {
+            this.renderEmpty();
+            return;
+          }
+
+          const yieldPercent = (dividend / current) * 100;
+          const capGain = buy > 0 ? ((current - buy) / buy) * 100 : 0;
+          const totalReturn = yieldPercent + capGain;
+
+          const isHighYield = yieldPercent >= 5;
+
+          document.getElementById("divResults").innerHTML = `
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Dividend Yield</div>
+                <div style="font-size: 3rem; font-weight: 800; color: ${isHighYield ? "var(--secondary)" : "var(--text-primary)"};">
+                    ${yieldPercent.toFixed(2)}%
+                </div>
+                ${isHighYield ? '<div style="color: var(--secondary); font-size: 0.8rem; font-weight: 600;"><i class="fas fa-fire"></i> High Yield Stock</div>' : ""}
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+              <span style="color: var(--text-secondary);">Capital Gain:</span>
+              <span style="font-weight: 600; color: ${capGain >= 0 ? "var(--secondary)" : "var(--danger)"};">${capGain.toFixed(2)}%</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--surface-border);">
+              <span>Total Return:</span>
+              <span style="color: ${totalReturn >= 0 ? "var(--secondary)" : "var(--danger)"};">${totalReturn.toFixed(2)}%</span>
+            </div>
+          `;
+
+          this.renderSplit(yieldPercent, capGain);
+        },
+
+        renderSplit(yieldP, capGainP) {
+          const summary = document.getElementById("returnSummary");
+
+          if (yieldP <= 0 && capGainP <= 0) {
+            summary.innerHTML = "";
+            return;
+          }
+
+          // Normalize for bar (handle negative capital gains by treating them as 0 for the split ratio)
+          const g = Math.max(0, capGainP);
+          const total = yieldP + g;
+          const yieldWeight = (yieldP / total) * 100;
+          const growthWeight = (g / total) * 100;
+
+          summary.innerHTML = `
+            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+                <span>Income vs Growth Split</span>
+                <span>Ratio: ${yieldWeight.toFixed(0)}:${growthWeight.toFixed(0)}</span>
+            </div>
+            <div class="split-bar">
+                <div class="income-segment" style="width: ${yieldWeight}%" title="Income (Yield)"></div>
+                <div class="growth-segment" style="width: ${growthWeight}%" title="Growth (Cap Gain)"></div>
+            </div>
+            <div style="display: flex; gap: 1rem; font-size: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <div style="width: 10px; height: 10px; background: var(--secondary); border-radius: 2px;"></div>
+                    <span>Income (Dividends)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <div style="width: 10px; height: 10px; background: var(--primary); border-radius: 2px;"></div>
+                    <span>Growth (Price Apprec.)</span>
+                </div>
+            </div>
+          `;
+        },
+
+        renderEmpty() {
+          document.getElementById("divResults").innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                <i class="fas fa-piggy-bank" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                <p>Enter stock price and dividend details to see your return analysis.</p>
+            </div>
+          `;
+          document.getElementById("returnSummary").innerHTML = "";
+        },
+      };
+
+      async function init() {
+        globalState.setState({ activePage: "dividend" });
+        await Layout.init();
+
+        const inputs = ["currentPrice", "annualDividend", "buyPrice"];
+        inputs.forEach((id) => {
+          document
+            .getElementById(id)
+            .addEventListener("input", () => DivLogic.calculate());
+        });
+
+        DivLogic.calculate();
+      }
+
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>

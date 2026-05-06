@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trade Planner | NEPSE HUB</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/themes.css" />
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+      <div id="sidebar-container"></div>
+      <main class="main-content">
+        <div id="app">
+          <div class="fade-in">
+            <div class="section-header">
+              <h2>Trade Planner & Approval System</h2>
+            </div>
+
+            <div
+              class="tools-grid"
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+                gap: 1.5rem;
+              "
+            >
+              <!-- Input Section -->
+              <div
+                class="glass"
+                style="
+                  padding: 2rem;
+                  border-radius: 20px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 2rem;
+                  "
+                >
+                  <div
+                    style="
+                      background: var(--primary);
+                      color: white;
+                      width: 45px;
+                      height: 45px;
+                      border-radius: 12px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 1.2rem;
+                    "
+                  >
+                    <i class="fas fa-edit"></i>
+                  </div>
+                  <h3 style="font-weight: 700">Setup Parameters</h3>
+                </div>
+
+                <div class="form-group">
+                  <label>Stock Symbol / Name</label>
+                  <input
+                    type="text"
+                    id="stockName"
+                    placeholder="e.g. NICA"
+                    value=""
+                  />
+                </div>
+
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1rem;
+                  "
+                >
+                  <div class="form-group">
+                    <label>Entry Price (NPR)</label>
+                    <input
+                      type="number"
+                      id="entryPrice"
+                      placeholder="500"
+                      value=""
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Stop Loss (NPR)</label>
+                    <input
+                      type="number"
+                      id="stopLoss"
+                      placeholder="480"
+                      value=""
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Target Price (NPR)</label>
+                  <input
+                    type="number"
+                    id="targetPrice"
+                    placeholder="550"
+                    value=""
+                  />
+                </div>
+
+                <div
+                  class="form-group"
+                  style="
+                    margin-top: 1.5rem;
+                    padding-top: 1.5rem;
+                    border-top: 1px solid var(--surface-border);
+                  "
+                >
+                  <label>Total Trading Capital (NPR)</label>
+                  <inputW
+                    type="number"
+                    id="capital"
+                    placeholder="100000"
+                    value=""
+                  />
+                </div>
+
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1rem;
+                  "
+                >
+                  <div class="form-group">
+                    <label>Risk Mode</label>
+                    <select id="riskMode">
+                      <option value="percent">Percentage (%)</option>
+                      <option value="fixed">Fixed NPR</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label id="riskLabel">Risk Amount</label>
+                    <input
+                      type="number"
+                      id="riskValue"
+                      placeholder="1"
+                      value="1"
+                      step="0.1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Result Section -->
+              <div
+                class="glass"
+                style="
+                  padding: 2rem;
+                  border-radius: 20px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 2rem;
+                  "
+                >
+                  <div
+                    style="
+                      background: var(--secondary);
+                      color: white;
+                      width: 45px;
+                      height: 45px;
+                      border-radius: 12px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 1.2rem;
+                    "
+                  >
+                    <i class="fas fa-check-double"></i>
+                  </div>
+                  <h3 style="font-weight: 700">Approval Results</h3>
+                </div>
+
+                <div id="plannerResults" class="calculator-results">
+                  <!-- Results here -->
+                </div>
+
+                <div
+                  id="decisionBadge"
+                  style="
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    border-radius: 16px;
+                    text-align: center;
+                    font-weight: 800;
+                    font-size: 1.25rem;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                  "
+                >
+                  <!-- Decision here -->
+                </div>
+
+                <div
+                  id="warningArea"
+                  style="
+                    margin-top: 1rem;
+                    color: var(--danger);
+                    font-size: 0.85rem;
+                    text-align: center;
+                  "
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module">
+      import globalState from "../../js/state.js";
+      import { Layout } from "../../js/layout.js";
+
+      const PlannerLogic = {
+        calculate() {
+          const entry =
+            parseFloat(document.getElementById("entryPrice").value) || 0;
+          const sl = parseFloat(document.getElementById("stopLoss").value) || 0;
+          const target =
+            parseFloat(document.getElementById("targetPrice").value) || 0;
+          const capital =
+            parseFloat(document.getElementById("capital").value) || 0;
+          const riskMode = document.getElementById("riskMode").value;
+          const riskVal =
+            parseFloat(document.getElementById("riskValue").value) || 0;
+
+          const warning = document.getElementById("warningArea");
+          warning.innerText = "";
+
+          // Validations
+          if (entry <= sl) {
+            warning.innerText = "Stop Loss must be below Entry Price.";
+            this.renderEmpty();
+            return;
+          }
+          if (target <= entry) {
+            warning.innerText = "Target must be above Entry Price.";
+            this.renderEmpty();
+            return;
+          }
+          if (entry <= 0 || sl <= 0 || target <= 0 || capital <= 0) {
+            this.renderEmpty();
+            return;
+          }
+
+          const riskPerShare = entry - sl;
+          const rewardPerShare = target - entry;
+          const rrRatio = rewardPerShare / riskPerShare;
+
+          let totalRiskAmount = 0;
+          if (riskMode === "percent") {
+            totalRiskAmount = capital * (riskVal / 100);
+          } else {
+            totalRiskAmount = riskVal;
+          }
+
+          const positionSize = Math.floor(totalRiskAmount / riskPerShare);
+          const capitalRequired = positionSize * entry;
+          const maxProfit = positionSize * rewardPerShare;
+
+          document.getElementById("plannerResults").innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.8rem;">Risk Per Share</div>
+                    <div style="font-weight: 700; font-size: 1.2rem;">Rs. ${riskPerShare.toFixed(2)}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.8rem;">Reward Per Share</div>
+                    <div style="font-weight: 700; font-size: 1.2rem;">Rs. ${rewardPerShare.toFixed(2)}</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="font-size: 0.9rem; color: var(--text-secondary);">Risk-Reward Ratio</div>
+                <div style="font-size: 2.5rem; font-weight: 800;">1 : ${rrRatio.toFixed(2)}</div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--text-secondary);">Position Size:</span>
+                    <span style="font-weight: 700; color: var(--primary);">${positionSize} Shares</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-secondary);">Capital Required:</span>
+                    <span style="font-weight: 700;">Rs. ${capitalRequired.toLocaleString()}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                <div style="color: var(--danger);"><i class="fas fa-arrow-down"></i> Max Loss: Rs. ${totalRiskAmount.toLocaleString()}</div>
+                <div style="color: var(--secondary);"><i class="fas fa-arrow-up"></i> Max Profit: Rs. ${maxProfit.toLocaleString()}</div>
+            </div>
+          `;
+
+          this.renderDecision(rrRatio);
+        },
+
+        renderDecision(rr) {
+          const badge = document.getElementById("decisionBadge");
+          if (rr < 1.5) {
+            badge.style.background = "rgba(239, 68, 68, 0.1)";
+            badge.style.color = "var(--danger)";
+            badge.style.border = "2px solid var(--danger)";
+            badge.innerHTML = '<i class="fas fa-times-circle"></i> Avoid Trade';
+          } else if (rr <= 2) {
+            badge.style.background = "rgba(245, 158, 11, 0.1)";
+            badge.style.color = "var(--warning)";
+            badge.style.border = "2px solid var(--warning)";
+            badge.innerHTML =
+              '<i class="fas fa-info-circle"></i> Neutral Setup';
+          } else {
+            badge.style.background = "rgba(16, 185, 129, 0.1)";
+            badge.style.color = "var(--secondary)";
+            badge.style.border = "2px solid var(--secondary)";
+            badge.innerHTML = '<i class="fas fa-check-circle"></i> Good Setup';
+          }
+        },
+
+        renderEmpty() {
+          document.getElementById("plannerResults").innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                    <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>Enter trade parameters to evaluate your setup.</p>
+                </div>
+            `;
+          const badge = document.getElementById("decisionBadge");
+          badge.style.background = "rgba(255,255,255,0.05)";
+          badge.style.color = "var(--text-secondary)";
+          badge.style.border = "none";
+          badge.innerText = "NO ANALYSIS";
+        },
+      };
+
+      async function init() {
+        globalState.setState({ activePage: "planner" });
+        await Layout.init();
+
+        const inputs = [
+          "entryPrice",
+          "stopLoss",
+          "targetPrice",
+          "capital",
+          "riskValue",
+          "riskMode",
+        ];
+        inputs.forEach((id) => {
+          document.getElementById(id).addEventListener("input", () => {
+            if (id === "riskMode") {
+              document.getElementById("riskLabel").innerText =
+                document.getElementById("riskMode").value === "percent"
+                  ? "Risk Amount (%)"
+                  : "Risk Amount (NPR)";
+            }
+            PlannerLogic.calculate();
+          });
+        });
+
+        PlannerLogic.calculate();
+      }
+
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>

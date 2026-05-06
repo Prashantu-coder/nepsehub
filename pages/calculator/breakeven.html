@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Break-even Calculator | NEPSE HUB</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/themes.css" />
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+      <div id="sidebar-container"></div>
+      <main class="main-content">
+        <div id="app">
+          <div class="fade-in">
+            <div class="section-header">
+              <h2>Break-even Price Calculator</h2>
+            </div>
+
+            <div class="tools-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+              <!-- Input Section -->
+              <div class="glass" style="padding: 2rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                  <div style="background: var(--primary); color: white; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-balance-scale"></i>
+                  </div>
+                  <h3 style="font-weight: 700">Buying Details</h3>
+                </div>
+
+                <div class="form-group">
+                  <label>Quantity (Shares)</label>
+                  <input type="number" id="buyQty" placeholder="e.g. 100" value="100">
+                </div>
+
+                <div class="form-group">
+                  <label>Buying Price (NPR)</label>
+                  <input type="number" id="buyPrice" placeholder="e.g. 500" value="500">
+                </div>
+
+                <div class="form-group" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--surface-border);">
+                    <label>Compare with Current LTP (Optional)</label>
+                    <input type="number" id="compareLtp" placeholder="e.g. 510">
+                </div>
+              </div>
+
+              <!-- Result Section -->
+              <div class="glass" style="padding: 2rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                  <div style="background: var(--secondary); color: white; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-flag-checkered"></i>
+                  </div>
+                  <h3 style="font-weight: 700">Break-even Analysis</h3>
+                </div>
+
+                <div id="beResults" class="calculator-results">
+                    <!-- Results injected here -->
+                </div>
+
+                <div id="ltpAnalysis" style="margin-top: 1.5rem;">
+                    <!-- Analysis vs LTP here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module">
+      import globalState from "../../js/state.js";
+      import { Layout } from "../../js/layout.js";
+
+      const BELogic = {
+        getCommission(amount) {
+          if (amount <= 50000) return Math.max(10, amount * 0.0036);
+          if (amount <= 500000) return amount * 0.0033;
+          if (amount <= 2000000) return amount * 0.0031;
+          if (amount <= 10000000) return amount * 0.0027;
+          return amount * 0.0024;
+        },
+
+        calculate() {
+          const qty = parseFloat(document.getElementById('buyQty').value) || 0;
+          const price = parseFloat(document.getElementById('buyPrice').value) || 0;
+
+          if (qty <= 0 || price <= 0) {
+            this.renderEmpty();
+            return;
+          }
+
+          const shareAmount = qty * price;
+          const buyComm = this.getCommission(shareAmount);
+          const buySebon = shareAmount * 0.00015;
+          const dpFee = 25;
+
+          const totalBuyingCost = shareAmount + buyComm + buySebon + dpFee;
+          const costPerShare = totalBuyingCost / qty;
+
+          // Iterative calculation for break-even selling price
+          // We need: (Ps * Q) - Comm(Ps * Q) - Sebon(Ps * Q) - DP = totalBuyingCost
+          let breakEvenPrice = costPerShare;
+          let diff = 1;
+          let iterations = 0;
+
+          while (Math.abs(diff) > 0.001 && iterations < 10) {
+            const currentAmount = breakEvenPrice * qty;
+            const comm = this.getCommission(currentAmount);
+            const sebon = currentAmount * 0.00015;
+            const proceeds = currentAmount - comm - sebon - dpFee;
+            
+            diff = totalBuyingCost - proceeds;
+            // Adjust break-even price based on diff
+            //Ps += diff / (Q * (1 - approx_fee))
+            breakEvenPrice += diff / (qty * 0.996); 
+            iterations++;
+          }
+
+          const percentNeeded = ((breakEvenPrice - price) / price) * 100;
+
+          document.getElementById('beResults').innerHTML = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+              <span style="color: var(--text-secondary);">Total Buying Cost:</span>
+              <span style="font-weight: 600;">Rs. ${totalBuyingCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+              <span style="color: var(--text-secondary);">Cost Per Share (WACC):</span>
+              <span style="font-weight: 600;">Rs. ${costPerShare.toFixed(2)}</span>
+            </div>
+            <hr style="border: none; border-top: 1px solid var(--surface-border); margin: 1.5rem 0;">
+            <div style="text-align: center; padding: 1.5rem; border-radius: 16px; background: rgba(255,255,255,0.05);">
+                <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Break-even Selling Price</div>
+                <div style="font-size: 2.5rem; font-weight: 800; color: var(--secondary);">Rs. ${breakEvenPrice.toFixed(2)}</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                    Must increase by <span style="color: var(--warning); font-weight: 700;">${percentNeeded.toFixed(2)}%</span>
+                </div>
+            </div>
+          `;
+
+          this.calculateAnalysis(totalBuyingCost, qty);
+        },
+
+        calculateAnalysis(totalBuyingCost, qty) {
+          const ltp = parseFloat(document.getElementById('compareLtp').value) || 0;
+          const container = document.getElementById('ltpAnalysis');
+          
+          if (ltp <= 0) {
+            container.innerHTML = '';
+            return;
+          }
+
+          const sellAmount = ltp * qty;
+          const comm = this.getCommission(sellAmount);
+          const sebon = sellAmount * 0.00015;
+          const dp = 25;
+          const netProceeds = sellAmount - comm - sebon - dp;
+
+          const pnl = netProceeds - totalBuyingCost;
+          const pnlPercent = (pnl / totalBuyingCost) * 100;
+
+          container.innerHTML = `
+            <div style="padding: 1.25rem; border-radius: 12px; background: ${pnl >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; border: 1px solid ${pnl >= 0 ? 'var(--secondary)' : 'var(--danger)'}">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Net P&L (if sold at Rs. ${ltp})</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: ${pnl >= 0 ? 'var(--secondary)' : 'var(--danger)'};">
+                            Rs. ${pnl.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.2rem; font-weight: 700; color: ${pnl >= 0 ? 'var(--secondary)' : 'var(--danger)'};">
+                            ${pnl >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Return on Investment</div>
+                    </div>
+                </div>
+            </div>
+          `;
+        },
+
+        renderEmpty() {
+          document.getElementById('beResults').innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                <p>Enter buying details to calculate your break-even point.</p>
+            </div>
+          `;
+          document.getElementById('ltpAnalysis').innerHTML = '';
+        }
+      };
+
+      async function init() {
+        globalState.setState({ activePage: 'breakeven' });
+        await Layout.init();
+
+        const inputs = ['buyQty', 'buyPrice', 'compareLtp'];
+        inputs.forEach(id => {
+          document.getElementById(id).addEventListener('input', () => BELogic.calculate());
+        });
+
+        BELogic.calculate();
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watchlist | NEPSE HUB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/themes.css">
+</head>
+<body>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+        <main class="main-content">
+            <div id="app">
+                <div class="fade-in">
+                    <div class="section-header">
+                        <h2>My Watchlist</h2>
+                        <span id="watchlist-count" style="color: var(--text-secondary);">0 Stocks</span>
+                    </div>
+                    <div id="watchlist-grid" class="dashboard-grid"></div>
+                    <div id="empty-watchlist" class="glass" style="display: none; padding: 4rem; text-align: center; border-radius: 20px;">
+                        <i class="far fa-heart" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem; display: block;"></i>
+                        <h3>Your watchlist is empty</h3>
+                        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Add stocks from the dashboard to track them here.</p>
+                        <a href="../index.html" class="btn btn-primary" style="margin-top: 1.5rem;">Go to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import globalState from '../js/state.js';
+        import { Layout } from '../js/layout.js';
+        import { StockCard } from '../components/stockCard.js';
+        import { initStockChart } from '../components/chart.js';
+        import StorageService from '../services/storageService.js';
+
+        async function init() {
+            globalState.setState({ activePage: 'watchlist' });
+            await Layout.init();
+            
+            globalState.subscribe((state) => renderWatchlist(state));
+            renderWatchlist(globalState.getState());
+        }
+
+        function renderWatchlist(state) {
+            const { watchlist, stocks } = state;
+            const watchlistStocks = stocks.filter(s => watchlist.includes(s.symbol));
+            
+            document.getElementById('watchlist-count').textContent = `${watchlistStocks.length} Stocks`;
+            
+            const grid = document.getElementById('watchlist-grid');
+            const empty = document.getElementById('empty-watchlist');
+
+            if (watchlistStocks.length > 0) {
+                grid.style.display = 'grid';
+                empty.style.display = 'none';
+                grid.innerHTML = watchlistStocks.map(stock => StockCard(stock)).join('');
+                
+                watchlistStocks.forEach(stock => {
+                    initStockChart(`chart-${stock.symbol}`, stock.history, stock.change >= 0);
+                });
+                
+                bindWatchlistEvents();
+            } else {
+                grid.style.display = 'none';
+                empty.style.display = 'block';
+            }
+        }
+
+        function bindWatchlistEvents() {
+            document.querySelectorAll('.addToWatchlist').forEach(btn => {
+                const symbol = btn.dataset.symbol;
+                btn.innerHTML = `<i class="fas fa-heart" style="color: var(--danger);"></i> Remove`;
+                
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const updatedWatchlist = globalState.getState().watchlist.filter(s => s !== symbol);
+                    globalState.setState({ watchlist: updatedWatchlist });
+                    StorageService.save('nepse_watchlist', updatedWatchlist);
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

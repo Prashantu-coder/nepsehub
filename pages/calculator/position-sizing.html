@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Position Sizing | NEPSE HUB</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/themes.css" />
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+      <div id="sidebar-container"></div>
+      <main class="main-content">
+        <div id="app">
+          <div class="fade-in">
+            <div class="section-header">
+              <h2>Position Sizing Calculator</h2>
+            </div>
+
+            <div class="tools-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+              <!-- Input Section -->
+              <div class="glass" style="padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                  <div style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-chart-pie"></i>
+                  </div>
+                  <h3 style="font-weight: 700">Trade Parameters</h3>
+                </div>
+
+                <div class="form-group">
+                  <label>Total Account Balance (Rs.)</label>
+                  <input type="number" id="balance" placeholder="e.g. 100000" value="100000">
+                </div>
+
+                <div class="form-group">
+                  <label>Risk Percentage (%)</label>
+                  <input type="number" id="riskPercent" placeholder="e.g. 1" value="1" step="0.1">
+                </div>
+
+                <div class="form-group">
+                  <label>Entry Price (Rs.)</label>
+                  <input type="number" id="entryPrice" placeholder="e.g. 500" value="500">
+                </div>
+
+                <div class="form-group">
+                  <label>Stop Loss (Rs.)</label>
+                  <input type="number" id="stopLoss" placeholder="e.g. 480" value="480">
+                </div>
+              </div>
+
+              <!-- Results Section -->
+              <div class="glass" style="padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="background: var(--secondary); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                      <i class="fas fa-calculator"></i>
+                    </div>
+                    <h3 style="font-weight: 700">Recommended Size</h3>
+                  </div>
+
+                  <div id="sizingResults" class="calculator-results">
+                    <!-- Results injected here -->
+                  </div>
+                </div>
+
+                <div id="riskWarning" style="margin-top: 1.5rem; padding: 1rem; border-radius: 12px; font-size: 0.85rem; display: none;">
+                  <!-- Warning injected here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module">
+      import globalState from "../../js/state.js";
+      import { Layout } from "../../js/layout.js";
+
+      const SizingLogic = {
+        calculate() {
+          const balance = parseFloat(document.getElementById('balance').value) || 0;
+          const riskPercent = parseFloat(document.getElementById('riskPercent').value) || 0;
+          const entry = parseFloat(document.getElementById('entryPrice').value) || 0;
+          const sl = parseFloat(document.getElementById('stopLoss').value) || 0;
+
+          if (entry <= sl || entry <= 0 || balance <= 0) {
+            this.renderError();
+            return;
+          }
+
+          const riskAmount = balance * (riskPercent / 100);
+          const riskPerShare = entry - sl;
+          const units = Math.floor(riskAmount / riskPerShare);
+          const totalInvestment = units * entry;
+          const portfolioRisk = (totalInvestment / balance) * 100;
+
+          document.getElementById('sizingResults').innerHTML = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+              <span style="color: var(--text-secondary);">Amount at Risk:</span>
+              <span style="font-weight: 600; color: var(--danger);">Rs. ${riskAmount.toLocaleString()}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+              <span style="color: var(--text-secondary);">Risk Per Share:</span>
+              <span style="font-weight: 600;">Rs. ${riskPerShare.toFixed(2)}</span>
+            </div>
+            <hr style="border: none; border-top: 1px solid var(--surface-border); margin: 1rem 0;">
+            <div style="text-align: center; margin-bottom: 1rem;">
+              <div style="font-size: 0.9rem; color: var(--text-secondary);">Recommended Units</div>
+              <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary);">${units}</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);">Shares</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 1rem; font-size: 0.95rem;">
+              <span style="color: var(--text-secondary);">Total Investment:</span>
+              <span style="font-weight: 600;">Rs. ${totalInvestment.toLocaleString()}</span>
+            </div>
+          `;
+
+          const warning = document.getElementById('riskWarning');
+          if (totalInvestment > balance) {
+            warning.style.display = 'block';
+            warning.style.background = 'rgba(239, 68, 68, 0.1)';
+            warning.style.color = 'var(--danger)';
+            warning.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Caution: Required investment exceeds your balance. Consider reducing risk or increasing capital.`;
+          } else {
+            warning.style.display = 'block';
+            warning.style.background = 'rgba(16, 185, 129, 0.1)';
+            warning.style.color = 'var(--secondary)';
+            warning.innerHTML = `<i class="fas fa-check-circle"></i> Safe: This trade takes up ${portfolioRisk.toFixed(1)}% of your total portfolio value.`;
+          }
+        },
+        renderError() {
+          document.getElementById('sizingResults').innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+              <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+              <p>Please enter valid numbers.<br>Entry price must be greater than Stop Loss.</p>
+            </div>
+          `;
+          document.getElementById('riskWarning').style.display = 'none';
+        }
+      };
+
+      async function init() {
+        globalState.setState({ activePage: 'position-sizing' });
+        await Layout.init();
+
+        const inputs = ['balance', 'riskPercent', 'entryPrice', 'stopLoss'];
+        inputs.forEach(id => {
+          document.getElementById(id).addEventListener('input', () => SizingLogic.calculate());
+        });
+
+        SizingLogic.calculate();
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    </script>
+  </body>
+</html>

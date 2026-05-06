@@ -1,0 +1,132 @@
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Sidebar Layout - Hidden by default on PC, Off-canvas on Mobile */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    left: -260px; /* Hidden by default */
+    top: 0;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--surface-border);
+    display: flex;
+    flex-direction: column;
+    z-index: 1100;
+    transition: left var(--transition-slow);
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+/* Main Content Layout */
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    transition: padding var(--transition-slow);
+}
+
+/* Top Navbar */
+.navbar {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    border-radius: 0 0 16px 16px;
+    margin-bottom: 2rem;
+}
+
+.navbar .logo {
+    display: none; /* Shown on PC */
+    padding: 0;
+}
+
+/* PC Horizontal Menu */
+.navbar-menu {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0 2rem;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition-fast);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+.nav-link:hover {
+    color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.nav-link.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Burger Button */
+.burger-menu {
+    display: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+/* Grid Layouts */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.content-section {
+    margin-bottom: 2.5rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive */
+@media (min-width: 1025px) {
+    .navbar .logo {
+        display: flex;
+    }
+}
+
+@media (max-width: 1024px) {
+    .navbar-menu {
+        display: none;
+    }
+    .burger-menu {
+        display: block;
+    }
+    .main-content {
+        padding: 1rem;
+    }
+    .pc-only {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 1rem;
+    }
+}

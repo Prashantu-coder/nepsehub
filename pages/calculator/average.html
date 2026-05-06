@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Average Price Calculator (DCA) | NEPSE HUB</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/themes.css" />
+    <style>
+      .entry-row {
+        display: grid;
+        grid-template-columns: 2fr 2fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        align-items: center;
+      }
+      .remove-btn {
+        color: var(--danger);
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: var(--transition-fast);
+        text-align: center;
+      }
+      .remove-btn:hover {
+        transform: scale(1.1);
+      }
+      .summary-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--surface-border);
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin-top: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+      <div id="sidebar-container"></div>
+      <main class="main-content">
+        <div id="app">
+          <div class="fade-in">
+            <div class="section-header">
+              <h2>Average Price Calculator (DCA)</h2>
+              <button id="addEntryBtn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Entry
+              </button>
+            </div>
+
+            <div
+              class="tools-grid"
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+                gap: 1.5rem;
+              "
+            >
+              <!-- Entries Section -->
+              <div
+                class="glass"
+                style="
+                  padding: 1.5rem;
+                  border-radius: 20px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                  "
+                >
+                  <div
+                    style="
+                      background: var(--primary);
+                      color: white;
+                      width: 40px;
+                      height: 40px;
+                      border-radius: 12px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                    "
+                  >
+                    <i class="fas fa-list"></i>
+                  </div>
+                  <h3 style="font-weight: 700">Buy Transactions</h3>
+                </div>
+
+                <div id="entries-container">
+                  <div class="entry-row">
+                    <div class="form-group" style="margin-bottom: 0">
+                      <label style="font-size: 0.75rem">Price (NPR)</label>
+                      <input
+                        type="number"
+                        class="buy-price"
+                        placeholder="e.g. 100"
+                        value=""
+                      />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0">
+                      <label style="font-size: 0.75rem">Quantity</label>
+                      <input
+                        type="number"
+                        class="buy-qty"
+                        placeholder="e.g. 10"
+                        value=""
+                      />
+                    </div>
+                    <div style="margin-top: 1.2rem"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Results Section -->
+              <div
+                class="glass"
+                style="
+                  padding: 1.5rem;
+                  border-radius: 20px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                  "
+                >
+                  <div
+                    style="
+                      background: var(--secondary);
+                      color: white;
+                      width: 40px;
+                      height: 40px;
+                      border-radius: 12px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                    "
+                  >
+                    <i class="fas fa-calculator"></i>
+                  </div>
+                  <h3 style="font-weight: 700">Weighted Summary</h3>
+                </div>
+
+                <div id="dcaResults" class="calculator-results">
+                  <!-- Results injected here -->
+                </div>
+
+                <div
+                  class="form-group"
+                  style="
+                    margin-top: 2rem;
+                    border-top: 1px solid var(--surface-border);
+                    padding-top: 1.5rem;
+                  "
+                >
+                  <label>Current LTP (for Gain/Loss analysis)</label>
+                  <input
+                    type="number"
+                    id="currentLtp"
+                    placeholder="e.g. 550"
+                    value=""
+                  />
+                </div>
+
+                <div id="profitAnalysis" style="margin-top: 1rem">
+                  <!-- Analysis injected here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module">
+      import globalState from "../../js/state.js";
+      import { Layout } from "../../js/layout.js";
+
+      const DCALogic = {
+        getCommission(amount) {
+          if (amount <= 50000) return Math.max(10, amount * 0.0036);
+          if (amount <= 500000) return amount * 0.0033;
+          if (amount <= 2000000) return amount * 0.0031;
+          if (amount <= 10000000) return amount * 0.0027;
+          return amount * 0.0024;
+        },
+
+        calculate() {
+          const rows = document.querySelectorAll(".entry-row");
+          let totalInvestment = 0;
+          let totalShares = 0;
+          let totalCommission = 0;
+          let totalSebon = 0;
+          let totalDp = 0;
+
+          rows.forEach((row) => {
+            const price =
+              parseFloat(row.querySelector(".buy-price").value) || 0;
+            const qty = parseFloat(row.querySelector(".buy-qty").value) || 0;
+
+            if (price > 0 && qty > 0) {
+              const amount = price * qty;
+              const comm = this.getCommission(amount);
+              const sebon = amount * 0.00015;
+              const dp = 25;
+
+              totalInvestment += amount + comm + sebon + dp;
+              totalShares += qty;
+              totalCommission += comm;
+              totalSebon += sebon;
+              totalDp += dp;
+            }
+          });
+
+          const averagePrice =
+            totalShares > 0 ? totalInvestment / totalShares : 0;
+
+          document.getElementById("dcaResults").innerHTML = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+              <span style="color: var(--text-secondary);">Total Units:</span>
+              <span style="font-weight: 600;">${totalShares.toLocaleString()} Shares</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+              <span style="color: var(--text-secondary);">Total Investment (inc. fees):</span>
+              <span style="font-weight: 600;">Rs. ${totalInvestment.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                (Comm: Rs. ${totalCommission.toFixed(2)} | Fees: Rs. ${(totalSebon + totalDp).toFixed(2)})
+            </div>
+            <hr style="border: none; border-top: 1px solid var(--surface-border); margin: 1rem 0;">
+            <div style="text-align: center;">
+                <div style="font-size: 0.9rem; color: var(--text-secondary);">Break-even Average Price (WACC)</div>
+                <div style="font-size: 2.2rem; font-weight: 800; color: var(--secondary);">Rs. ${averagePrice.toFixed(4)}</div>
+            </div>
+          `;
+
+          this.calculateAnalysis(averagePrice, totalShares);
+        },
+
+        calculateAnalysis(avgPrice, shares) {
+          const ltp =
+            parseFloat(document.getElementById("currentLtp").value) || 0;
+          const container = document.getElementById("profitAnalysis");
+
+          if (ltp <= 0 || avgPrice <= 0) {
+            container.innerHTML = "";
+            return;
+          }
+
+          const diff = ltp - avgPrice;
+          const percent = (diff / avgPrice) * 100;
+          const totalPL = diff * shares;
+
+          container.innerHTML = `
+            <div class="glass" style="padding: 1rem; border-radius: 12px; background: ${diff >= 0 ? "rgba(16, 185, 129, 0.05)" : "rgba(239, 68, 68, 0.05)"}; border: 1px solid ${diff >= 0 ? "var(--secondary)" : "var(--danger)"}">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Est. Profit/Loss</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: ${diff >= 0 ? "var(--secondary)" : "var(--danger)"};">
+                            Rs. ${totalPL.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.1rem; font-weight: 700; color: ${diff >= 0 ? "var(--secondary)" : "var(--danger)"};">
+                            ${diff >= 0 ? "+" : ""}${percent.toFixed(2)}%
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">vs Average</div>
+                    </div>
+                </div>
+            </div>
+          `;
+        },
+
+        addEntry() {
+          const container = document.getElementById("entries-container");
+          const div = document.createElement("div");
+          div.className = "entry-row fade-in";
+          div.innerHTML = `
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="number" class="buy-price" placeholder="Price">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="number" class="buy-qty" placeholder="Qty">
+            </div>
+            <div class="remove-btn"><i class="fas fa-times-circle"></i></div>
+          `;
+
+          div.querySelector(".remove-btn").onclick = () => {
+            div.remove();
+            this.calculate();
+          };
+
+          div.querySelectorAll("input").forEach((input) => {
+            input.oninput = () => this.calculate();
+          });
+
+          container.appendChild(div);
+        },
+      };
+
+      async function init() {
+        globalState.setState({ activePage: "average" });
+        await Layout.init();
+
+        document.getElementById("addEntryBtn").onclick = () =>
+          DCALogic.addEntry();
+        document.getElementById("currentLtp").oninput = () =>
+          DCALogic.calculate();
+
+        // Initial listeners
+        document.querySelectorAll(".entry-row input").forEach((input) => {
+          input.oninput = () => DCALogic.calculate();
+        });
+
+        DCALogic.calculate();
+      }
+
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>

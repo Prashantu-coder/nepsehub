@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator | NEPSE HUB</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/themes.css" />
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+      <div id="sidebar-container"></div>
+      <main class="main-content">
+        <div id="app">
+          <!-- Calculator Content -->
+          <div class="fade-in">
+            <div class="section-header">
+              <h2>Calculator</h2>
+            </div>
+
+            <div
+              class="tools-grid"
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+              "
+            >
+              <!-- Buy Calculator -->
+              <div
+                class="glass"
+                style="
+                  padding: 1.5rem;
+                  border-radius: 20px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                  "
+                >
+                  <div
+                    style="
+                      background: var(--secondary);
+                      color: white;
+                      width: 40px;
+                      height: 40px;
+                      border-radius: 12px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                    "
+                  >
+                    <i class="fas fa-shopping-cart"></i>
+                  </div>
+                  <h3 style="font-weight: 700">Buy Calculator</h3>
+                </div>
+                <div class="form-group">
+                  <label>Units / Quantity</label>
+                  <input
+                    type="number"
+                    id="buyQty"
+                    placeholder="e.g. 10"
+                    value=""
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Purchase Price (Rs.)</label>
+                  <input
+                    type="number"
+                    id="buyPrice"
+                    placeholder="e.g. 100"
+                    value=""
+                  />
+                </div>
+                <div
+                  id="buyResults"
+                  class="calculator-results"
+                  style="
+                    margin-top: 1.5rem;
+                    padding: 1.25rem;
+                    border-radius: 12px;
+                    background: rgba(0, 0, 0, 0.03);
+                  "
+                ></div>
+              </div>
+
+              <!-- Sell Calculator -->
+              <div
+                class="glass"
+                style="
+                  padding: 1.5rem;
+                  border-radius: 20px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                  "
+                >
+                  <div
+                    style="
+                      background: var(--danger);
+                      color: white;
+                      width: 40px;
+                      height: 40px;
+                      border-radius: 12px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                    "
+                  >
+                    <i class="fas fa-tags"></i>
+                  </div>
+                  <h3 style="font-weight: 700">Sell Calculator</h3>
+                </div>
+                <div class="form-group">
+                  <label>Units / Quantity</label>
+                  <input
+                    type="number"
+                    id="sellQty"
+                    placeholder="e.g. 10"
+                    value=""
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Selling Price (Rs.)</label>
+                  <input
+                    type="number"
+                    id="sellPrice"
+                    placeholder="e.g. 200"
+                    value=""
+                  />
+                </div>
+
+                <!-- WACC Selection -->
+                <div class="form-group">
+                  <label>WACC Mode</label>
+                  <select
+                    id="waccMode"
+                    style="
+                      width: 100%;
+                      padding: 0.75rem;
+                      border-radius: 10px;
+                      border: 1px solid var(--surface-border);
+                      background: var(--surface);
+                      color: var(--text-primary);
+                      font-family: inherit;
+                    "
+                  >
+                    <option value="auto">Automatic (From Buy Calc)</option>
+                    <option value="manual">Manual Entry</option>
+                  </select>
+                </div>
+
+                <div
+                  id="manualWaccContainer"
+                  class="form-group"
+                  style="display: none"
+                >
+                  <label>Purchase WACC (Rs.)</label>
+                  <input
+                    type="number"
+                    id="manualWacc"
+                    placeholder="e.g. 505.2534"
+                    step="0.0001"
+                    value="0.0000"
+                  />
+                </div>
+
+                <div
+                  id="sellResults"
+                  class="calculator-results"
+                  style="
+                    margin-top: 1.5rem;
+                    padding: 1.25rem;
+                    border-radius: 12px;
+                    background: rgba(0, 0, 0, 0.03);
+                  "
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module">
+      import globalState from "../../js/state.js";
+      import { Layout } from "../../js/layout.js";
+
+      let lastCalculatedWacc = 500;
+
+      const CalcLogic = {
+        getCommission(amount) {
+          if (amount <= 50000) return Math.max(10, amount * 0.0036);
+          if (amount <= 500000) return amount * 0.0033;
+          if (amount <= 2000000) return amount * 0.0031;
+          if (amount <= 10000000) return amount * 0.0027;
+          return amount * 0.0024;
+        },
+        calculateBuy() {
+          const qtyInput = document.getElementById("buyQty").value;
+          const priceInput = document.getElementById("buyPrice").value;
+          const isEmpty = qtyInput === "" || priceInput === "";
+
+          const qty = parseFloat(qtyInput) || 0;
+          const price = parseFloat(priceInput) || 0;
+          const shareAmount = qty * price;
+
+          const commission = isEmpty ? 0 : this.getCommission(shareAmount);
+          const sebonFee = isEmpty ? 0 : shareAmount * 0.00015;
+          const dpFee = isEmpty ? 0 : 25;
+          const total = shareAmount + commission + sebonFee + dpFee;
+
+          const wacc = qty > 0 ? total / qty : 0;
+          lastCalculatedWacc = wacc;
+
+          document.getElementById("buyResults").innerHTML = this.formatResults(
+            [
+              { label: "Share Amount", value: shareAmount },
+              { label: "Broker Commission", value: commission },
+              { label: "SEBON Fee", value: sebonFee },
+              { label: "DP Fee", value: dpFee },
+            ],
+            "Total Cost",
+            total,
+            "negative",
+            wacc,
+          );
+
+          // If in auto mode, sync units and update sell calc
+          if (document.getElementById("waccMode").value === "auto") {
+            this.syncSellQty();
+            this.calculateSell();
+          }
+        },
+        syncSellQty() {
+          const mode = document.getElementById("waccMode").value;
+          if (mode === "auto") {
+            const buyQty = document.getElementById("buyQty").value;
+            document.getElementById("sellQty").value = buyQty;
+          }
+        },
+        calculateSell() {
+          const qtyInput = document.getElementById("sellQty").value;
+          const priceInput = document.getElementById("sellPrice").value;
+          const isEmpty = qtyInput === "" || priceInput === "";
+
+          const qty = parseFloat(qtyInput) || 0;
+          const price = parseFloat(priceInput) || 0;
+          const mode = document.getElementById("waccMode").value;
+
+          let wacc = 0;
+          if (mode === "auto") {
+            wacc = lastCalculatedWacc;
+          } else {
+            const manualInput = document.getElementById("manualWacc");
+            // Enforce 4 decimal places
+            wacc = parseFloat(parseFloat(manualInput.value).toFixed(4)) || 0;
+          }
+
+          const shareAmount = qty * price;
+          const commission = isEmpty ? 0 : this.getCommission(shareAmount);
+          const sebonFee = isEmpty ? 0 : shareAmount * 0.00015;
+          const dpFee = isEmpty ? 0 : 25;
+
+          const costBasis = qty * wacc;
+          const grossProfit = shareAmount - commission - sebonFee - dpFee;
+          const taxableProfit =
+            shareAmount - commission - sebonFee - dpFee - costBasis;
+
+          const capitalGainTax = taxableProfit > 0 ? taxableProfit * 0.05 : 0;
+          const receivableAmount =
+            shareAmount - commission - sebonFee - dpFee - capitalGainTax;
+          const netProfit = receivableAmount - costBasis;
+
+          document.getElementById("sellResults").innerHTML = `
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px dashed var(--surface-border);">
+                        Using WACC: <span style="color: var(--text-primary); font-weight: 600;">Rs. ${wacc.toFixed(4)}</span>
+                    </div>
+                    ${this.formatResults(
+                      [
+                        { label: "Share Amount", value: shareAmount },
+                        { label: "Broker Commission", value: commission },
+                        { label: "SEBON Fee", value: sebonFee },
+                        { label: "DP Fee", value: dpFee },
+                        {
+                          label: "Capital Gain Tax (5%)",
+                          value: capitalGainTax,
+                        },
+                      ],
+                      "Receivable Amount",
+                      receivableAmount,
+                      "positive",
+                      receivableAmount / qty,
+                    )}
+                    <div style="margin-top: 1rem; padding: 1rem; border-radius: 10px; background: ${netProfit >= 0 ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)"}; text-align: center;">
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Net Profit / Loss</div>
+                        <div style="font-size: 1.25rem; font-weight: 700; color: ${netProfit >= 0 ? "var(--secondary)" : "var(--danger)"};">
+                            Rs. ${netProfit.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </div>
+                    </div>
+                `;
+        },
+        formatResults(items, totalLabel, totalValue, totalClass, perShare) {
+          return `
+                    ${items
+                      .map(
+                        (item) => `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                            <span style="color: var(--text-secondary);">${item.label}:</span>
+                            <span style="font-weight: 500;">Rs. ${item.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                        </div>
+                    `,
+                      )
+                      .join("")}
+                    <hr style="border: none; border-top: 1px solid var(--surface-border); margin: 0.75rem 0;">
+                    <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.05rem;">
+                        <span>${totalLabel}:</span>
+                        <span class="${totalClass}">Rs. ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem; text-align: right;">
+                        Per Unit: Rs. ${perShare.toFixed(2)}
+                    </div>
+                `;
+        },
+      };
+
+      async function init() {
+        globalState.setState({ activePage: "calculator" });
+        await Layout.init();
+
+        const inputs = [
+          "buyQty",
+          "buyPrice",
+          "sellQty",
+          "sellPrice",
+          "manualWacc",
+        ];
+        inputs.forEach((id) => {
+          document.getElementById(id).addEventListener("input", () => {
+            if (id.startsWith("buy")) {
+              CalcLogic.calculateBuy();
+            } else {
+              CalcLogic.calculateSell();
+            }
+          });
+        });
+
+        document.getElementById("waccMode").addEventListener("change", (e) => {
+          const manualContainer = document.getElementById(
+            "manualWaccContainer",
+          );
+          const isManual = e.target.value === "manual";
+          manualContainer.style.display = isManual ? "block" : "none";
+          
+          if (!isManual) {
+            CalcLogic.syncSellQty();
+          }
+          
+          CalcLogic.calculateSell();
+        });
+
+        document.getElementById("manualWacc").addEventListener("blur", (e) => {
+          // Enforce 4 decimal places on focus out
+          if (e.target.value) {
+            e.target.value = parseFloat(e.target.value).toFixed(4);
+          }
+        });
+
+        // Initial calc
+        CalcLogic.calculateBuy();
+        CalcLogic.calculateSell();
+      }
+
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>

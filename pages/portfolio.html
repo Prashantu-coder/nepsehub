@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio | NEPSE HUB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/themes.css">
+</head>
+<body>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+        <main class="main-content">
+            <div id="app">
+                <div class="fade-in">
+                    <div class="section-header">
+                        <h2>My Portfolio</h2>
+                        <button id="addStockBtn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Stock
+                        </button>
+                    </div>
+
+                    <div id="portfolio-summary" class="portfolio-summary">
+                        <!-- Summary injected here -->
+                    </div>
+
+                    <div id="portfolio-table-container" class="data-table-container glass">
+                        <!-- Table injected here -->
+                    </div>
+
+                    <div id="portfolioModal" class="modal-overlay">
+                        <div class="modal glass">
+                            <h3>Add to Portfolio</h3>
+                            <form id="portfolioForm" style="margin-top: 1.5rem;">
+                                <div class="form-group">
+                                    <label>Stock Symbol</label>
+                                    <select id="portfolioSymbol" required></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    <input type="number" id="portfolioQty" required min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Buy Price</label>
+                                    <input type="number" id="portfolioPrice" step="0.01" required>
+                                </div>
+                                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                                    <button type="button" class="btn btn-outline closeModal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Save Entry</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import globalState from '../js/state.js';
+        import { Layout } from '../js/layout.js';
+        import { Table } from '../components/table.js';
+        import StorageService from '../services/storageService.js';
+
+        async function init() {
+            globalState.setState({ activePage: 'portfolio' });
+            await Layout.init();
+            
+            globalState.subscribe((state) => renderPortfolio(state));
+            renderPortfolio(globalState.getState());
+            bindLocalEvents();
+        }
+
+        function renderPortfolio(state) {
+            const { portfolio, stocks } = state;
+            
+            // Render Symbol Dropdown
+            const select = document.getElementById('portfolioSymbol');
+            if (select && stocks.length > 0 && select.children.length === 0) {
+                select.innerHTML = stocks.map(s => `<option value="${s.symbol}">${s.symbol} - ${s.name}</option>`).join('');
+            }
+
+            let totalInvestment = 0;
+            let currentValue = 0;
+
+            const rows = portfolio.map(item => {
+                const stock = stocks.find(s => s.symbol === item.symbol);
+                const currentPrice = stock ? stock.price : item.buyPrice;
+                const currentVal = item.quantity * currentPrice;
+                const investment = item.quantity * item.buyPrice;
+                const profitLoss = currentVal - investment;
+                const profitLossPercent = investment > 0 ? (profitLoss / investment) * 100 : 0;
+
+                totalInvestment += investment;
+                currentValue += currentVal;
+
+                return [
+                    item.symbol,
+                    item.quantity,
+                    `Rs. ${item.buyPrice}`,
+                    `Rs. ${currentPrice}`,
+                    `Rs. ${investment.toLocaleString()}`,
+                    `<span class="${profitLoss >= 0 ? 'positive' : 'negative'}">Rs. ${profitLoss.toLocaleString()} (${profitLossPercent.toFixed(2)}%)</span>`,
+                    `<button class="btn btn-outline removePortfolio" data-id="${item.id}" style="padding: 0.2rem 0.5rem; font-size: 0.7rem;">Remove</button>`
+                ];
+            });
+
+            const totalProfitLoss = currentValue - totalInvestment;
+            const totalProfitLossPercent = totalInvestment > 0 ? (totalProfitLoss / totalInvestment) * 100 : 0;
+
+            document.getElementById('portfolio-summary').innerHTML = `
+                <div class="summary-item glass">
+                    <div class="summary-label">Total Investment</div>
+                    <div class="summary-value">Rs. ${totalInvestment.toLocaleString()}</div>
+                </div>
+                <div class="summary-item glass">
+                    <div class="summary-label">Current Value</div>
+                    <div class="summary-value">Rs. ${currentValue.toLocaleString()}</div>
+                </div>
+                <div class="summary-item glass">
+                    <div class="summary-label">Overall Profit/Loss</div>
+                    <div class="summary-value ${totalProfitLoss >= 0 ? 'positive' : 'negative'}">
+                        Rs. ${totalProfitLoss.toLocaleString()} (${totalProfitLossPercent.toFixed(2)}%)
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('portfolio-table-container').innerHTML = Table(
+                ['Symbol', 'Qty', 'Buy Price', 'LTP', 'Investment', 'P/L', 'Action'], 
+                rows
+            );
+            
+            rebindRemoveEvents();
+        }
+
+        function bindLocalEvents() {
+            const modal = document.getElementById('portfolioModal');
+            document.getElementById('addStockBtn')?.addEventListener('click', () => modal.classList.add('active'));
+            document.querySelectorAll('.closeModal').forEach(btn => btn.addEventListener('click', () => modal.classList.remove('active')));
+
+            document.getElementById('portfolioForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newEntry = {
+                    id: Date.now().toString(),
+                    symbol: document.getElementById('portfolioSymbol').value,
+                    quantity: parseInt(document.getElementById('portfolioQty').value),
+                    buyPrice: parseFloat(document.getElementById('portfolioPrice').value)
+                };
+                const updatedPortfolio = [...globalState.getState().portfolio, newEntry];
+                globalState.setState({ portfolio: updatedPortfolio });
+                StorageService.save('nepse_portfolio', updatedPortfolio);
+                modal.classList.remove('active');
+            });
+        }
+
+        function rebindRemoveEvents() {
+            document.querySelectorAll('.removePortfolio').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const updatedPortfolio = globalState.getState().portfolio.filter(p => p.id !== id);
+                    globalState.setState({ portfolio: updatedPortfolio });
+                    StorageService.save('nepse_portfolio', updatedPortfolio);
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
