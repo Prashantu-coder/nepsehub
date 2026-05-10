@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,58 @@
     <link rel="stylesheet" href="../css/layout.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/themes.css">
+    <style>
+        .wl-table th, .wl-table td {
+            padding: 1rem 1.25rem;
+            text-align: right;
+            border-bottom: 1px solid var(--surface-border);
+            white-space: nowrap;
+        }
+        .wl-table th:first-child, .wl-table td:first-child { text-align: left; }
+        .wl-table { width: 100%; border-collapse: collapse; }
+        .wl-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+        .target-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .target-buy-badge  { background: rgba(16,185,129,0.15); color: #10b981; }
+        .target-sell-badge { background: rgba(244,63,94,0.15);  color: #f43f5e; }
+        .notes-text        { color: var(--text-secondary); font-size: 0.8rem; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Modal */
+        #wl-modal {
+            display: none;
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.85);
+            z-index: 99999;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(6px);
+        }
+        .wl-modal-box {
+            background: #161b22;
+            border: 1px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%; max-width: 460px;
+        }
+        .wl-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--surface-border);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        .wl-input:focus { border-color: var(--primary); outline: none; }
+        .wl-label { display: block; margin-bottom: 0.4rem; color: var(--text-secondary); font-size: 0.8rem; }
+        .form-row { margin-bottom: 1rem; }
+    </style>
 </head>
 <body>
     <div id="navbar-container"></div>
@@ -17,77 +69,104 @@
         <main class="main-content">
             <div id="app">
                 <div class="fade-in">
-                    <div class="section-header">
-                        <h2>My Watchlist</h2>
-                        <span id="watchlist-count" style="color: var(--text-secondary);">0 Stocks</span>
+                    <!-- Header -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+                        <div>
+                            <h2 style="margin-bottom:0.2rem;"><i class="fas fa-eye" style="margin-right:0.75rem;"></i>My Watchlist</h2>
+                            <p style="color:var(--text-secondary); font-size:0.85rem;">Track stocks with custom target prices</p>
+                        </div>
+                        <div style="display:flex; gap:0.75rem; align-items:center;">
+                            <span id="wl-live-dot" style="display:flex; align-items:center; gap:0.4rem; font-size:0.78rem; color:var(--text-secondary);">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;animation:pulse 2s infinite;"></span> LIVE
+                            </span>
+                            <button class="btn btn-primary" id="open-wl-modal">
+                                <i class="fas fa-plus"></i> Add Stock
+                            </button>
+                        </div>
                     </div>
-                    <div id="watchlist-grid" class="dashboard-grid"></div>
-                    <div id="empty-watchlist" class="glass" style="display: none; padding: 4rem; text-align: center; border-radius: 20px;">
-                        <i class="far fa-heart" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem; display: block;"></i>
-                        <h3>Your watchlist is empty</h3>
-                        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Add stocks from the dashboard to track them here.</p>
-                        <a href="../index.html" class="btn btn-primary" style="margin-top: 1.5rem;">Go to Dashboard</a>
+
+                    <!-- Summary bar -->
+                    <div style="display:flex; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+                        <span id="wl-count" style="color:var(--text-secondary); font-size:0.85rem;"></span>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="glass" style="border-radius:20px; overflow:hidden;">
+                        <div style="overflow-x:auto;">
+                            <table class="wl-table" id="watchlistTable">
+                                <thead>
+                                    <tr style="color:var(--text-secondary); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.5px;">
+                                        <th>Symbol</th>
+                                        <th>LTP</th>
+                                        <th>Change</th>
+                                        <th>Target Buy</th>
+                                        <th>Target Sell</th>
+                                        <th>Notes</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="watchlistBody"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="wl-empty" style="display:none; padding:4rem; text-align:center;">
+                            <i class="fas fa-eye-slash" style="font-size:3rem; color:var(--text-secondary); margin-bottom:1rem; display:block;"></i>
+                            <h3 style="margin-bottom:0.5rem;">No stocks watched yet</h3>
+                            <p style="color:var(--text-secondary); margin-bottom:1.5rem;">Add stocks to monitor their price against your target.</p>
+                            <button class="btn btn-primary" id="empty-add-btn"><i class="fas fa-plus"></i> Add Stock</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <script type="module">
-        import globalState from '../js/state.js';
-        import { Layout } from '../js/layout.js';
-        import { StockCard } from '../components/stockCard.js';
-        import { initStockChart } from '../components/chart.js';
-        import StorageService from '../services/storageService.js';
+    <!-- ADD / EDIT MODAL -->
+    <div id="wl-modal">
+        <div class="wl-modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h3 id="wl-modal-title" style="margin:0;">Add to Watchlist</h3>
+                <button id="close-wl-modal" style="color:var(--text-secondary); font-size:1.2rem;"><i class="fas fa-times"></i></button>
+            </div>
 
-        async function init() {
-            globalState.setState({ activePage: 'watchlist' });
-            await Layout.init();
-            
-            globalState.subscribe((state) => renderWatchlist(state));
-            renderWatchlist(globalState.getState());
+            <input type="hidden" id="wl-edit-id">
+
+            <div class="form-row">
+                <label class="wl-label">Symbol *</label>
+                <input type="text" id="wl-symbol" placeholder="e.g. NICA" class="wl-input" style="text-transform:uppercase;">
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="form-row">
+                    <label class="wl-label">Target Buy Price <span style="color:#10b981;">(Rs.)</span></label>
+                    <input type="number" id="wl-target-buy" placeholder="Optional" class="wl-input">
+                </div>
+                <div class="form-row">
+                    <label class="wl-label">Target Sell Price <span style="color:#f43f5e;">(Rs.)</span></label>
+                    <input type="number" id="wl-target-sell" placeholder="Optional" class="wl-input">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label class="wl-label">Notes <span style="color:var(--text-secondary);">(Optional)</span></label>
+                <textarea id="wl-notes" placeholder="e.g. Waiting for support at 400, strong sector..." class="wl-input" rows="3" style="resize:vertical;"></textarea>
+            </div>
+
+            <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+                <button class="btn btn-secondary" id="cancel-wl-modal" style="flex:1;">Cancel</button>
+                <button class="btn btn-primary" id="save-wl-btn" style="flex:1;">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
         }
+    </style>
 
-        function renderWatchlist(state) {
-            const { watchlist, stocks } = state;
-            const watchlistStocks = stocks.filter(s => watchlist.includes(s.symbol));
-            
-            document.getElementById('watchlist-count').textContent = `${watchlistStocks.length} Stocks`;
-            
-            const grid = document.getElementById('watchlist-grid');
-            const empty = document.getElementById('empty-watchlist');
-
-            if (watchlistStocks.length > 0) {
-                grid.style.display = 'grid';
-                empty.style.display = 'none';
-                grid.innerHTML = watchlistStocks.map(stock => StockCard(stock)).join('');
-                
-                watchlistStocks.forEach(stock => {
-                    initStockChart(`chart-${stock.symbol}`, stock.history, stock.change >= 0);
-                });
-                
-                bindWatchlistEvents();
-            } else {
-                grid.style.display = 'none';
-                empty.style.display = 'block';
-            }
-        }
-
-        function bindWatchlistEvents() {
-            document.querySelectorAll('.addToWatchlist').forEach(btn => {
-                const symbol = btn.dataset.symbol;
-                btn.innerHTML = `<i class="fas fa-heart" style="color: var(--danger);"></i> Remove`;
-                
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const updatedWatchlist = globalState.getState().watchlist.filter(s => s !== symbol);
-                    globalState.setState({ watchlist: updatedWatchlist });
-                    StorageService.save('nepse_watchlist', updatedWatchlist);
-                });
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+    <script type="module" src="../js/pages/watchlist.js"></script>
 </body>
 </html>

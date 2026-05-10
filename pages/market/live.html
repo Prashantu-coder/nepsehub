@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Market | NEPSE HUB</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/themes.css" />
+    <link rel="stylesheet" href="../../css/pages/market.css" />
+    <style>
+      .market-table-container {
+        overflow-x: auto;
+        border-radius: 16px;
+        margin-top: 1.5rem;
+      }
+
+      .market-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+
+     /* Sticky Header fix */
+      .market-table thead {
+          position: sticky;
+          top: 0;
+          z-index: 10;
+          background: var(--surface-bg) !important;
+      }
+
+      .market-table thead th {
+          background: var(--surface-bg) !important;
+      }
+
+      /* Column Settings Popup */
+      .column-settings {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          width: 200px;
+          background: var(--surface-bg);
+          border: 1px solid var(--surface-border);
+          border-radius: 12px;
+          padding: 1rem;
+          z-index: 100;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+          display: none;
+      }
+
+      .column-settings.active {
+          display: block;
+      }
+
+      .column-option {
+          display: flex;
+          align-items: center;
+          gap: 0.8rem;
+          margin-bottom: 0.5rem;
+          cursor: pointer;
+          font-size: 0.85rem;
+      }
+
+      .column-option input {
+          cursor: pointer;
+      }
+
+      .market-table th, .market-table td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid var(--surface-border);
+        white-space: nowrap;
+        text-align: right; /* Default right alignment for numbers */
+      }
+
+      .market-table th:first-child, .market-table td:first-child {
+        text-align: left; /* Symbol left aligned */
+        padding-left: 0;
+      }
+
+      .market-table th:last-child, .market-table td:last-child {
+        padding-right: 0; /* Remove space on right */
+      }
+
+      .market-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .market-table tr:hover {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .symbol-cell {
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      .price-up {
+        color: var(--secondary);
+        font-weight: 600;
+      }
+
+      .price-down {
+        color: var(--danger);
+        font-weight: 600;
+      }
+
+      .search-bar {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--surface-border);
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        color: var(--text-primary);
+        width: 300px;
+        outline: none;
+        transition: border-color 0.3s;
+      }
+
+      .search-bar:focus {
+        border-color: var(--primary);
+      }
+
+      .refresh-status {
+        font-size: 0.75rem;
+        color: #4ade80;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: rgba(74, 222, 128, 0.1);
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--secondary);
+        box-shadow: 0 0 10px var(--secondary);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.5;
+        }
+      }
+
+      .market-summary-bar {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .summary-item {
+        padding: 0.6rem 1.25rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--surface-border);
+        min-width: 120px;
+        text-align: center;
+      }
+
+      .summary-item.advances {
+        background: rgba(34, 197, 94, 0.15);
+        border-color: rgba(34, 197, 94, 0.3);
+        color: #4ade80;
+      }
+
+      .summary-item.declines {
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.3);
+        color: #f87171;
+      }
+
+      .summary-item.neutral {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-secondary);
+      }
+
+      .summary-item {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+      }
+
+      .summary-item:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.2);
+      }
+
+      .summary-item.active {
+        box-shadow: 0 0 0 2px var(--primary);
+        transform: translateY(-2px);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+      <div id="sidebar-container"></div>
+      <main class="main-content">
+        <div id="app">
+          <div class="fade-in">
+            <div class="market-summary-bar" style="justify-content: space-between; align-items: center;">
+              <div style="display: flex; gap: 1rem;">
+                <div class="summary-item advances" title="Filter Advances">
+                  Advances: <span id="advancesCount">0</span>
+                </div>
+                <div class="summary-item declines" title="Filter Declines">
+                  Declines: <span id="declinesCount">0</span>
+                </div>
+                <div class="summary-item neutral" title="Filter Neutral">
+                  Neutral: <span id="neutralCount">0</span>
+                </div>
+              </div>
+              
+              <div class="refresh-status">
+                <div class="status-dot"></div>
+                LIVE MARKET
+              </div>
+            </div>
+
+            <div
+              class="glass"
+              style="padding: 1.5rem; border-radius: 20px; margin-top: 1.5rem"
+            >
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 1rem;
+                  gap: 1rem;
+                "
+              >
+                <div style="display: flex; gap: 1rem; align-items: center; flex: 1;">
+                  <input
+                    type="text"
+                    id="marketSearch"
+                    class="search-bar"
+                    placeholder="Search Symbol or Company..."
+                    style="flex: 1; max-width: 300px;"
+                  />
+                  <select id="sectorFilter" class="search-bar" style="width: 220px; cursor: pointer;">
+                    <option value="all">All Sectors (12)</option>
+                    <option value="Commercial Banks">Commercial Banks</option>
+                    <option value="Development Banks">Development Banks</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Hotel & Tourism">Hotel & Tourism</option>
+                    <option value="Hydro Power">Hydro Power</option>
+                    <option value="Life Insurance">Life Insurance</option>
+                    <option value="Non-Life Insurance">Non-Life Insurance</option>
+                    <option value="Microfinance">Microfinance</option>
+                    <option value="Manufacturing & Processing">Manufacturing & Processing</option>
+                    <option value="Trading">Trading</option>
+                    <option value="Investment">Investment</option>
+                    <option value="Others">Others</option>
+                  </select>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                  <div id="marketSummary" style="font-size: 0.9rem; color: var(--text-secondary)">
+                    Showing <span id="filteredCount">0</span> of <span id="totalCount">0</span> stocks
+                  </div>
+                  <div style="position: relative;">
+                    <button id="columnSettingsBtn" class="btn btn-secondary btn-sm" title="Customize Columns">
+                        <i class="fas fa-columns"></i>
+                    </button>
+                    <div id="columnSettingsPopup" class="column-settings">
+                        <h4 style="margin-bottom: 0.8rem; font-size: 0.9rem;">Show Columns</h4>
+                        <label class="column-option"><input type="checkbox" data-col="symbol" checked disabled> Symbol</label>
+                        <label class="column-option"><input type="checkbox" data-col="lastTradedPrice" checked> LTP</label>
+                        <label class="column-option"><input type="checkbox" data-col="lastTradedVolume" checked> LTQ</label>
+                        <label class="column-option"><input type="checkbox" data-col="percentageChange" checked> %Change</label>
+                        <label class="column-option"><input type="checkbox" data-col="openPrice" checked> OPEN</label>
+                        <label class="column-option"><input type="checkbox" data-col="highPrice" checked> High</label>
+                        <label class="column-option"><input type="checkbox" data-col="lowPrice" checked> LOW</label>
+                        <label class="column-option"><input type="checkbox" data-col="totalTradeQuantity" checked> TTQ</label>
+                        <label class="column-option"><input type="checkbox" data-col="previousClose" checked> PrevClosing</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="market-table-container">
+                <table class="market-table">
+                  <thead>
+                    <tr>
+                      <th class="sortable" data-sort="symbol">Symbol</th>
+                      <th class="sortable" data-sort="lastTradedPrice">LTP</th>
+                      <th class="sortable" data-sort="lastTradedVolume">LTQ</th>
+                      <th class="sortable" data-sort="percentageChange">%Change</th>
+                      <th class="sortable" data-sort="openPrice">OPEN</th>
+                      <th class="sortable" data-sort="highPrice">High</th>
+                      <th class="sortable" data-sort="lowPrice">LOW</th>
+                      <th class="sortable" data-sort="totalTradeQuantity">TTQ</th>
+                      <th class="sortable" data-sort="previousClose">PrevClosing</th>
+                    </tr>
+                  </thead>
+                  <tbody id="marketBody">
+                    <!-- Data injected here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Quick Action Side Panel -->
+    <div class="side-panel-overlay" id="panelOverlay"></div>
+    <div class="side-panel" id="quickPanel">
+      <div class="close-panel" id="closePanel"><i class="fas fa-times"></i></div>
+      <div id="panelContent">
+        <!-- Content injected dynamically -->
+      </div>
+    </div>
+
+    <script type="module" src="../../js/pages/market/live.js"></script>
+  </body>
+</html>

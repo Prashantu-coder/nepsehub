@@ -13,9 +13,9 @@ export const Layout = {
         // Let's use a simpler way: check how many '../' we need to get to root.
         
         // Count how many directories deep we are relative to index.html
-        // We expect: root, pages/, or pages/calculator/, or pages/trade/
+        // We expect: root, pages/, or pages/calculator/, or pages/trade/, or pages/market/
         let prefix = '';
-        if (path.includes('/pages/calculator/') || path.includes('/pages/trade/')) {
+        if (path.includes('/pages/calculator/') || path.includes('/pages/trade/') || path.includes('/pages/market/')) {
             prefix = '../../';
         } else if (path.includes('/pages/')) {
             prefix = '../';
@@ -28,8 +28,10 @@ export const Layout = {
         });
 
         // Load basic state
-        const savedPortfolio = StorageService.load('nepse_portfolio') || [];
-        const savedWatchlist = StorageService.load('nepse_watchlist') || [];
+        const [savedPortfolio, savedWatchlist] = await Promise.all([
+            StorageService.load('nepse_portfolio').then(d => d || []),
+            StorageService.load('nepse_watchlist').then(d => d || [])
+        ]);
         
         globalState.setState({ 
             theme: 'dark',

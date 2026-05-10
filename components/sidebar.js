@@ -8,6 +8,14 @@ export const Sidebar = () => {
         { id: 'index', icon: 'fa-th-large', text: 'Dashboard', path: 'index.html' },
         { id: 'portfolio', icon: 'fa-briefcase', text: 'Portfolio', path: 'pages/portfolio.html' },
         { id: 'watchlist', icon: 'fa-heart', text: 'Watchlist', path: 'pages/watchlist.html' },
+        { 
+            id: 'market', 
+            icon: 'fa-chart-bar', 
+            text: 'Market',
+            children: [
+                { id: 'live-market', text: 'Live Market', icon: 'fa-broadcast-tower', path: 'pages/market/live.html' }
+            ]
+        },
         { id: 'news', icon: 'fa-newspaper', text: 'Market News', path: 'pages/news.html' },
         { 
             id: 'calculator', 

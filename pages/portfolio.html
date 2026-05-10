@@ -1,14 +1,65 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Portfolio | NEPSE HUB</title>
+    <title>Investment Portfolio | NEPSE HUB</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/base.css">
     <link rel="stylesheet" href="../css/layout.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/themes.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .portfolio-header-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .summary-card {
+            background: var(--surface-solid);
+            padding: 1.25rem;
+            border-radius: 16px;
+            border: 1px solid var(--surface-border);
+        }
+        .summary-label { color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+        .summary-value { font-size: 1.25rem; font-weight: 700; }
+        .summary-change { font-size: 0.8rem; margin-top: 0.25rem; }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .chart-container {
+            background: var(--surface-solid);
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: 1px solid var(--surface-border);
+            height: 400px;
+        }
+        
+        /* Modal Enhanced */
+        .fee-preview-box {
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .fee-row { display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.85rem; }
+    </style>
 </head>
 <body>
     <div id="navbar-container"></div>
@@ -17,42 +68,113 @@
         <main class="main-content">
             <div id="app">
                 <div class="fade-in">
-                    <div class="section-header">
-                        <h2>My Portfolio</h2>
-                        <button id="addStockBtn" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Add Stock
+                    <!-- Page Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <div>
+                            <h2 style="margin-bottom: 0.25rem;"><i class="fas fa-briefcase" style="margin-right: 0.75rem;"></i>PORTFOLIO</h2>
+                            <p style="color: var(--text-secondary); font-size: 0.85rem;">Track your NEPSE investments & performance</p>
+                        </div>
+                        <button class="btn btn-primary" id="open-portfolio-modal">
+                            <i class="fas fa-plus-circle"></i> Add Transaction
                         </button>
                     </div>
 
-                    <div id="portfolio-summary" class="portfolio-summary">
-                        <!-- Summary injected here -->
+                    <!-- 5 Summary Cards -->
+                    <div class="portfolio-header-grid">
+                        <div class="summary-card">
+                            <div class="summary-label">Total Investment</div>
+                            <div class="summary-value" id="stat-total-inv">Rs. 0.00</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Current Value</div>
+                            <div class="summary-value" id="stat-current-val">Rs. 0.00</div>
+                            <div class="summary-change" id="stat-total-pnl-pct">0.00% unrealized</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Unrealized P&L</div>
+                            <div class="summary-value" id="stat-unrealized-pnl">Rs. 0.00</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Realized P&L</div>
+                            <div class="summary-value" id="stat-realized-pnl">Rs. 0.00</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Today's Change</div>
+                            <div class="summary-value" id="stat-today-change">Rs. 0.00</div>
+                            <div class="summary-change" id="stat-today-pct">+0.00%</div>
+                        </div>
                     </div>
 
-                    <div id="portfolio-table-container" class="data-table-container glass">
-                        <!-- Table injected here -->
+                    <!-- Tabs Navigation -->
+                    <div class="tab-nav" style="margin-bottom: 2rem;">
+                        <button class="tab-btn active" data-tab="overview">Overview</button>
+                        <button class="tab-btn" data-tab="analytics">Analytics</button>
+                        <button class="tab-btn" data-tab="transactions">Transactions</button>
                     </div>
 
-                    <div id="portfolioModal" class="modal-overlay">
-                        <div class="modal glass">
-                            <h3>Add to Portfolio</h3>
-                            <form id="portfolioForm" style="margin-top: 1.5rem;">
-                                <div class="form-group">
-                                    <label>Stock Symbol</label>
-                                    <select id="portfolioSymbol" required></select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Quantity</label>
-                                    <input type="number" id="portfolioQty" required min="1">
-                                </div>
-                                <div class="form-group">
-                                    <label>Buy Price</label>
-                                    <input type="number" id="portfolioPrice" step="0.01" required>
-                                </div>
-                                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                                    <button type="button" class="btn btn-outline closeModal">Cancel</button>
-                                    <button type="submit" class="btn btn-primary">Save Entry</button>
-                                </div>
-                            </form>
+                    <!-- Tab Contents -->
+                    <div id="tab-overview">
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+                            <!-- Performance Chart -->
+                            <div class="chart-container">
+                                <h4 style="margin-bottom: 1.5rem;">Portfolio Performance</h4>
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                            <!-- Sector Allocation -->
+                            <div class="chart-container">
+                                <h4 style="margin-bottom: 1.5rem;">Sector Allocation</h4>
+                                <canvas id="sectorChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Current Holdings Table -->
+                        <div class="content-section" style="margin-top: 2rem;">
+                            <h4 style="margin-bottom: 1.5rem;">Current Holdings</h4>
+                            <div class="table-container glass">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Symbol</th>
+                                            <th>Qty</th>
+                                            <th>WACC</th>
+                                            <th>LTP</th>
+                                            <th>Invested</th>
+                                            <th>Current Value</th>
+                                            <th>P&L</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="portfolio-list-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-analytics" style="display: none;">
+                        <div class="glass" style="padding: 3rem; text-align: center; border-radius: 20px;">
+                            <i class="fas fa-chart-pie" style="font-size: 3rem; margin-bottom: 1rem; color: var(--secondary);"></i>
+                            <h3>Advanced Analytics Coming Soon</h3>
+                            <p style="color: var(--text-secondary);">Deep insights into your sector exposure and dividend yields.</p>
+                        </div>
+                    </div>
+
+                    <div id="tab-transactions" style="display: none;">
+                        <div class="table-container glass">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Symbol</th>
+                                        <th>Qty</th>
+                                        <th>Rate</th>
+                                        <th>Fees</th>
+                                        <th>Total</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transaction-history-body"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -60,115 +182,97 @@
         </main>
     </div>
 
-    <script type="module">
-        import globalState from '../js/state.js';
-        import { Layout } from '../js/layout.js';
-        import { Table } from '../components/table.js';
-        import StorageService from '../services/storageService.js';
-
-        async function init() {
-            globalState.setState({ activePage: 'portfolio' });
-            await Layout.init();
+    <!-- TRANSACTION MODAL (PREMIUM DESIGN) -->
+    <div id="portfolio-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+        <div class="modal-content-box glass" style="max-width: 500px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="margin: 0;">Add Transaction</h3>
+                <button id="close-portfolio-modal" style="color: var(--text-secondary); font-size: 1.25rem;"><i class="fas fa-times"></i></button>
+            </div>
             
-            globalState.subscribe((state) => renderPortfolio(state));
-            renderPortfolio(globalState.getState());
-            bindLocalEvents();
-        }
-
-        function renderPortfolio(state) {
-            const { portfolio, stocks } = state;
-            
-            // Render Symbol Dropdown
-            const select = document.getElementById('portfolioSymbol');
-            if (select && stocks.length > 0 && select.children.length === 0) {
-                select.innerHTML = stocks.map(s => `<option value="${s.symbol}">${s.symbol} - ${s.name}</option>`).join('');
-            }
-
-            let totalInvestment = 0;
-            let currentValue = 0;
-
-            const rows = portfolio.map(item => {
-                const stock = stocks.find(s => s.symbol === item.symbol);
-                const currentPrice = stock ? stock.price : item.buyPrice;
-                const currentVal = item.quantity * currentPrice;
-                const investment = item.quantity * item.buyPrice;
-                const profitLoss = currentVal - investment;
-                const profitLossPercent = investment > 0 ? (profitLoss / investment) * 100 : 0;
-
-                totalInvestment += investment;
-                currentValue += currentVal;
-
-                return [
-                    item.symbol,
-                    item.quantity,
-                    `Rs. ${item.buyPrice}`,
-                    `Rs. ${currentPrice}`,
-                    `Rs. ${investment.toLocaleString()}`,
-                    `<span class="${profitLoss >= 0 ? 'positive' : 'negative'}">Rs. ${profitLoss.toLocaleString()} (${profitLossPercent.toFixed(2)}%)</span>`,
-                    `<button class="btn btn-outline removePortfolio" data-id="${item.id}" style="padding: 0.2rem 0.5rem; font-size: 0.7rem;">Remove</button>`
-                ];
-            });
-
-            const totalProfitLoss = currentValue - totalInvestment;
-            const totalProfitLossPercent = totalInvestment > 0 ? (totalProfitLoss / totalInvestment) * 100 : 0;
-
-            document.getElementById('portfolio-summary').innerHTML = `
-                <div class="summary-item glass">
-                    <div class="summary-label">Total Investment</div>
-                    <div class="summary-value">Rs. ${totalInvestment.toLocaleString()}</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label>Symbol *</label>
+                    <input type="text" id="input-symbol" placeholder="SEARCH SYMBOL..." style="width: 100%;">
                 </div>
-                <div class="summary-item glass">
-                    <div class="summary-label">Current Value</div>
-                    <div class="summary-value">Rs. ${currentValue.toLocaleString()}</div>
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" id="input-date" style="width: 100%;">
                 </div>
-                <div class="summary-item glass">
-                    <div class="summary-label">Overall Profit/Loss</div>
-                    <div class="summary-value ${totalProfitLoss >= 0 ? 'positive' : 'negative'}">
-                        Rs. ${totalProfitLoss.toLocaleString()} (${totalProfitLossPercent.toFixed(2)}%)
-                    </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label>Quantity *</label>
+                    <input type="number" id="input-qty" placeholder="0" style="width: 100%;">
                 </div>
-            `;
+                <div class="form-group">
+                    <label>Rate (Rs.) *</label>
+                    <input type="number" id="input-price" placeholder="0.00" style="width: 100%;">
+                </div>
+            </div>
 
-            document.getElementById('portfolio-table-container').innerHTML = Table(
-                ['Symbol', 'Qty', 'Buy Price', 'LTP', 'Investment', 'P/L', 'Action'], 
-                rows
-            );
-            
-            rebindRemoveEvents();
-        }
+            <!-- Fee Calculation Preview (Matching Screenshot) -->
+            <div class="fee-preview-box">
+                <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--primary); margin-bottom: 0.75rem; font-weight: 600;">
+                    <i class="fas fa-calculator"></i> Fee Calculation Preview
+                </div>
+                <div class="fee-row">
+                    <span>Transaction Value</span>
+                    <span id="preview-value">Rs. 0.00</span>
+                </div>
+                <div class="fee-row">
+                    <span>Broker Commission</span>
+                    <span id="preview-broker">Rs. 0.00</span>
+                </div>
+                <div class="fee-row">
+                    <span>SEBON Fee (0.015%)</span>
+                    <span id="preview-sebon">Rs. 0.00</span>
+                </div>
+                <div class="fee-row">
+                    <span>DP Charge</span>
+                    <span>Rs. 25.00</span>
+                </div>
+                <hr style="border: none; border-top: 1px solid rgba(16, 185, 129, 0.2); margin: 0.75rem 0;">
+                <div class="fee-row" style="color: var(--danger); font-weight: 700; font-size: 1rem;">
+                    <span>Total Cost</span>
+                    <span id="preview-total-cost">Rs. 0.00</span>
+                </div>
+                <div class="fee-row" style="color: var(--text-secondary); font-size: 0.75rem;">
+                    <span>Cost per Share</span>
+                    <span id="preview-wacc">Rs. 0.00</span>
+                </div>
+            </div>
 
-        function bindLocalEvents() {
-            const modal = document.getElementById('portfolioModal');
-            document.getElementById('addStockBtn')?.addEventListener('click', () => modal.classList.add('active'));
-            document.querySelectorAll('.closeModal').forEach(btn => btn.addEventListener('click', () => modal.classList.remove('active')));
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-secondary" id="cancel-modal" style="flex:1;">Cancel</button>
+                <button class="btn btn-primary" id="save-holding-btn" style="flex:1; background: var(--primary); color: white;">Confirm Buy</button>
+            </div>
+        </div>
+    </div>
 
-            document.getElementById('portfolioForm')?.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const newEntry = {
-                    id: Date.now().toString(),
-                    symbol: document.getElementById('portfolioSymbol').value,
-                    quantity: parseInt(document.getElementById('portfolioQty').value),
-                    buyPrice: parseFloat(document.getElementById('portfolioPrice').value)
-                };
-                const updatedPortfolio = [...globalState.getState().portfolio, newEntry];
-                globalState.setState({ portfolio: updatedPortfolio });
-                StorageService.save('nepse_portfolio', updatedPortfolio);
-                modal.classList.remove('active');
-            });
-        }
+    <!-- SELL MODAL -->
+    <div id="sell-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+        <div class="modal-content-box glass">
+            <h3 id="sell-modal-title" style="margin-bottom: 1.5rem;">Sell Stock</h3>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label>Sell Rate (Rs.)</label>
+                <input type="number" id="sell-input-price" style="width: 100%;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label id="sell-max-label">Quantity (Max: 0)</label>
+                <input type="number" id="sell-input-qty" style="width: 100%;">
+            </div>
+            <div id="sell-fee-preview" class="fee-preview-box" style="background: rgba(244, 63, 94, 0.05); border-color: rgba(244, 63, 94, 0.2);">
+                <!-- Sell fees populated by JS -->
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button class="btn btn-secondary" id="close-sell-modal" style="flex:1;">Cancel</button>
+                <button class="btn btn-danger" id="confirm-sell-btn" style="flex:1; background: var(--danger);">Confirm Sell</button>
+            </div>
+        </div>
+    </div>
 
-        function rebindRemoveEvents() {
-            document.querySelectorAll('.removePortfolio').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const id = btn.dataset.id;
-                    const updatedPortfolio = globalState.getState().portfolio.filter(p => p.id !== id);
-                    globalState.setState({ portfolio: updatedPortfolio });
-                    StorageService.save('nepse_portfolio', updatedPortfolio);
-                });
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+    <script type="module" src="../js/pages/portfolio.js"></script>
 </body>
 </html>

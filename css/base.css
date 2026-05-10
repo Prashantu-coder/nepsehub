@@ -1,25 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* Color Palette - NEPSE HUB Premium Dark */
-    --primary: #818cf8;
-    --primary-hover: #6366f1;
-    --secondary: #10b981;
-    --danger: #ef4444;
-    --warning: #f59e0b;
-    --background: #1A3A5C;
-    --surface: linear-gradient(135deg, #0D1B2A 0%, #1A3A5C 100%);
-    --surface-solid: #0D1B2A;
-    --surface-border: rgba(255, 255, 255, 0.2);
-    --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.7);
-    --sidebar-bg: #0D1B2A;
-    --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    --glass-blur: 12px;
+    /* Color Palette - Deep Dark Premium */
+    --primary: #10b981;        /* Emerald */
+    --primary-hover: #059669;
+    --secondary: #6366f1;      /* Indigo */
+    --danger: #f43f5e;         /* Rose */
+    --warning: #f59e0b;        /* Amber */
+    --background: #0d1117;     /* GitHub Dark Style */
+    --surface-solid: #161b22;
+    --surface: rgba(22, 27, 34, 0.8);
+    --surface-hover: #21262d;
+    --surface-border: rgba(255, 255, 255, 0.1);
+    --text-primary: #f0f6fc;
+    --text-secondary: #8b949e;
+    --sidebar-bg: #0d1117;
+    --card-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5);
+    --glass-blur: 16px;
     
     /* Transitions */
-    --transition-fast: 0.2s ease;
-    --transition-slow: 0.4s ease;
+    --transition-fast: 0.15s ease;
+    --transition-slow: 0.35s ease;
 }
 
 * {
