@@ -20,14 +20,29 @@ const DataService = {
         return this._fetchWithDelay('/data/mockNews.json');
     },
 
+    // Proxy Backend URL
+    API_BASE: 'https://nepse-live-api-bbv6.onrender.com',
+
     async getLiveMarket() {
         try {
-            const response = await fetch('https://nepse-live-api-bbv6.onrender.com/api/live');
+            const response = await fetch(`${this.API_BASE}/api`);
             if (!response.ok) throw new Error('Network response was not ok');
             return await response.json();
         } catch (error) {
             console.error('Failed to fetch live market data:', error);
             return [];
+        }
+    },
+
+    async getIPOData(page = 1, size = 20) {
+        try {
+            const url = `${this.API_BASE}/ipo?page=${page}&size=${size}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to fetch IPO data:', error);
+            return null;
         }
     },
 

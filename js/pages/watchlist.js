@@ -2,6 +2,10 @@ import globalState from '../state.js';
 import { Layout } from '../layout.js';
 import DataService from '../../services/dataService.js';
 import StorageService from '../../services/storageService.js';
+import NotificationService from '../../services/notificationService.js';
+import { SymbolSearch } from '../components/symbolSearch.js';
+
+let wlSymbolSearch; // Watchlist modal symbol search instance
 
 let marketData = [];
 let watchlistData = []; // full rows from DB
@@ -13,12 +17,30 @@ async function init() {
     globalState.setState({ activePage: 'watchlist' });
     await Layout.init();
 
+    // Initialize SymbolSearch (mounts into #wl-symbol-search)
+    wlSymbolSearch = new SymbolSearch({
+        wrapperId:   'wl-symbol-search',
+        inputId:     'wl-symbol',
+        placeholder: 'Type symbol or company name...'
+    });
+
     // Modal
     const modal = document.getElementById('wl-modal');
     document.getElementById('open-wl-modal').onclick     = () => openModal();
     document.getElementById('close-wl-modal').onclick    = () => modal.style.display = 'none';
     document.getElementById('cancel-wl-modal').onclick   = () => modal.style.display = 'none';
     document.getElementById('save-wl-btn').onclick       = handleSave;
+    
+    document.getElementById('enable-notifications').onclick = async () => {
+        const granted = await NotificationService.requestPermission();
+        if (granted) {
+            alert('Notifications Enabled! You will receive alerts when target prices are reached.');
+            document.getElementById('enable-notifications').innerHTML = '<i class="fas fa-check"></i> Alerts Active';
+            document.getElementById('enable-notifications').classList.add('btn-success');
+        } else {
+            alert('Permission denied. Please enable notifications in your browser settings.');
+        }
+    };
     
     const emptyAddBtn = document.getElementById('empty-add-btn');
     if (emptyAddBtn) emptyAddBtn.onclick = () => openModal();
@@ -129,12 +151,22 @@ function render() {
 // MODAL OPEN (Add or Edit)
 // ─────────────────────────────────────────────
 function openModal(item = null) {
-    document.getElementById('wl-edit-id').value    = item ? item.id : '';
-    document.getElementById('wl-symbol').value     = item ? item.symbol : '';
-    document.getElementById('wl-symbol').disabled  = !!item; // lock symbol on edit
+    document.getElementById('wl-edit-id').value     = item ? item.id : '';
+
+    if (item) {
+        // Edit mode: show symbol as plain text, disable search
+        wlSymbolSearch.setValue(item.symbol);
+        document.getElementById('wl-symbol').disabled = true;
+    } else {
+        // Add mode: clear and enable search
+        wlSymbolSearch.setData(marketData);
+        wlSymbolSearch.clear();
+        document.getElementById('wl-symbol').disabled = false;
+    }
+
     document.getElementById('wl-target-buy').value  = item?.target_buy  ?? '';
     document.getElementById('wl-target-sell').value = item?.target_sell ?? '';
-    document.getElementById('wl-notes').value       = item?.notes ?? '';
+    document.getElementById('wl-notes').value        = item?.notes ?? '';
     document.getElementById('wl-modal-title').innerText = item ? `Edit ${item.symbol}` : 'Add to Watchlist';
     document.getElementById('wl-modal').style.display = 'flex';
 }
@@ -143,23 +175,31 @@ function openModal(item = null) {
 // SAVE
 // ─────────────────────────────────────────────
 async function handleSave() {
-    const editId    = document.getElementById('wl-edit-id').value;
-    const symbol    = document.getElementById('wl-symbol').value.toUpperCase().trim();
+    const editId     = document.getElementById('wl-edit-id').value;
+    const symbol     = wlSymbolSearch ? wlSymbolSearch.getValue() : document.getElementById('wl-symbol')?.value.toUpperCase().trim();
     const targetBuy  = parseFloat(document.getElementById('wl-target-buy').value)  || null;
     const targetSell = parseFloat(document.getElementById('wl-target-sell').value) || null;
-    const notes     = document.getElementById('wl-notes').value.trim() || null;
+    const notes      = document.getElementById('wl-notes').value.trim() || null;
 
-    if (!symbol) { alert('Symbol is required.'); return; }
+    if (!editId && !symbol) { alert('Please select a symbol from the dropdown.'); return; }
+
+    // On edit, use the existing symbol from the hidden field
+    const finalSymbol = editId
+        ? watchlistData.find(w => w.id === parseInt(editId))?.symbol
+        : symbol;
+
+    if (!finalSymbol) { alert('Symbol not found.'); return; }
 
     if (editId) {
         await StorageService.updateWatchlistItem(parseInt(editId), {
             target_buy: targetBuy, target_sell: targetSell, notes
         });
     } else {
-        await StorageService.addToWatchlist({ symbol, target_buy: targetBuy, target_sell: targetSell, notes });
+        await StorageService.addToWatchlist({ symbol: finalSymbol, target_buy: targetBuy, target_sell: targetSell, notes });
     }
 
     document.getElementById('wl-modal').style.display = 'none';
+    wlSymbolSearch?.clear();
     await refresh();
 }
 

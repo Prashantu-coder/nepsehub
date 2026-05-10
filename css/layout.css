@@ -1,7 +1,21 @@
+/* ── Sticky Navbar Wrapper ── */
+#navbar-container {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  background-color: var(--background);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--surface-border);
+}
+
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: calc(100vh - 80px);   /* subtract navbar height */
+  width: 100%;
+  background-color: var(--background);
 }
 
 /* Sidebar Layout - Hidden by default on PC, Off-canvas on Mobile */
@@ -26,7 +40,10 @@
 /* Main Content Layout */
 .main-content {
   flex: 1;
-  padding: 2rem 2.5rem;
+  padding: 2rem;          /* Even padding on all 4 sides */
+  min-height: calc(100vh - 80px);
+  width: 100%;
+  box-sizing: border-box;
   transition: padding var(--transition-slow);
 }
 
@@ -37,11 +54,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
-  position: sticky;
-  top: 0;
-  z-index: 900;
-  border-radius: 0 0 16px 16px;
-  margin-bottom: 2rem;
+  z-index: 1000;
 }
 
 .navbar .logo {
@@ -118,7 +131,7 @@
     display: block;
   }
   .main-content {
-    padding: 1rem;
+    padding: 1.5rem;     /* Even on all sides for mobile too */
   }
   .pc-only {
     display: none !important;

@@ -1,0 +1,125 @@
+/* ═══════════════════════════════════════════
+   WATCHLIST PAGE — Dedicated Styles
+   Shared utilities live in: css/base.css
+═══════════════════════════════════════════ */
+
+/* ── Main Table ── */
+.watchlist-table-wrap {
+    background: var(--surface-solid);
+    border: 1px solid var(--surface-border);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+/* Watchlist table — left-align first col, right-align the rest */
+.wl-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.wl-table th {
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.85rem 1.25rem;
+    text-align: right;
+    border-bottom: 1px solid var(--surface-border);
+    white-space: nowrap;
+}
+.wl-table td {
+    padding: 1rem 1.25rem;
+    text-align: right;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.wl-table th:first-child,
+.wl-table td:first-child { text-align: left; }
+.wl-table tbody tr:hover  { background: rgba(255,255,255,0.025); }
+
+/* ── Symbol cell highlight ── */
+.wl-symbol {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 0.92rem;
+}
+
+/* ── Target price badges ── */
+.target-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.target-buy-badge  { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.25); }
+.target-sell-badge { background: rgba(244,63,94,0.12);  color: #f43f5e; border: 1px solid rgba(244,63,94,0.25); }
+
+/* ── Target hit glow ── */
+.target-hit-buy  { box-shadow: 0 0 10px rgba(16,185,129,0.5); animation: glowBuy  1.5s infinite alternate; }
+.target-hit-sell { box-shadow: 0 0 10px rgba(244,63,94,0.5);  animation: glowSell 1.5s infinite alternate; }
+
+@keyframes glowBuy  { from { box-shadow: 0 0 4px rgba(16,185,129,0.3);  } to { box-shadow: 0 0 14px rgba(16,185,129,0.7); } }
+@keyframes glowSell { from { box-shadow: 0 0 4px rgba(244,63,94,0.3);   } to { box-shadow: 0 0 14px rgba(244,63,94,0.7);  } }
+
+/* ── Row highlight when either target is hit ── */
+.wl-row-buy-hit  { border-left: 3px solid #10b981 !important; }
+.wl-row-sell-hit { border-left: 3px solid #f43f5e !important; }
+.wl-row-normal   { border-left: 3px solid transparent; }
+
+/* ── Notes cell ── */
+.wl-notes {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+}
+
+/* ── Count bar above table ── */
+.wl-count-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.5rem;
+    border-bottom: 1px solid var(--surface-border);
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+/* ── Modal: Watchlist Add/Edit ── */
+.wl-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.88);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+}
+.wl-modal-box {
+    background: var(--surface-solid);
+    border: 1px solid var(--surface-border);
+    border-radius: 22px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 480px;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+}
+
+/* ── Target price input hint colors ── */
+.wl-buy-hint  { color: #10b981; font-size: 0.75rem; }
+.wl-sell-hint { color: #f43f5e; font-size: 0.75rem; }
+
+/* ── Empty state for watchlist ── */
+.wl-empty {
+    display: none;
+    padding: 5rem 2rem;
+    text-align: center;
+}
+.wl-empty i { font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem; display: block; }
+.wl-empty h3 { margin-bottom: 0.5rem; }
+.wl-empty p  { color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem; }

@@ -13,7 +13,8 @@ export const Navbar = () => {
             icon: 'fa-chart-bar', 
             text: 'Market',
             children: [
-                { id: 'live-market', text: 'Live Market', icon: 'fa-broadcast-tower', path: 'pages/market/live.html' }
+                { id: 'live-market', text: 'Live Market', icon: 'fa-broadcast-tower', path: 'pages/market/live.html' },
+                { id: 'ipo-tracker', text: 'IPO Tracker', icon: 'fa-rocket', path: 'pages/market/ipo-tracker.html' }
             ]
         },
         { id: 'news', icon: 'fa-newspaper', text: 'Market News', path: 'pages/news.html' },
@@ -86,11 +87,6 @@ export const Navbar = () => {
             <div class="nav-actions" style="display: flex; gap: 1rem; align-items: center;">
                 <div class="search-box pc-only">
                     <input type="text" id="globalSearch" placeholder="Search..." value="${globalState.getState().searchQuery || ''}">
-                </div>
-                
-                <div class="user-profile" style="display: flex; align-items: center; gap: 0.5rem;">
-                    <img src="https://ui-avatars.com/api/?name=Admin&background=6366f1&color=fff" alt="User" style="width: 35px; height: 35px; border-radius: 50%;">
-                    <span class="pc-only" style="font-weight: 500;">Admin</span>
                 </div>
             </div>
         </nav>

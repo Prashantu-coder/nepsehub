@@ -3,6 +3,7 @@ import StorageService from '../services/storageService.js';
 import DataService from '../services/dataService.js';
 import { Sidebar } from '../components/sidebar.js';
 import { Navbar } from '../components/navbar.js';
+import { AlertManager } from './alerts.js';
 
 export const Layout = {
     async init() {
@@ -44,6 +45,9 @@ export const Layout = {
         // Render Components
         this.renderComponents();
         this.bindEvents();
+
+        // Initialize Background Alerts
+        AlertManager.init();
 
         // Load dynamic data
         try {

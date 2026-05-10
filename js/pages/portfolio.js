@@ -3,6 +3,9 @@ import { Layout } from '../layout.js';
 import DataService from '../../services/dataService.js';
 import StorageService from '../../services/storageService.js';
 import FeeService from '../../services/feeService.js';
+import { SymbolSearch } from '../components/symbolSearch.js';
+
+let symbolSearch; // Portfolio modal symbol search instance
 
 let marketData = [];
 let allTransactions = [];      // Full ledger from DB
@@ -59,19 +62,33 @@ async function init() {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             const tab = btn.dataset.tab;
-            ['overview', 'analytics', 'transactions'].forEach(t => {
-                document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
+            ['overview', 'analytics', 'transactions', 'reports'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if (el) el.style.display = t === tab ? 'block' : 'none';
             });
             if (tab === 'transactions') renderTransactions();
+            if (tab === 'reports') renderTaxReport();
         };
     });
 
+    document.getElementById('export-tax-csv').onclick = exportTaxCSV;
+
     // Add Transaction modal
     const modal = document.getElementById('portfolio-modal-overlay');
+
+    // Initialize SymbolSearch inside the modal
+    symbolSearch = new SymbolSearch({
+        wrapperId:   'portfolio-symbol-search',
+        inputId:     'input-symbol',
+        placeholder: 'Type symbol or company name...',
+        onSelect:    () => updateBuyPreview()  // refresh preview when symbol chosen
+    });
+
     document.getElementById('open-portfolio-modal').onclick = () => {
         modal.style.display = 'flex';
         document.getElementById('input-date').valueAsDate = new Date();
-        // reset fee preview
+        symbolSearch.setData(marketData);   // feed latest market data
+        symbolSearch.clear();
         updateBuyPreview();
     };
     document.getElementById('close-portfolio-modal').onclick = () => modal.style.display = 'none';
@@ -382,15 +399,14 @@ function updateSellPreview() {
 // SAVE BUY TRANSACTION
 // ─────────────────────────────────────────────
 async function handleSave() {
-    const sym   = document.getElementById('input-symbol').value.toUpperCase().trim();
+    const sym   = symbolSearch ? symbolSearch.getValue() : document.getElementById('input-symbol')?.value.toUpperCase().trim();
     const qty   = parseFloat(document.getElementById('input-qty').value);
     const prc   = parseFloat(document.getElementById('input-price').value);
     const date  = document.getElementById('input-date').value;
 
-    if (!sym || isNaN(qty) || isNaN(prc) || qty <= 0 || prc <= 0) {
-        alert('Please fill in all fields correctly.');
-        return;
-    }
+    if (!sym)              { alert('Please select a symbol from the dropdown.'); return; }
+    if (isNaN(qty) || qty <= 0) { alert('Please enter a valid quantity.'); return; }
+    if (isNaN(prc) || prc <= 0) { alert('Please enter a valid price.'); return; }
 
     const calc = FeeService.calculateBuy(prc, qty);
 
@@ -408,8 +424,9 @@ async function handleSave() {
 
     if (res.success) {
         document.getElementById('portfolio-modal-overlay').style.display = 'none';
-        // Clear inputs
-        ['input-symbol','input-qty','input-price'].forEach(id => document.getElementById(id).value = '');
+        symbolSearch?.clear();
+        document.getElementById('input-qty').value   = '';
+        document.getElementById('input-price').value = '';
         await refresh();
     } else {
         alert('Save failed: ' + res.error);
@@ -460,6 +477,113 @@ window.deleteTx = async (id) => {
     await refresh();
     renderTransactions();
 };
+
+// ─────────────────────────────────────────────
+// TAX REPORT GENERATOR
+// ─────────────────────────────────────────────
+function renderTaxReport() {
+    const tbody = document.getElementById('tax-report-body');
+    if (!tbody) return;
+
+    // We calculate realized gains based on FIFO (First In First Out)
+    const sells = allTransactions.filter(t => t.type === 'SELL').sort((a,b) => new Date(a.transaction_date) - new Date(b.transaction_date));
+    const buys  = allTransactions.filter(t => t.type === 'BUY').sort((a,b) => new Date(a.transaction_date) - new Date(b.transaction_date));
+
+    // Deep copy buys to track remaining quantities for FIFO
+    let buyPool = buys.map(b => ({ ...b, remaining: b.quantity }));
+    let reportData = [];
+
+    sells.forEach(sell => {
+        let qtyToMatch = sell.quantity;
+        
+        // Find matching buys for this sell
+        for (let buy of buyPool) {
+            if (qtyToMatch <= 0) break;
+            if (buy.symbol !== sell.symbol || buy.remaining <= 0) continue;
+
+            const matchedQty = Math.min(qtyToMatch, buy.remaining);
+            const holdDays = Math.floor((new Date(sell.transaction_date) - new Date(buy.transaction_date)) / (1000 * 60 * 60 * 24));
+            
+            // Tax rate: 5% if > 365 days, 7.5% if <= 365 days
+            const isLongTerm = holdDays > 365;
+            const taxRate = isLongTerm ? 0.05 : 0.075;
+
+            // Cost calculation (Buy Price includes fees)
+            const buyCostPerUnit = buy.total_amount / buy.quantity;
+            const totalCost = buyCostPerUnit * matchedQty;
+
+            // Sale calculation (Sell Price is before fees deduction from total_amount)
+            // Note: total_amount in Storage for SELL is netReceivable (after fees)
+            // But usually CGT is calculated as: (Sale Amount - Purchase Amount - Sell Fees) * rate
+            // Simplified here: (Net Receivable - Proportional Purchase Cost) * rate
+            const profit = sell.total_amount * (matchedQty / sell.quantity) - totalCost;
+            const tax = profit > 0 ? profit * taxRate : 0;
+
+            reportData.push({
+                symbol: sell.symbol,
+                sellDate: new Date(sell.transaction_date).toLocaleDateString(),
+                holdDays,
+                qty: matchedQty,
+                sellPrice: sell.price,
+                wacc: buyCostPerUnit,
+                pnl: profit,
+                tax: tax
+            });
+
+            buy.remaining -= matchedQty;
+            qtyToMatch -= matchedQty;
+        }
+    });
+
+    if (reportData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--text-secondary);">No realized trades found yet. Sell some stocks to see tax reports.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = reportData.reverse().map(row => `
+        <tr>
+            <td style="font-weight:700;color:var(--primary);">${row.symbol}</td>
+            <td>${row.sellDate}</td>
+            <td>
+                <span class="badge ${row.holdDays > 365 ? 'badge-success' : 'badge-warning'}" style="font-size:0.65rem;">
+                    ${row.holdDays} days (${row.holdDays > 365 ? 'LT' : 'ST'})
+                </span>
+            </td>
+            <td>${row.qty}</td>
+            <td>Rs. ${fmt(row.sellPrice)}</td>
+            <td>Rs. ${fmt(row.wacc)}</td>
+            <td style="color:${row.pnl >= 0 ? '#10b981' : '#f43f5e'};font-weight:600;">
+                ${row.pnl >= 0 ? '+' : ''}${fmt(row.pnl)}
+            </td>
+            <td style="color:#f59e0b;font-weight:600;">Rs. ${fmt(row.tax)}</td>
+        </tr>
+    `).join('');
+}
+
+function exportTaxCSV() {
+    const table = document.querySelector('#tab-reports table');
+    if (!table) return;
+
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = [], cols = rows[i].querySelectorAll('td, th');
+        for (let j = 0; j < cols.length; j++) {
+            row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
+        }
+        csv.push(row.join(','));
+    }
+
+    const csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `NEPSE_Tax_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 
 // ─────────────────────────────────────────────
 // HELPERS

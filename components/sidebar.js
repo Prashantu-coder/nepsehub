@@ -13,7 +13,8 @@ export const Sidebar = () => {
             icon: 'fa-chart-bar', 
             text: 'Market',
             children: [
-                { id: 'live-market', text: 'Live Market', icon: 'fa-broadcast-tower', path: 'pages/market/live.html' }
+                { id: 'live-market', text: 'Live Market', icon: 'fa-broadcast-tower', path: 'pages/market/live.html' },
+                { id: 'ipo-tracker', text: 'IPO Tracker', icon: 'fa-rocket', path: 'pages/market/ipo-tracker.html' }
             ]
         },
         { id: 'news', icon: 'fa-newspaper', text: 'Market News', path: 'pages/news.html' },
@@ -85,15 +86,6 @@ export const Sidebar = () => {
                 }).join('')}
             </ul>
 
-            <div class="sidebar-footer" style="margin-top: auto; padding: 2rem; border-top: 1px solid var(--surface-border);">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                    <img src="https://ui-avatars.com/api/?name=Admin&background=6366f1&color=fff" alt="User" style="width: 40px; height: 40px; border-radius: 50%;">
-                    <div>
-                        <div style="font-weight: 600;">Admin</div>
-                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Premium Account</div>
-                    </div>
-                </div>
-            </div>
         </aside>
     `;
 };

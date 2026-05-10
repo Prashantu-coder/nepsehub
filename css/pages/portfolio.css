@@ -1,0 +1,129 @@
+/* ═══════════════════════════════════════════
+   PORTFOLIO PAGE — Dedicated Styles
+   Shared utilities live in: css/base.css
+═══════════════════════════════════════════ */
+
+/* ── Stats Grid ── */
+.portfolio-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+@media (max-width: 1100px) {
+  .portfolio-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .portfolio-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ── Charts Row ── */
+.portfolio-charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+@media (max-width: 900px) {
+  .portfolio-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Holdings Table container ── */
+.holdings-table-wrap {
+  background: var(--surface-solid);
+  border: 1px solid var(--surface-border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.holdings-table-wrap h4 {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--surface-border);
+  font-size: 0.95rem;
+}
+
+/* ── P&L cell special styling ── */
+.pnl-cell .pnl-pct {
+  font-size: 0.7rem;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
+/* ── Transaction history badge row ── */
+.tx-summary-bar {
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--surface-border);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+/* ── Buy Transaction Modal (wide) ── */
+.portfolio-modal-box {
+  max-width: 520px;
+}
+
+/* ── Fee Preview (buy) ── */
+.fee-preview-buy {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 14px;
+  padding: 1.1rem;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+.fee-preview-buy .fee-header {
+  color: var(--primary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.fee-preview-buy .fee-total {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--danger);
+}
+.fee-preview-buy .fee-wacc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* ── Sell Modal (danger theme) ── */
+.fee-preview-sell {
+  background: rgba(244, 63, 94, 0.05);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  border-radius: 14px;
+  padding: 1.1rem;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+
+/* ── Empty portfolio ── */
+.portfolio-empty {
+  padding: 5rem 2rem;
+  text-align: center;
+}
+.portfolio-empty i {
+  font-size: 3rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  display: block;
+}
+.portfolio-empty p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.modal-content-box {
+  padding: 2rem;
+  border-radius: 20px;
+  background: var(--surface-solid);
+}
