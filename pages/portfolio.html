@@ -89,7 +89,12 @@
 
             <!-- Tab Contents -->
             <div id="tab-overview">
-              <div class="portfolio-charts-grid">
+              <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                <button class="btn btn-secondary btn-sm" id="toggle-charts" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">
+                  <i class="fas fa-eye-slash"></i> <span>Hide Charts</span>
+                </button>
+              </div>
+              <div class="portfolio-charts-grid" id="charts-grid">
                 <!-- Performance Chart -->
                 <div class="chart-card">
                   <h4>Portfolio Performance</h4>
@@ -115,6 +120,7 @@
                         <th>LTP</th>
                         <th>Invested</th>
                         <th>Current Value</th>
+                        <th>Today Change</th>
                         <th>P&L</th>
                         <th>Action</th>
                       </tr>
@@ -126,22 +132,72 @@
             </div>
 
             <div id="tab-analytics" style="display: none">
-              <div
-                class="glass"
-                style="padding: 3rem; text-align: center; border-radius: 20px"
-              >
-                <i
-                  class="fas fa-chart-pie"
-                  style="
-                    font-size: 3rem;
-                    margin-bottom: 1rem;
-                    color: var(--secondary);
-                  "
-                ></i>
-                <h3>Advanced Analytics Coming Soon</h3>
-                <p style="color: var(--text-secondary)">
-                  Deep insights into your sector exposure and dividend yields.
-                </p>
+              <div class="risk-analytics-container">
+                <!-- Capital Config Row -->
+                <div class="glass" style="padding: 1rem 1.5rem; border-radius: 16px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                   <div style="display: flex; align-items: center; gap: 1rem;">
+                      <i class="fas fa-wallet" style="color: var(--primary); font-size: 1.2rem;"></i>
+                      <div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Total Trading Capital</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 2px;">
+                          <span style="font-weight: 700; color: var(--text-secondary);">Rs.</span>
+                          <input type="number" id="config-total-capital" placeholder="e.g. 500000" 
+                            style="background: transparent; border: none; border-bottom: 1px dashed rgba(255,255,255,0.3); color: white; font-weight: 800; font-size: 1.1rem; width: 150px; outline: none; padding: 0;">
+                        </div>
+                      </div>
+                   </div>
+                   <div style="text-align: right;">
+                      <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Buying Power (Cash)</div>
+                      <div id="risk-buying-power" style="font-weight: 800; font-size: 1.1rem; color: var(--secondary); margin-top: 2px;">Rs. 0.00</div>
+                   </div>
+                </div>
+
+                <!-- Risk Overview Row -->
+                <div class="risk-stats-grid">
+                  <div class="risk-card glass">
+                    <div class="risk-card-header">
+                      <span class="risk-label">Total Risk at Stake</span>
+                      <i class="fas fa-shield-alt risk-icon"></i>
+                    </div>
+                    <div class="risk-value" id="risk-total-stake">Rs. 0.00</div>
+                    <div class="risk-sub-label" id="risk-total-pct">0.00% of capital</div>
+                  </div>
+                  
+                  <div class="risk-card glass">
+                    <div class="risk-card-header">
+                      <span class="risk-label">Capital Exposure</span>
+                      <i class="fas fa-balance-scale risk-icon"></i>
+                    </div>
+                    <div class="risk-value" id="risk-cap-exposure">Rs. 0.00</div>
+                    <div class="risk-sub-label" id="risk-cap-pct">0.00% of portfolio</div>
+                  </div>
+
+                  <div class="risk-card glass">
+                    <div class="risk-card-header">
+                      <span class="risk-label">Diversification</span>
+                      <i class="fas fa-th-large risk-icon"></i>
+                    </div>
+                    <div class="risk-value" id="risk-diversification">Good</div>
+                    <div class="risk-sub-label" id="risk-sector-count">across 0 sectors</div>
+                  </div>
+                </div>
+
+                <!-- Concentration and Exposure -->
+                <div class="exposure-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                  <div class="exposure-card glass" style="padding: 1.5rem; border-radius: 20px;">
+                    <h4 style="margin-bottom: 1.25rem;"><i class="fas fa-chart-pie" style="margin-right:0.5rem; color:var(--primary);"></i> Sector Concentration</h4>
+                    <div id="sector-concentration-list" class="concentration-list">
+                      <!-- Sectors injected here -->
+                    </div>
+                  </div>
+
+                  <div class="exposure-card glass" style="padding: 1.5rem; border-radius: 20px;">
+                    <h4 style="margin-bottom: 1.25rem;"><i class="fas fa-exclamation-triangle" style="margin-right:0.5rem; color:var(--danger);"></i> Risk Warnings</h4>
+                    <div id="risk-warnings-list" class="warnings-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                      <!-- Warnings injected here -->
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -276,7 +332,7 @@
         <div
           style="
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 1rem;
             margin-bottom: 1.5rem;
           "
@@ -299,6 +355,26 @@
               style="width: 100%"
             />
           </div>
+          <div class="form-group">
+            <label>Stop Loss (Rs.)</label>
+            <input
+              type="number"
+              id="input-stop-loss"
+              placeholder="Optional"
+              style="width: 100%; border-color: rgba(244, 63, 94, 0.3);"
+            />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label>Source</label>
+          <select id="input-source" style="width: 100%; padding: 0.75rem; background: var(--surface-bg); border: 1px solid var(--surface-border); border-radius: 10px; color: var(--text-primary);">
+            <option value="Secondary">Secondary Market</option>
+            <option value="IPO">IPO</option>
+            <option value="Bonus">Bonus</option>
+            <option value="FPO">FPO</option>
+            <option value="Right">Right Share</option>
+          </select>
         </div>
 
         <!-- Fee Calculation Preview (Matching Screenshot) -->
