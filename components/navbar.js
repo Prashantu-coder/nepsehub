@@ -14,7 +14,8 @@ export const Navbar = () => {
             text: 'Market',
             children: [
                 { id: 'live-market', text: 'Live Market', icon: 'fa-broadcast-tower', path: 'pages/market/live.html' },
-                { id: 'ipo-tracker', text: 'IPO Tracker', icon: 'fa-rocket', path: 'pages/market/ipo-tracker.html' }
+                { id: 'ipo-tracker', text: 'IPO Tracker', icon: 'fa-rocket', path: 'pages/market/ipo-tracker.html' },
+                { id: 'market-analysis', text: 'Market Analysis', icon: 'fa-chart-pie', path: 'pages/market/analysis.html' }
             ]
         },
         { id: 'news', icon: 'fa-newspaper', text: 'Market News', path: 'pages/news.html' },

@@ -1,91 +1,44 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NEPSE HUB | Premium Stock Dashboard</title>
-
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEPSE HUB | Market Dashboard</title>
+    
     <!-- SEO Meta Tags -->
-    <meta
-      name="description"
-      content="Premium NEPSE Stock Dashboard for real-time market analysis, portfolio tracking, and latest market news."
-    />
-    <meta
-      name="keywords"
-      content="NEPSE, Nepal Stock Exchange, Stock Dashboard, Portfolio Tracker, Nepal Finance"
-    />
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta name="description" content="Premium NEPSE Stock Dashboard for real-time market analysis, portfolio tracking, and latest market news.">
+    <meta name="keywords" content="NEPSE, Nepal Stock Exchange, Stock Dashboard, Portfolio Tracker, Nepal Finance">
 
     <!-- Font Awesome -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/layout.css" />
-    <link rel="stylesheet" href="css/components.css" />
-    <link rel="stylesheet" href="css/themes.css" />
-
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  </head>
-  <body>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/themes.css">
+</head>
+<body>
     <div id="navbar-container"></div>
     <div class="app-container">
-      <div id="sidebar-container"></div>
-      <main class="main-content">
-        <div id="app">
-          <!-- Dashboard Content -->
-          <div class="fade-in">
-            <div
-              class="section-header"
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              "
-            >
-              <h2>Market Overview</h2>
-              <div class="refresh-status" id="marketStatus">
-                <div class="status-dot"></div>
-                <span id="marketStatusText">LIVE MARKET</span>
-              </div>
+        <div id="sidebar-container"></div>
+        <main class="main-content">
+            <div id="app">
+                <div class="fade-in" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70vh; text-align: center;">
+                    <div class="glass" style="padding: 3rem; border-radius: 30px; max-width: 600px;">
+                        <i class="fas fa-tools" style="font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
+                        <h2 style="margin-bottom: 1rem;">Dashboard Under Construction</h2>
+                        <p style="color: var(--text-secondary); line-height: 1.6;">
+                            We are currently redesigning the dashboard experience to provide better market insights. 
+                            In the meantime, feel free to use the <strong>Portfolio</strong> and <strong>Watchlist</strong> tabs.
+                        </p>
+                    </div>
+                </div>
             </div>
-
-            <div id="dashboard-grid" class="dashboard-grid">
-              <div class="loading-placeholder">Loading market data...</div>
-            </div>
-
-            <div class="content-section">
-              <div class="section-header">
-                <h3>Sector Performance</h3>
-              </div>
-              <div
-                id="sector-grid"
-                class="glass"
-                style="
-                  padding: 2rem;
-                  border-radius: 20px;
-                  display: grid;
-                  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                  gap: 1rem;
-                  text-align: center;
-                "
-              >
-                <div class="loading-placeholder">Analyzing sector data...</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+        </main>
     </div>
 
     <!-- Initialization Script -->
     <script type="module" src="./js/pages/index.js"></script>
-  </body>
+</body>
 </html>

@@ -294,3 +294,113 @@
     padding: 0.6rem 1rem;
     font-size: 0.85rem;
 }
+
+/* Quick View Side Panel */
+.quick-view-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 999999;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.quick-view-panel.active {
+    right: 0;
+}
+
+.qv-header {
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#qv-symbol {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--primary);
+    letter-spacing: -0.5px;
+}
+
+#qv-name {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.qv-content {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.qv-price-section {
+    margin-bottom: 2rem;
+}
+
+#qv-ltp {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+#qv-change {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+}
+
+.qv-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.qv-stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.qv-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.qv-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.qv-chart-placeholder {
+    width: 100%;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+@media (max-width: 480px) {
+    .quick-view-panel {
+        width: 100%;
+        right: -100%;
+    }
+}

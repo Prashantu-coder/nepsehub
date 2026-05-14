@@ -127,3 +127,136 @@
   border-radius: 20px;
   background: var(--surface-solid);
 }
+
+/* Risk Dashboard Styles */
+.risk-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.risk-card {
+    padding: 1.5rem;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.risk-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.risk-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.risk-icon {
+    color: var(--primary);
+    opacity: 0.6;
+}
+
+.risk-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+}
+
+.risk-sub-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.concentration-item {
+    margin-bottom: 1rem;
+}
+
+.concentration-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+}
+
+.concentration-bar-bg {
+    height: 8px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.concentration-bar-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 4px;
+    transition: width 1s ease-out;
+}
+
+.warning-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(244, 63, 94, 0.05);
+    border: 1px solid rgba(244, 63, 94, 0.1);
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.warning-item.warning-low {
+    background: rgba(245, 158, 11, 0.05);
+    border-color: rgba(245, 158, 11, 0.1);
+}
+
+.warning-item i {
+    margin-top: 0.2rem;
+}
+
+/* ── Skeleton Loading ── */
+.skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+}
+
+.skeleton::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.02) 20%,
+        rgba(255, 255, 255, 0.05) 60%,
+        rgba(255, 255, 255, 0)
+    );
+    animation: shimmer 2s infinite linear;
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.skeleton-text {
+    height: 1.2rem;
+    width: 100%;
+}
+
+.skeleton-card {
+    height: 80px;
+}
+
+.skeleton-chart {
+    height: 300px;
+    width: 100%;
+}

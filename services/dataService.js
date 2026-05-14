@@ -27,7 +27,24 @@ const DataService = {
         try {
             const response = await fetch(`${this.API_BASE}/api`);
             if (!response.ok) throw new Error('Network response was not ok');
-            return await response.json();
+            const rawData = await response.json();
+            
+            // Normalize data fields to match our components
+            return rawData.map(s => ({
+                symbol:          s.symbol,
+                name:            s.securityName,
+                price:           parseFloat(s.lastTradedPrice) || 0,
+                ltq:             parseFloat(s.lastTradedVolume) || 0, // Last Traded Quantity
+                change:          parseFloat(s.change) || 0,
+                changePercent:   parseFloat(s.percentageChange) || 0,
+                previousClose:   parseFloat(s.previousClose) || 0,
+                sector:          s.sector,
+                volume:          parseFloat(s.totalTradeQuantity) || 0, // TTQ
+                high:            parseFloat(s.highPrice) || 0,
+                low:             parseFloat(s.lowPrice) || 0,
+                open:            parseFloat(s.openPrice) || 0,
+                lastUpdated:     s.lastUpdatedDateTime
+            }));
         } catch (error) {
             console.error('Failed to fetch live market data:', error);
             return [];
