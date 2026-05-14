@@ -19,37 +19,70 @@ let performanceChart, sectorChart;
 // WACC     = weighted average of BUY total_amount / total_buy_qty
 // ─────────────────────────────────────────────
 function computeHoldingsFromTransactions(transactions) {
-    const map = {};
+    const symbolMap = {};
 
-    // Process oldest → newest for correct FIFO-style WACC
-    const sorted = [...transactions].sort((a, b) =>
-        new Date(a.transaction_date) - new Date(b.transaction_date)
-    );
+    // Sort oldest first for running average
+    const sorted = [...transactions].sort((a, b) => {
+        if (a.transaction_date < b.transaction_date) return -1;
+        if (a.transaction_date > b.transaction_date) return 1;
+        return (a.id || 0) - (b.id || 0);
+    });
 
     sorted.forEach(t => {
-        if (!map[t.symbol]) {
-            map[t.symbol] = { symbol: t.symbol, qty: 0, totalBuyCost: 0, totalBuyQty: 0 };
+        const sym = t.symbol.toUpperCase();
+        const type = t.type ? t.type.toUpperCase() : '';
+        
+        if (!symbolMap[sym]) {
+            symbolMap[sym] = { qty: 0, totalInvestment: 0, wacc: 0 };
         }
-        const h = map[t.symbol];
-
-        if (t.type === 'BUY') {
+        
+        const h = symbolMap[sym];
+        
+        if (type === 'BUY') {
+            // New Total Investment = Previous Total Investment + New Amount (Price*Qty + Fees)
+            h.totalInvestment = Number((h.totalInvestment + t.total_amount).toFixed(4));
+            // New Total Quantity = Previous Quantity + New Quantity
             h.qty += t.quantity;
-            h.totalBuyCost += t.total_amount;   // actual_cost including fees
-            h.totalBuyQty  += t.quantity;
-        } else if (t.type === 'SELL') {
+            // New WACC = Total Investment / Total Quantity
+            h.wacc = h.qty > 0 ? Number((h.totalInvestment / h.qty).toFixed(4)) : 0;
+        } else if (type === 'SELL') {
+            // When selling, WACC remains the same. 
+            // But we must reduce the Total Investment by the cost-value of sold shares.
+            const costOfSoldShares = Number((h.wacc * t.quantity).toFixed(4));
+            h.totalInvestment = Number((h.totalInvestment - costOfSoldShares).toFixed(4));
             h.qty -= t.quantity;
+            
+            // Clean up if position closed
+            if (h.qty <= 0.0001) {
+                h.qty = 0; h.totalInvestment = 0; h.wacc = 0;
+            }
         }
     });
 
-    // Keep only symbols with remaining units
-    return Object.values(map)
-        .filter(h => h.qty > 0.0001)
-        .map(h => ({
-            symbol:       h.symbol,
-            quantity:     h.qty,
-            totalInvested: (h.totalBuyCost / h.totalBuyQty) * h.qty,  // cost of remaining units
-            wacc:         h.totalBuyCost / h.totalBuyQty               // avg cost per share
+    return Object.entries(symbolMap)
+        .filter(([sym, data]) => data.qty > 0.0001)
+        .map(([sym, data]) => ({
+            symbol: sym,
+            quantity: data.qty,
+            totalInvested: data.totalInvestment,
+            wacc: data.wacc
         }));
+}
+
+function computeHoldingsWithRisk(transactions) {
+    const holdings = computeHoldingsFromTransactions(transactions);
+    
+    // Enrich with latest Stop Loss from ledger
+    return holdings.map(h => {
+        const lastBuy = transactions
+            .filter(t => t.symbol === h.symbol && t.type === 'BUY' && t.stop_loss)
+            .sort((a,b) => new Date(b.transaction_date) - new Date(a.transaction_date))[0];
+        
+        return {
+            ...h,
+            stopLoss: lastBuy ? lastBuy.stop_loss : null
+        };
+    });
 }
 
 // ─────────────────────────────────────────────
@@ -68,6 +101,7 @@ async function init() {
             });
             if (tab === 'transactions') renderTransactions();
             if (tab === 'reports') renderTaxReport();
+            if (tab === 'analytics') renderRiskAnalytics();
         };
     });
 
@@ -99,6 +133,16 @@ async function init() {
         document.getElementById(id).addEventListener('input', updateBuyPreview)
     );
 
+    // Total Capital Config
+    const capitalInput = document.getElementById('config-total-capital');
+    if (capitalInput) {
+        capitalInput.value = localStorage.getItem('nepse_total_capital') || 0;
+        capitalInput.addEventListener('input', (e) => {
+            localStorage.setItem('nepse_total_capital', e.target.value);
+            renderRiskAnalytics(); // Refresh analytics with new capital
+        });
+    }
+
     // Sell modal
     const sellModal = document.getElementById('sell-modal-overlay');
     document.getElementById('close-sell-modal').onclick   = () => sellModal.style.display = 'none';
@@ -110,14 +154,39 @@ async function init() {
     globalState.setState({ activePage: 'portfolio' });
     try { await Layout.init(); } catch(e) {}
 
-    await refresh();
+    // Chart Visibility Toggle
+    const toggleChartsBtn = document.getElementById('toggle-charts');
+    const chartsGrid = document.getElementById('charts-grid');
+    if (toggleChartsBtn && chartsGrid) {
+        let chartsVisible = localStorage.getItem('portfolio_charts_visible') !== 'false';
+        
+        const updateVisibility = () => {
+            chartsGrid.style.display = chartsVisible ? 'grid' : 'none';
+            toggleChartsBtn.innerHTML = chartsVisible 
+                ? '<i class="fas fa-eye-slash"></i> <span>Hide Charts</span>' 
+                : '<i class="fas fa-eye"></i> <span>Show Charts</span>';
+        };
+
+        updateVisibility();
+
+        toggleChartsBtn.onclick = () => {
+            chartsVisible = !chartsVisible;
+            localStorage.setItem('portfolio_charts_visible', chartsVisible);
+            updateVisibility();
+            if (chartsVisible) initCharts(); // Re-init if showing to ensure proper sizing
+        };
+    }
+
+    await refresh(true); // Pass true for initial load skeletons
     setInterval(refresh, 60000);
 }
 
 // ─────────────────────────────────────────────
 // DATA REFRESH
 // ─────────────────────────────────────────────
-async function refresh() {
+async function refresh(isInitial = false) {
+    if (isInitial) showSkeletons();
+
     const [txRes, mktRes] = await Promise.allSettled([
         StorageService.getTransactions(),
         DataService.getLiveMarket()
@@ -134,6 +203,39 @@ async function refresh() {
     renderHoldings();
     updateSummaryCards();
     initCharts();
+}
+
+function showSkeletons() {
+    // 1. Stats Grid
+    const statIds = ['stat-total-inv', 'stat-current-val', 'stat-unrealized-pnl', 'stat-realized-pnl', 'stat-today-change'];
+    statIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<div class="skeleton skeleton-text" style="width: 100px; margin: 0.5rem 0;"></div>';
+    });
+
+    // 2. Table
+    const body = document.getElementById('portfolio-list-body');
+    if (body) {
+        body.innerHTML = Array(3).fill(0).map(() => `
+            <tr>
+                <td><div class="skeleton skeleton-text" style="width: 60px;"></div></td>
+                <td><div class="skeleton skeleton-text" style="width: 40px;"></div></td>
+                <td><div class="skeleton skeleton-text" style="width: 70px;"></div></td>
+                <td><div class="skeleton skeleton-text" style="width: 70px;"></div></td>
+                <td><div class="skeleton skeleton-text" style="width: 80px;"></div></td>
+                <td><div class="skeleton skeleton-text" style="width: 80px;"></div></td>
+                <td><div class="skeleton skeleton-text" style="width: 90px;"></div></td>
+                <td><div class="skeleton skeleton-text" style="width: 90px;"></div></td>
+                <td><div class="skeleton skeleton-text" style="width: 50px;"></div></td>
+            </tr>
+        `).join('');
+    }
+
+    // 3. Charts (if visible)
+    const perfCanvas = document.getElementById('performanceChart');
+    const sectCanvas = document.getElementById('sectorChart');
+    if (perfCanvas) perfCanvas.parentElement.innerHTML = '<div class="skeleton skeleton-chart"></div>';
+    if (sectCanvas) sectCanvas.parentElement.innerHTML = '<div class="skeleton skeleton-chart"></div>';
 }
 
 // ─────────────────────────────────────────────
@@ -153,19 +255,26 @@ function renderHoldings() {
 
     body.innerHTML = computedHoldings.map(h => {
         const stock   = marketData.find(s => s.symbol.toUpperCase() === h.symbol.toUpperCase());
-        const ltp     = stock ? parseFloat(stock.lastTradedPrice) : h.wacc;
+        const ltp     = stock ? stock.price : h.wacc;
         const curVal  = ltp * h.quantity;
         const pnl     = curVal - h.totalInvested;
         const pnlPct  = h.totalInvested > 0 ? (pnl / h.totalInvested) * 100 : 0;
 
+        const dayChgVal = stock ? (stock.change * h.quantity) : 0;
+        const dayChgPct = stock ? stock.changePercent : 0;
+
         return `
         <tr>
-            <td style="font-weight:700;">${h.symbol}</td>
+            <td style="font-weight:700; cursor:pointer; color:var(--primary);" onclick="showSymbolDetails('${h.symbol}')">${h.symbol}</td>
             <td>${h.quantity.toFixed(2)}</td>
             <td>Rs. ${h.wacc.toFixed(2)}</td>
             <td>Rs. ${ltp.toFixed(2)}</td>
             <td>Rs. ${h.totalInvested.toLocaleString('en-IN', {maximumFractionDigits:2})}</td>
             <td>Rs. ${curVal.toLocaleString('en-IN', {maximumFractionDigits:2})}</td>
+            <td class="${dayChgVal >= 0 ? 'price-up' : 'price-down'}">
+                ${dayChgVal >= 0 ? '+' : ''}${dayChgVal.toLocaleString('en-IN', {maximumFractionDigits:2})}
+                <div style="font-size:0.7rem;">(${dayChgPct.toFixed(2)}%)</div>
+            </td>
             <td class="${pnl >= 0 ? 'price-up' : 'price-down'}">
                 ${pnl >= 0 ? '+' : ''}${pnl.toLocaleString('en-IN', {maximumFractionDigits:2})}
                 <div style="font-size:0.7rem;">(${pnlPct.toFixed(2)}%)</div>
@@ -187,8 +296,8 @@ function updateSummaryCards() {
 
     computedHoldings.forEach(h => {
         const stock    = marketData.find(s => s.symbol.toUpperCase() === h.symbol.toUpperCase());
-        const ltp      = stock ? parseFloat(stock.lastTradedPrice) : h.wacc;
-        const prevClose= stock ? parseFloat(stock.previousClose || ltp) : ltp;
+        const ltp      = stock ? stock.price : h.wacc;
+        const prevClose= stock ? (stock.previousClose || ltp) : ltp;
 
         totalInv    += h.totalInvested;
         totalCur    += ltp * h.quantity;
@@ -199,9 +308,18 @@ function updateSummaryCards() {
     const pnlPct = totalInv > 0 ? (pnl / totalInv) * 100 : 0;
     const dayPct = (totalCur - todayChange) > 0 ? (todayChange / (totalCur - todayChange)) * 100 : 0;
 
+    // Calculate Realized P&L from SELL transactions (FIFO)
+    const { totalRealizedPnL } = calculateRealizedData(allTransactions);
+
     setText('stat-total-inv',   `Rs. ${fmt(totalInv)}`);
     setText('stat-current-val', `Rs. ${fmt(totalCur)}`);
     setText('stat-total-pnl-pct', `${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}% unrealized`);
+    
+    const realizedPnLEl = document.getElementById('stat-realized-pnl');
+    if (realizedPnLEl) {
+        realizedPnLEl.innerText = `Rs. ${fmt(totalRealizedPnL)}`;
+        realizedPnLEl.className = `summary-value ${totalRealizedPnL >= 0 ? 'price-up' : 'price-down'}`;
+    }
 
     const pnlEl = document.getElementById('stat-unrealized-pnl');
     if (pnlEl) {
@@ -233,7 +351,7 @@ function initCharts() {
     const invested = computedHoldings.map(h => +h.totalInvested.toFixed(2));
     const current  = computedHoldings.map(h => {
         const stock = marketData.find(s => s.symbol.toUpperCase() === h.symbol.toUpperCase());
-        return +((stock ? parseFloat(stock.lastTradedPrice) : h.wacc) * h.quantity).toFixed(2);
+        return +((stock ? stock.price : h.wacc) * h.quantity).toFixed(2);
     });
 
     if (labels.length === 0) {
@@ -263,8 +381,8 @@ function initCharts() {
     const sectorMap = {};
     computedHoldings.forEach(h => {
         const stock  = marketData.find(s => s.symbol.toUpperCase() === h.symbol.toUpperCase());
-        const sector = stock?.sectorName || 'Other';
-        const val    = (stock ? parseFloat(stock.lastTradedPrice) : h.wacc) * h.quantity;
+        const sector = stock?.sector || 'Other';
+        const val    = (stock ? stock.price : h.wacc) * h.quantity;
         sectorMap[sector] = (sectorMap[sector] || 0) + val;
     });
 
@@ -298,18 +416,18 @@ function renderTransactions() {
     }
 
     const totalFees = allTransactions.reduce((s, t) => s + (t.broker_commission + t.sebon_fee + t.dp_charge), 0);
-    const buyTotal  = allTransactions.filter(t => t.type === 'BUY').reduce((s, t) => s + t.total_amount, 0);
-    const sellTotal = allTransactions.filter(t => t.type === 'SELL').reduce((s, t) => s + t.total_amount, 0);
+    const buyTotal  = allTransactions.filter(t => t.type?.toUpperCase() === 'BUY').reduce((s, t) => s + t.total_amount, 0);
+    const sellTotal = allTransactions.filter(t => t.type?.toUpperCase() === 'SELL').reduce((s, t) => s + t.total_amount, 0);
 
     // Update summary badges if they exist
     const buyBadge = document.getElementById('tx-buy-total');
     const sellBadge = document.getElementById('tx-sell-total');
-    if (buyBadge) buyBadge.innerText = `Buys: Rs. ${fmt(buyTotal)} (${allTransactions.filter(t=>t.type==='BUY').length})`;
-    if (sellBadge) sellBadge.innerText = `Sells: Rs. ${fmt(sellTotal)} (${allTransactions.filter(t=>t.type==='SELL').length})`;
+    if (buyBadge) buyBadge.innerText = `Buys: Rs. ${fmt(buyTotal)} (${allTransactions.filter(t=>t.type?.toUpperCase()==='BUY').length})`;
+    if (sellBadge) sellBadge.innerText = `Sells: Rs. ${fmt(sellTotal)} (${allTransactions.filter(t=>t.type?.toUpperCase()==='SELL').length})`;
 
     body.innerHTML = allTransactions.map(t => {
         const fees   = t.broker_commission + t.sebon_fee + t.dp_charge;
-        const isBuy  = t.type === 'BUY';
+        const isBuy  = t.type?.toUpperCase() === 'BUY';
         return `
         <tr>
             <td>${new Date(t.transaction_date).toLocaleDateString()}</td>
@@ -320,7 +438,7 @@ function renderTransactions() {
                     ${t.type}
                 </span>
             </td>
-            <td style="font-weight:700;">${t.symbol}</td>
+            <td style="font-weight:700; cursor:pointer; color:var(--primary);" onclick="showSymbolDetails('${t.symbol}')">${t.symbol}</td>
             <td>${t.quantity}</td>
             <td>Rs. ${t.price.toFixed(2)}</td>
             <td style="color:var(--text-secondary);">Rs. ${fees.toFixed(2)}</td>
@@ -363,7 +481,7 @@ window.openSellModal = (symbol) => {
     document.getElementById('sell-input-qty').value       = holding.quantity;
 
     const stock = marketData.find(s => s.symbol.toUpperCase() === symbol.toUpperCase());
-    document.getElementById('sell-input-price').value = stock ? stock.lastTradedPrice : '';
+    document.getElementById('sell-input-price').value = stock ? stock.price : '';
 
     document.getElementById('sell-modal-overlay').style.display = 'flex';
     updateSellPreview();
@@ -403,6 +521,7 @@ async function handleSave() {
     const qty   = parseFloat(document.getElementById('input-qty').value);
     const prc   = parseFloat(document.getElementById('input-price').value);
     const date  = document.getElementById('input-date').value;
+    const source = document.getElementById('input-source').value;
 
     if (!sym)              { alert('Please select a symbol from the dropdown.'); return; }
     if (isNaN(qty) || qty <= 0) { alert('Please enter a valid quantity.'); return; }
@@ -415,10 +534,13 @@ async function handleSave() {
         type:               'BUY',
         quantity:           qty,
         price:              prc,
+        source:             source,
+        stop_loss:          parseFloat(document.getElementById('input-stop-loss').value) || null,
         broker_commission:  calc.brokerCommission,
         sebon_fee:          calc.sebonFee,
         dp_charge:          calc.dpCharge,
         total_amount:       calc.totalCost,
+        wacc:               calc.wacc,
         transaction_date:   date || new Date().toISOString()
     });
 
@@ -427,6 +549,7 @@ async function handleSave() {
         symbolSearch?.clear();
         document.getElementById('input-qty').value   = '';
         document.getElementById('input-price').value = '';
+        document.getElementById('input-stop-loss').value = '';
         await refresh();
     } else {
         alert('Save failed: ' + res.error);
@@ -458,6 +581,8 @@ async function handleSell() {
         broker_commission:  calc.brokerCommission,
         sebon_fee:          calc.sebonFee,
         dp_charge:          calc.dpCharge,
+        capital_gain_tax:   calc.cgt,
+        profit_loss:        calc.totalProfit,
         total_amount:       calc.netReceivable,
         transaction_date:   new Date().toISOString()
     });
@@ -485,55 +610,7 @@ function renderTaxReport() {
     const tbody = document.getElementById('tax-report-body');
     if (!tbody) return;
 
-    // We calculate realized gains based on FIFO (First In First Out)
-    const sells = allTransactions.filter(t => t.type === 'SELL').sort((a,b) => new Date(a.transaction_date) - new Date(b.transaction_date));
-    const buys  = allTransactions.filter(t => t.type === 'BUY').sort((a,b) => new Date(a.transaction_date) - new Date(b.transaction_date));
-
-    // Deep copy buys to track remaining quantities for FIFO
-    let buyPool = buys.map(b => ({ ...b, remaining: b.quantity }));
-    let reportData = [];
-
-    sells.forEach(sell => {
-        let qtyToMatch = sell.quantity;
-        
-        // Find matching buys for this sell
-        for (let buy of buyPool) {
-            if (qtyToMatch <= 0) break;
-            if (buy.symbol !== sell.symbol || buy.remaining <= 0) continue;
-
-            const matchedQty = Math.min(qtyToMatch, buy.remaining);
-            const holdDays = Math.floor((new Date(sell.transaction_date) - new Date(buy.transaction_date)) / (1000 * 60 * 60 * 24));
-            
-            // Tax rate: 5% if > 365 days, 7.5% if <= 365 days
-            const isLongTerm = holdDays > 365;
-            const taxRate = isLongTerm ? 0.05 : 0.075;
-
-            // Cost calculation (Buy Price includes fees)
-            const buyCostPerUnit = buy.total_amount / buy.quantity;
-            const totalCost = buyCostPerUnit * matchedQty;
-
-            // Sale calculation (Sell Price is before fees deduction from total_amount)
-            // Note: total_amount in Storage for SELL is netReceivable (after fees)
-            // But usually CGT is calculated as: (Sale Amount - Purchase Amount - Sell Fees) * rate
-            // Simplified here: (Net Receivable - Proportional Purchase Cost) * rate
-            const profit = sell.total_amount * (matchedQty / sell.quantity) - totalCost;
-            const tax = profit > 0 ? profit * taxRate : 0;
-
-            reportData.push({
-                symbol: sell.symbol,
-                sellDate: new Date(sell.transaction_date).toLocaleDateString(),
-                holdDays,
-                qty: matchedQty,
-                sellPrice: sell.price,
-                wacc: buyCostPerUnit,
-                pnl: profit,
-                tax: tax
-            });
-
-            buy.remaining -= matchedQty;
-            qtyToMatch -= matchedQty;
-        }
-    });
+    const { reportData } = calculateRealizedData(allTransactions);
 
     if (reportData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--text-secondary);">No realized trades found yet. Sell some stocks to see tax reports.</td></tr>`;
@@ -583,6 +660,168 @@ function exportTaxCSV() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+// ─────────────────────────────────────────────
+// RISK ANALYTICS RENDERING
+// ─────────────────────────────────────────────
+function renderRiskAnalytics() {
+    const holdingsWithRisk = computeHoldingsWithRisk(allTransactions);
+    let totalRiskStake = 0;
+    let totalCurrentValue = 0;
+    const sectorExposure = {};
+
+    holdingsWithRisk.forEach(h => {
+        const stock = marketData.find(s => s.symbol.toUpperCase() === h.symbol.toUpperCase());
+        const ltp = stock ? stock.price : h.wacc;
+        const curVal = ltp * h.quantity;
+        
+        totalCurrentValue += curVal;
+
+        // Risk at Stake = (WACC - SL) * Qty
+        if (h.stopLoss) {
+            const riskPerShare = Math.max(0, h.wacc - h.stopLoss);
+            totalRiskStake += riskPerShare * h.quantity;
+        }
+
+        // Sector mapping
+        const sector = stock ? stock.sector : 'Unknown';
+        if (!sectorExposure[sector]) sectorExposure[sector] = 0;
+        sectorExposure[sector] += curVal;
+    });
+
+    // Update Top Cards
+    const totalCapital = parseFloat(localStorage.getItem('nepse_total_capital')) || 0;
+    const riskPctOfCap = totalCapital > 0 ? (totalRiskStake / totalCapital) * 100 : 0;
+    
+    setText('risk-total-stake', `Rs. ${fmt(totalRiskStake)}`);
+    setText('risk-total-pct', `${totalCapital > 0 ? riskPctOfCap.toFixed(2) : '0.00'}% of total capital`);
+    
+    setText('risk-cap-exposure', `Rs. ${fmt(totalCurrentValue)}`);
+    const exposurePct = totalCapital > 0 ? (totalCurrentValue / totalCapital) * 100 : 0;
+    setText('risk-cap-pct', `${exposurePct.toFixed(1)}% of total capital`);
+
+    const buyingPower = Math.max(0, totalCapital - totalCurrentValue);
+    setText('risk-buying-power', `Rs. ${fmt(buyingPower)}`);
+
+    const sectorCount = Object.keys(sectorExposure).length;
+    setText('risk-sector-count', `across ${sectorCount} sectors`);
+    setText('risk-diversification', sectorCount > 4 ? 'Excellent' : sectorCount > 2 ? 'Good' : 'Concentrated');
+
+    // Sector Concentration List
+    const concList = document.getElementById('sector-concentration-list');
+    if (concList) {
+        concList.innerHTML = Object.entries(sectorExposure)
+            .sort((a,b) => b[1] - a[1])
+            .map(([name, val]) => {
+                const pct = totalCurrentValue > 0 ? (val / totalCurrentValue) * 100 : 0;
+                return `
+                    <div class="concentration-item">
+                        <div class="concentration-info">
+                            <span>${name}</span>
+                            <span>${pct.toFixed(1)}%</span>
+                        </div>
+                        <div class="concentration-bar-bg">
+                            <div class="concentration-bar-fill" style="width: ${pct}%; background: ${pct > 40 ? '#f43f5e' : '#10b981'};"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+    }
+
+    // Risk Warnings
+    const warnings = [];
+    Object.entries(sectorExposure).forEach(([name, val]) => {
+        const pct = totalCurrentValue > 0 ? (val / totalCurrentValue) * 100 : 0;
+        if (pct > 40) {
+            warnings.push({
+                type: 'danger',
+                msg: `High Concentration: Your exposure to <strong>${name}</strong> is ${pct.toFixed(1)}%. Consider diversifying.`
+            });
+        }
+    });
+
+    if (riskPctOfCap > 5) {
+        warnings.push({
+            type: 'danger',
+            msg: `High Portfolio Risk: You are risking ${riskPctOfCap.toFixed(1)}% of your capital. Standard limit is 1-2%.`
+        });
+    }
+
+    if (sectorCount < 3 && totalCurrentValue > 0) {
+        warnings.push({
+            type: 'low',
+            msg: `Low Diversification: You only have holdings in ${sectorCount} sectors. Explore other industries.`
+        });
+    }
+
+    const warningEl = document.getElementById('risk-warnings-list');
+    if (warningEl) {
+        if (warnings.length === 0) {
+            warningEl.innerHTML = '<div style="color:var(--text-secondary);font-size:0.85rem;padding:1rem;text-align:center;">No major risks detected. Trade safe!</div>';
+        } else {
+            warningEl.innerHTML = warnings.map(w => `
+                <div class="warning-item ${w.type === 'low' ? 'warning-low' : ''}">
+                    <i class="fas ${w.type === 'danger' ? 'fa-exclamation-circle' : 'fa-info-circle'}" 
+                       style="color: ${w.type === 'danger' ? '#f43f5e' : '#f59e0b'};"></i>
+                    <span>${w.msg}</span>
+                </div>
+            `).join('');
+        }
+    }
+}
+
+function calculateRealizedData(transactions) {
+    const sells = transactions.filter(t => t.type?.toUpperCase() === 'SELL').sort((a,b) => new Date(a.transaction_date) - new Date(b.transaction_date));
+    const buys  = transactions.filter(t => t.type?.toUpperCase() === 'BUY').sort((a,b) => new Date(a.transaction_date) - new Date(b.transaction_date));
+
+    // Deep copy buys to track remaining quantities for FIFO
+    let buyPool = buys.map(b => ({ ...b, remaining: b.quantity }));
+    let reportData = [];
+    let totalRealizedPnL = 0;
+
+    sells.forEach(sell => {
+        let qtyToMatch = sell.quantity;
+        
+        // Find matching buys for this sell
+        for (let buy of buyPool) {
+            if (qtyToMatch <= 0) break;
+            if (buy.symbol !== sell.symbol || buy.remaining <= 0) continue;
+
+            const matchedQty = Math.min(qtyToMatch, buy.remaining);
+            const holdDays = Math.floor((new Date(sell.transaction_date) - new Date(buy.transaction_date)) / (1000 * 60 * 60 * 24));
+            
+            // Tax rate: 5% if > 365 days, 7.5% if <= 365 days
+            const isLongTerm = holdDays > 365;
+            const taxRate = isLongTerm ? 0.05 : 0.075;
+
+            // Cost calculation (Buy Price includes fees)
+            const buyCostPerUnit = buy.total_amount / buy.quantity;
+            const totalCost = buyCostPerUnit * matchedQty;
+
+            // Sale calculation (Net Receivable - Proportional Purchase Cost)
+            const profit = sell.total_amount * (matchedQty / sell.quantity) - totalCost;
+            const tax = profit > 0 ? profit * taxRate : 0;
+
+            totalRealizedPnL += profit;
+
+            reportData.push({
+                symbol: sell.symbol,
+                sellDate: new Date(sell.transaction_date).toLocaleDateString(),
+                holdDays,
+                qty: matchedQty,
+                sellPrice: sell.price,
+                wacc: buyCostPerUnit,
+                pnl: profit,
+                tax: tax
+            });
+
+            buy.remaining -= matchedQty;
+            qtyToMatch -= matchedQty;
+        }
+    });
+
+    return { reportData, totalRealizedPnL };
 }
 
 // ─────────────────────────────────────────────
