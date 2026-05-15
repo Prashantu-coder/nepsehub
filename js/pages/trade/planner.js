@@ -143,6 +143,41 @@ async function init() {
   globalState.setState({ activePage: "planner" });
   await Layout.init();
 
+  // Check for Symbol in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const querySymbol = urlParams.get('symbol');
+  
+  if (querySymbol) {
+      const stockInput = document.getElementById('stockName');
+      if (stockInput) {
+          stockInput.value = querySymbol.toUpperCase();
+          // Trigger change manually to load price
+          stockInput.dispatchEvent(new Event('change'));
+      }
+  }
+
+  // Populate Stock Datalist
+  const stockList = document.getElementById('stockList');
+  const stocks = globalState.getState().stocks || [];
+  if (stockList && stocks.length > 0) {
+      stockList.innerHTML = stocks.map(s => `<option value="${s.symbol}">${s.name || s.securityName}</option>`).join('');
+  }
+
+  const stockInput = document.getElementById('stockName');
+  if (stockInput) {
+      stockInput.addEventListener('change', () => {
+          const symbol = stockInput.value.toUpperCase();
+          const stock = stocks.find(s => s.symbol.toUpperCase() === symbol);
+          if (stock) {
+              const entryInput = document.getElementById('entryPrice');
+              if (entryInput) {
+                  entryInput.value = stock.price || stock.lastTradedPrice || "";
+                  PlannerLogic.calculate();
+              }
+          }
+      });
+  }
+
   const inputs = [
     "entryPrice",
     "stopLoss",
@@ -151,6 +186,7 @@ async function init() {
     "riskValue",
     "riskMode",
   ];
+
   inputs.forEach((id) => {
     const el = document.getElementById(id);
     if (el) {

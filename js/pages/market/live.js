@@ -28,8 +28,8 @@ function applyFilter() {
   filteredData = marketData.filter((stock) => {
     const matchesSearch =
       stock.symbol.toUpperCase().includes(query) ||
-      (stock.securityName &&
-        stock.securityName.toUpperCase().includes(query));
+      (stock.name &&
+        stock.name.toUpperCase().includes(query));
 
     const change = parseFloat(stock.change);
     let matchesCategory = true;
@@ -94,18 +94,18 @@ window.renderTable = function() {
 
       const cols = {
           symbol: `
-              <td class="symbol-cell" title="${stock.securityName}">
+              <td class="symbol-cell" title="${stock.name}">
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                   ${stock.symbol}
                 </div>
               </td>`,
-          lastTradedPrice: `<td style="font-weight: 700;">${stock.lastTradedPrice}</td>`,
-          lastTradedVolume: `<td>${stock.lastTradedVolume || 0}</td>`,
-          percentageChange: `<td class="${changeClass}">${stock.change} (${stock.percentageChange}%)</td>`,
-          openPrice: `<td>${stock.openPrice}</td>`,
-          highPrice: `<td>${stock.highPrice}</td>`,
-          lowPrice: `<td>${stock.lowPrice}</td>`,
-          totalTradeQuantity: `<td>${parseInt(stock.totalTradeQuantity).toLocaleString()}</td>`,
+          price: `<td style="font-weight: 700;">${stock.price}</td>`,
+          ltq: `<td>${stock.ltq}</td>`,
+          changePercent: `<td class="${changeClass}">${stock.change} (${stock.changePercent}%)</td>`,
+          open: `<td>${stock.open}</td>`,
+          high: `<td>${stock.high}</td>`,
+          low: `<td>${stock.low}</td>`,
+          volume: `<td>${parseInt(stock.volume).toLocaleString()}</td>`,
           previousClose: `<td>${stock.previousClose}</td>`
       };
 
@@ -127,16 +127,16 @@ window.openQuickPanel = async function(symbol) {
   content.innerHTML = `
     <div style="margin-top: 1rem;">
       <h3 style="color: var(--primary); margin-bottom: 0.2rem;">${stock.symbol}</h3>
-      <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.5rem;">${stock.securityName}</p>
+      <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.5rem;">${stock.name}</p>
       
       <div class="glass" style="padding: 1rem; margin-bottom: 1.5rem;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
           <span style="color: var(--text-secondary);">LTP</span>
-          <span style="font-weight: 700;">Rs. ${stock.lastTradedPrice}</span>
+          <span style="font-weight: 700;">Rs. ${stock.price}</span>
         </div>
         <div style="display: flex; justify-content: space-between;">
           <span style="color: var(--text-secondary);">Change</span>
-          <span class="${parseFloat(stock.change) >= 0 ? 'price-up' : 'price-down'}">${stock.change} (${stock.percentageChange}%)</span>
+          <span class="${parseFloat(stock.change) >= 0 ? 'price-up' : 'price-down'}">${stock.change} (${stock.changePercent}%)</span>
         </div>
       </div>
 
@@ -169,7 +169,7 @@ function closeQuickPanel() {
 }
 
 // Column Customization Logic
-let visibleCols = ['symbol', 'lastTradedPrice', 'lastTradedVolume', 'percentageChange', 'openPrice', 'highPrice', 'lowPrice', 'totalTradeQuantity', 'previousClose'];
+let visibleCols = ['symbol', 'price', 'ltq', 'changePercent', 'open', 'high', 'low', 'volume', 'previousClose'];
 
 async function initColumnVisibility() {
     const saved = await StorageService.load('market_visible_cols');

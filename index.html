@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/pages/dashboard.css">
 </head>
 <body>
     <div id="navbar-container"></div>
@@ -24,14 +25,114 @@
         <div id="sidebar-container"></div>
         <main class="main-content">
             <div id="app">
-                <div class="fade-in" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70vh; text-align: center;">
-                    <div class="glass" style="padding: 3rem; border-radius: 30px; max-width: 600px;">
-                        <i class="fas fa-tools" style="font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
-                        <h2 style="margin-bottom: 1rem;">Dashboard Under Construction</h2>
-                        <p style="color: var(--text-secondary); line-height: 1.6;">
-                            We are currently redesigning the dashboard experience to provide better market insights. 
-                            In the meantime, feel free to use the <strong>Portfolio</strong> and <strong>Watchlist</strong> tabs.
-                        </p>
+                <div class="summary-pulse">
+                    <div class="glass pulse-card">
+                        <div class="pulse-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i class="fas fa-balance-scale"></i></div>
+                        <div class="pulse-info">
+                            <span class="pulse-label">Sentiment</span>
+                            <div class="pulse-value" id="pulse-sentiment">0 / 0 / 0</div>
+                        </div>
+                    </div>
+                    <div class="glass pulse-card">
+                        <div class="pulse-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;"><i class="fas fa-coins"></i></div>
+                        <div class="pulse-info">
+                            <span class="pulse-label">Total Turnover</span>
+                            <div class="pulse-value" id="pulse-turnover">Rs. 0.00</div>
+                        </div>
+                    </div>
+                    <div class="glass pulse-card">
+                        <div class="pulse-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;"><i class="fas fa-chart-line"></i></div>
+                        <div class="pulse-info">
+                            <span class="pulse-label">Total Volume</span>
+                            <div class="pulse-value" id="pulse-volume">0</div>
+                        </div>
+                    </div>
+                    <div class="glass pulse-card">
+                        <div class="pulse-icon" style="background: rgba(244, 63, 94, 0.1); color: #f43f5e;"><i class="fas fa-building"></i></div>
+                        <div class="pulse-info">
+                            <span class="pulse-label">Companies</span>
+                            <div class="pulse-value" id="pulse-companies">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Top Gainers -->
+                    <div class="glass market-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-arrow-trend-up" style="color: #10b981;"></i> Top Gainers</h3>
+                        </div>
+                        <div class="table-mini-container">
+                            <table class="mini-table">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>LTP</th>
+                                        <th>Change %</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-gainers-body">
+                                    <!-- Skeletons -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Top Losers -->
+                    <div class="glass market-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-arrow-trend-down" style="color: #f43f5e;"></i> Top Losers</h3>
+                        </div>
+                        <div class="table-mini-container">
+                            <table class="mini-table">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>LTP</th>
+                                        <th>Change %</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-losers-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Top Turnover -->
+                    <div class="glass market-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-coins" style="color: #f59e0b;"></i> Top Turnover</h3>
+                        </div>
+                        <div class="table-mini-container">
+                            <table class="mini-table">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>LTP</th>
+                                        <th>Turnover</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-turnover-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Top Volume -->
+                    <div class="glass market-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-simple" style="color: #6366f1;"></i> Top Volume</h3>
+                        </div>
+                        <div class="table-mini-container">
+                            <table class="mini-table">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>LTP</th>
+                                        <th>Volume</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-volume-body"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

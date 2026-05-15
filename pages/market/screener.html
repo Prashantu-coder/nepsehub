@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Screener | NEPSE HUB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="../../css/themes.css">
+    <style>
+        .screener-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .signal-card {
+            padding: 1.5rem;
+            border-radius: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .signal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .signal-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-bullish { background: rgba(16, 185, 129, 0.1); color: var(--secondary); border: 1px solid var(--secondary); }
+        .badge-bearish { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+        .badge-neutral { background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); border: 1px solid var(--surface-border); }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+        }
+        .metric-label { color: var(--text-secondary); }
+        .metric-value { font-weight: 600; }
+        
+        .tab-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--surface-border);
+            color: var(--text-secondary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+        <main class="main-content">
+            <div id="app">
+                <div class="fade-in">
+                    <div class="section-header">
+                        <div>
+                            <h2>Technical Screener</h2>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Automated market scanning for high-probability setups</p>
+                        </div>
+                        <div class="market-badge">
+                            <i class="fas fa-robot"></i> AI POWERED
+                        </div>
+                    </div>
+
+                    <div class="tab-nav">
+                        <button class="tab-btn active" data-type="macd">MACD Signals</button>
+                        <button class="tab-btn" data-type="rsi">RSI Levels</button>
+                        <button class="tab-btn" data-type="bollinger">Bollinger Bands</button>
+                    </div>
+
+                    <div style="position: relative; min-height: 400px;">
+                        <!-- Under Development Overlay -->
+                        <div style="position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(13, 17, 23, 0.7); backdrop-filter: blur(8px); border-radius: 20px; text-align: center; padding: 2rem;">
+                            <div style="background: rgba(245, 158, 11, 0.1); color: var(--warning); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 1.5rem; border: 2px solid var(--warning);">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">Feature Under Development</h3>
+                            <p style="color: var(--text-secondary); max-width: 400px; line-height: 1.6;">
+                                We are currently calibrating the MACD and Bollinger Band algorithms with our live data stream. This feature will be available soon.
+                            </p>
+                            <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                                <div class="signal-badge badge-neutral" style="opacity: 0.7;">MACD: PENDING</div>
+                                <div class="signal-badge badge-neutral" style="opacity: 0.7;">BOLLINGER: PENDING</div>
+                            </div>
+                        </div>
+
+                        <div id="screener-content" class="screener-grid" style="filter: blur(4px); pointer-events: none;">
+                            <!-- Content loaded via JS but blurred -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="../../js/pages/market/screener.js"></script>
+</body>
+</html>

@@ -9,58 +9,67 @@
     <link rel="stylesheet" href="../css/layout.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/themes.css">
+    <link rel="stylesheet" href="../css/pages/news.css">
 </head>
 <body>
     <div id="navbar-container"></div>
     <div class="app-container">
         <div id="sidebar-container"></div>
-        <main class="main-content">
+        <main class="main-content" style="padding: 2.5rem;">
             <div id="app">
                 <div class="fade-in">
-                    <div class="section-header">
-                        <h2>Market News & Updates</h2>
+                    <div class="section-header" style="margin-bottom: 2rem;">
+                        <h2 style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;">News & Announcements</h2>
                     </div>
-                    <div id="news-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
-                        <div class="loading-placeholder">Loading news...</div>
+                    
+                    <div class="news-table-container">
+                        <table class="pro-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 130px;">Date</th>
+                                    <th style="width: 110px;">Symbol</th>
+                                    <th>Announcement Title</th>
+                                    <th style="width: 140px; text-align: center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="news-table-body">
+                                <!-- Dynamic rows here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <script type="module">
-        import globalState from '../js/state.js';
-        import { Layout } from '../js/layout.js';
+    <!-- News Modal Overlay -->
+    <div id="news-modal-overlay" class="modal-overlay">
+        <div class="glass modal-content-glass">
+            <button id="close-news-modal" class="btn-icon" style="position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(255,255,255,0.05); border: none; color: var(--text-secondary); cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-times"></i>
+            </button>
 
-        async function init() {
-            globalState.setState({ activePage: 'news' });
-            await Layout.init();
-            
-            globalState.subscribe((state) => {
-                if (state.news.length > 0) {
-                    renderNews(state.news);
-                }
-            });
-        }
-
-        function renderNews(news) {
-            const grid = document.getElementById('news-grid');
-            if (!grid) return;
-            grid.innerHTML = news.map(item => `
-                <div class="glass" style="padding: 1.5rem; border-radius: 16px; transition: var(--transition-fast);">
-                    <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase;">
-                        ${item.date}
-                    </div>
-                    <h3 style="margin-bottom: 1rem; line-height: 1.4;">${item.title}</h3>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem;">
-                        ${item.summary}
-                    </p>
-                    <a href="#" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">Read More</a>
+            <div id="modal-content">
+                <div id="modal-date" style="color: var(--primary); font-weight: 700; font-size: 0.85rem; margin-bottom: 0.75rem;">DATE</div>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                    <span id="modal-symbol" class="symbol-badge" style="font-size: 1.1rem; width: auto;">SYMBOL</span>
+                    <h2 id="modal-title" style="font-size: 1.5rem; font-weight: 800; line-height: 1.3;">Announcement Title</h2>
                 </div>
-            `).join('');
-        }
+                
+                <div id="modal-details" class="modal-details-box">
+                    Announcement details go here...
+                </div>
 
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <a id="modal-pdf-link" href="#" target="_blank" class="btn btn-pdf">
+                        <i class="fas fa-file-pdf"></i> View PDF
+                    </a>
+                    <button id="modal-close-btn" class="btn btn-outline" style="padding: 1rem; border-radius: 12px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../js/pages/market/news.js"></script>
 </body>
 </html>

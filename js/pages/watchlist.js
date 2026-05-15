@@ -90,8 +90,8 @@ function render() {
 
     body.innerHTML = watchlistData.map(w => {
         const stock  = marketData.find(s => s.symbol.toUpperCase() === w.symbol.toUpperCase());
-        const ltp    = stock ? parseFloat(stock.lastTradedPrice) : null;
-        const change = stock ? parseFloat(stock.percentageChange) : null;
+        const ltp    = stock ? parseFloat(stock.price) : null;
+        const change = stock ? parseFloat(stock.changePercent) : null;
 
         // Target alerts
         const buyHit  = ltp && w.target_buy  && ltp <= w.target_buy;
@@ -125,7 +125,7 @@ function render() {
 
         return `
         <tr style="border-left: 3px solid ${buyHit ? '#10b981' : sellHit ? '#f43f5e' : 'transparent'};">
-            <td style="font-weight:700; color:var(--primary);">${w.symbol}</td>
+            <td style="font-weight:700; color:var(--primary); cursor:pointer;" onclick="showSymbolDetails('${w.symbol}')">${w.symbol}</td>
             <td>${ltpHtml}</td>
             <td>${changeHtml}</td>
             <td>${targetBuyHtml}</td>

@@ -105,6 +105,28 @@ async function init() {
   globalState.setState({ activePage: "dividend" });
   await Layout.init();
 
+  // Populate Stock Datalist
+  const stockList = document.getElementById('stockList');
+  const stocks = globalState.getState().stocks || [];
+  if (stockList && stocks.length > 0) {
+      stockList.innerHTML = stocks.map(s => `<option value="${s.symbol}">${s.name || s.securityName}</option>`).join('');
+  }
+
+  const stockInput = document.getElementById('stockName');
+  if (stockInput) {
+      stockInput.addEventListener('change', () => {
+          const symbol = stockInput.value.toUpperCase();
+          const stock = stocks.find(s => s.symbol.toUpperCase() === symbol);
+          if (stock) {
+              const currentInput = document.getElementById('currentPrice');
+              if (currentInput) {
+                  currentInput.value = stock.price || stock.lastTradedPrice || "";
+                  DivLogic.calculate();
+              }
+          }
+      });
+  }
+
   const inputs = ["currentPrice", "annualDividend", "buyPrice"];
   inputs.forEach((id) => {
     const el = document.getElementById(id);
