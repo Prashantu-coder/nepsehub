@@ -89,12 +89,58 @@
   font-weight: 600;
 }
 
-/* Burger Button */
-.burger-menu {
-  display: none;
-  font-size: 1.5rem;
-  cursor: pointer;
+.market-status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1.2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-open {
+  background-color: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulse-green 2s infinite;
+}
+
+.status-closed {
+  background-color: #f43f5e;
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.3);
+}
+
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.navbar-clock {
+  font-family: 'Inter', monospace;
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.navbar-clock i {
+  font-size: 0.9rem;
 }
 
 /* Grid Layouts */
@@ -120,6 +166,9 @@
 @media (min-width: 1025px) {
   .navbar .logo {
     display: flex;
+  }
+  .burger-menu {
+    display: none !important;
   }
 }
 
