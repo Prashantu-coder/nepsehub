@@ -58,6 +58,8 @@ export const Layout = {
             globalState.setState({ stocks, news });
         } catch (error) {
             console.error('Data load failed:', error);
+        } finally {
+            this.hideSplash();
         }
 
         // Initialize Live Clock
@@ -68,6 +70,93 @@ export const Layout = {
 
         // Add Quick View Panel to DOM if it doesn't exist
         this.initQuickView();
+
+        // Initialize Notifications
+        this.initNotifications();
+    },
+
+    initNotifications() {
+        const bell = document.getElementById('notification-bell');
+        const dropdown = document.getElementById('notif-dropdown');
+        const badge = document.getElementById('notif-badge');
+        const list = document.getElementById('notif-list');
+        const markReadBtn = document.getElementById('mark-read-btn');
+
+        if (!bell) return;
+
+        const refreshNotifs = async () => {
+            const notifs = await StorageService.getNotifications();
+            const unreadCount = notifs.filter(n => !n.is_read).length;
+
+            if (unreadCount > 0) {
+                badge.innerText = unreadCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            if (notifs.length === 0) {
+                list.innerHTML = '<div class="notif-empty">No notifications in the last 7 days</div>';
+            } else {
+                list.innerHTML = notifs.map(n => {
+                    const date = new Date(n.created_at);
+                    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                    
+                    let icon = 'fa-info-circle';
+                    if (n.type === 'buy') icon = 'fa-shopping-cart';
+                    if (n.type === 'sell') icon = 'fa-hand-holding-usd';
+                    if (n.type === 'stoploss') icon = 'fa-exclamation-triangle';
+
+                    return `
+                        <div class="notif-item ${n.is_read ? '' : 'unread'}">
+                            <div class="notif-icon ${n.type}">
+                                <i class="fas ${icon}"></i>
+                            </div>
+                            <div class="notif-body">
+                                <div class="notif-title">${n.title}</div>
+                                <div class="notif-msg">${n.message}</div>
+                                <div class="notif-time">${dateStr} at ${timeStr}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        };
+
+        bell.onclick = (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('hidden');
+            if (!dropdown.classList.contains('hidden')) {
+                refreshNotifs();
+            }
+        };
+
+        markReadBtn.onclick = async (e) => {
+            e.stopPropagation();
+            await StorageService.markNotificationsAsRead();
+            refreshNotifs();
+        };
+
+        document.addEventListener('click', () => {
+            dropdown.classList.add('hidden');
+        });
+
+        dropdown.onclick = (e) => e.stopPropagation();
+
+        // Initial check and periodic refresh
+        refreshNotifs();
+        setInterval(refreshNotifs, 60000); // Check for new ones every minute
+    },
+
+    hideSplash() {
+        const splash = document.getElementById('splash-loader');
+        if (splash) {
+            splash.classList.add('hidden');
+            setTimeout(() => {
+                splash.remove();
+            }, 600);
+        }
     },
 
     initMarketStatus() {
@@ -195,18 +284,18 @@ export const Layout = {
             
             if (stock) {
                 document.getElementById('qv-symbol').innerText = stock.symbol;
-                document.getElementById('qv-name').innerText = stock.securityName;
-                document.getElementById('qv-ltp').innerText = `Rs. ${parseFloat(stock.lastTradedPrice).toLocaleString()}`;
+                document.getElementById('qv-name').innerText = stock.name || stock.symbol;
+                document.getElementById('qv-ltp').innerText = `Rs. ${(stock.price || 0).toLocaleString()}`;
                 
-                const change = parseFloat(stock.percentageChange);
+                const change = stock.changePercent || 0;
                 const changeEl = document.getElementById('qv-change');
                 changeEl.innerText = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
                 changeEl.className = change >= 0 ? 'qv-change price-up' : 'qv-change price-down';
 
-                document.getElementById('qv-open').innerText = stock.openPrice || '-';
-                document.getElementById('qv-high').innerText = stock.highPrice || '-';
-                document.getElementById('qv-low').innerText = stock.lowPrice || '-';
-                document.getElementById('qv-vol').innerText = (parseFloat(stock.totalTradeQuantity) || 0).toLocaleString();
+                document.getElementById('qv-open').innerText = stock.open || '-';
+                document.getElementById('qv-high').innerText = stock.high || '-';
+                document.getElementById('qv-low').innerText = stock.low || '-';
+                document.getElementById('qv-vol').innerText = (stock.volume || 0).toLocaleString();
                 document.getElementById('qv-prev').innerText = stock.previousClose || '-';
                 document.getElementById('qv-sector').innerText = stock.sector || 'N/A';
 

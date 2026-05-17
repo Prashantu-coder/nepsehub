@@ -9,6 +9,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const STORAGE_KEYS = {
     SETTINGS: 'nepse_hub_settings',
+    NOTIFICATIONS: 'nepse_notifications'
 };
 
 const StorageService = {
@@ -126,6 +127,55 @@ const StorageService = {
                 .from('transactions')
                 .delete()
                 .eq('id', id);
+            return !error;
+        } catch (err) {
+            return false;
+        }
+    },
+    
+    // --- Notifications (Supabase) ---
+    async getNotifications() {
+        try {
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            
+            const { data, error } = await supabase
+                .from('notifications')
+                .select('*')
+                .gte('created_at', sevenDaysAgo.toISOString())
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            return data || [];
+        } catch (err) {
+            console.error('Notification Fetch Error:', err.message);
+            return [];
+        }
+    },
+
+    async addNotification(notif) {
+        try {
+            const { error } = await supabase
+                .from('notifications')
+                .insert([{
+                    title: notif.title,
+                    message: notif.message,
+                    type: notif.type || 'info',
+                    symbol: notif.symbol || null,
+                    is_read: false
+                }]);
+            return !error;
+        } catch (err) {
+            return false;
+        }
+    },
+
+    async markNotificationsAsRead() {
+        try {
+            const { error } = await supabase
+                .from('notifications')
+                .update({ is_read: true })
+                .eq('is_read', false);
             return !error;
         } catch (err) {
             return false;

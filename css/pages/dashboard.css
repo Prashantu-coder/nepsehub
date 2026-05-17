@@ -1,61 +1,334 @@
-.summary-pulse {
+/* ══════════════════════════════════════════════
+   NEPSE INDEX HERO SECTION
+   ══════════════════════════════════════════════ */
+.index-hero-section {
+    margin-bottom: 0.8rem;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
+    grid-template-columns: minmax(220px, 280px) minmax(250px, 320px) 1fr;
+    gap: 0.8rem;
+}
+
+.index-hero-card {
+    background: var(--surface-gradient), var(--surface-solid);
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    height: 100%;
+}
+
+.hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     width: 100%;
 }
 
+/* ── Watchlist Card ── */
+.watchlist-hero-card {
+    background: var(--surface-gradient), var(--surface-solid);
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.hero-watchlist-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.watchlist-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    flex: 1;
+    align-content: flex-start;
+    overflow-y: auto;
+    padding-right: 0.5rem; /* for scrollbar */
+}
+
+/* Custom Scrollbar for pills */
+.watchlist-pills::-webkit-scrollbar {
+    width: 4px;
+}
+.watchlist-pills::-webkit-scrollbar-track {
+    background: transparent;
+}
+.watchlist-pills::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.wl-pill {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 0.35rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.wl-pill:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+    cursor: pointer;
+}
+
+.wl-sym {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.wl-ltp {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+.wl-ltp.up { color: #10b981; }
+.wl-ltp.down { color: #f43f5e; }
+
+.hero-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.4rem;
+}
+
+.hero-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.hero-change {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.hero-change.up { color: #10b981; }
+.hero-change.down { color: #f43f5e; }
+
+.hero-meta {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.3px;
+}
+
+
+
+/* ── Side Cards Container ── */
+.hero-side-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    height: 100%;
+}
+
+.mini-index-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+}
+
+.mini-idx-card {
+    background: var(--surface-gradient), var(--surface-solid);
+    padding: 1.2rem 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    flex: 1;
+}
+
+.mini-idx-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.mini-idx-name {
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mini-idx-val {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.mini-idx-chg {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 4px;
+}
+
+.mini-idx-chg.up {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.mini-idx-chg.down {
+    color: #f43f5e;
+    background: rgba(244, 63, 94, 0.1);
+}
+
+/* ══════════════════════════════════════════════
+   PULSE SUMMARY CARDS
+   ══════════════════════════════════════════════ */
+.summary-pulse-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+    flex: 1;
+}
+
 .pulse-card {
-    padding: 1rem 1.5rem;
-    border-radius: 16px;
+    background: var(--surface-gradient), var(--surface-solid);
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     gap: 1rem;
-    min-height: 80px;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.pulse-card:hover {
-    transform: translateY(-3px);
-    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .pulse-icon {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
 }
 
 .pulse-info {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    gap: 0.2rem;
     overflow: hidden;
 }
 
 .pulse-label {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 2px;
-    font-weight: 600;
+    letter-spacing: 0.5px;
+    font-weight: 700;
 }
 
 .pulse-value {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 0.95rem;
+    font-weight: 800;
     color: var(--text-primary);
     white-space: nowrap;
 }
 
+/* ══════════════════════════════════════════════
+   SECTOR SUBINDEX TABLE
+   ══════════════════════════════════════════════ */
+.subindex-section {
+    padding: 1.5rem;
+    border-radius: 20px;
+    margin-bottom: 1.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.badge-live {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.subindex-table th {
+    font-size: 0.7rem !important;
+}
+
+.subindex-table td {
+    font-size: 0.82rem;
+}
+
+.subindex-table .sector-name {
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.sector-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.subindex-table .idx-val {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.subindex-table .chg-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.78rem;
+}
+
+.chg-badge.up {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.chg-badge.down {
+    background: rgba(244, 63, 94, 0.1);
+    color: #f43f5e;
+}
+
+/* ══════════════════════════════════════════════
+   MARKET CARDS GRID
+   ══════════════════════════════════════════════ */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -133,7 +406,9 @@
     font-weight: 600;
 }
 
-/* Animations */
+/* ══════════════════════════════════════════════
+   ANIMATIONS
+   ══════════════════════════════════════════════ */
 .dashboard-grid > div {
     animation: slideUp 0.5s ease-out forwards;
     opacity: 0;
@@ -147,4 +422,65 @@
 @keyframes slideUp {
     from { transform: translateY(20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from { transform: translateY(15px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .index-hero-section {
+        grid-template-columns: 1fr;
+    }
+
+    .index-hero-card {
+        flex-direction: column;
+        padding: 1.5rem;
+        gap: 1.5rem;
+    }
+
+    .hero-left {
+        padding-right: 0;
+        padding-bottom: 1.5rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        align-items: center;
+        text-align: center;
+    }
+
+    .hero-value {
+        font-size: 2rem;
+    }
+
+    .hero-watchlist {
+        padding-left: 0;
+        align-items: center;
+        text-align: center;
+    }
+
+    .watchlist-pills {
+        justify-content: center;
+    }
+
+    .hide-mobile {
+        display: none !important;
+    }
+
+    .summary-pulse-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .mini-index-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-pulse-grid {
+        grid-template-columns: 1fr;
+    }
 }

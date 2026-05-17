@@ -31,16 +31,30 @@ async function init() {
     document.getElementById('cancel-wl-modal').onclick   = () => modal.style.display = 'none';
     document.getElementById('save-wl-btn').onclick       = handleSave;
     
-    document.getElementById('enable-notifications').onclick = async () => {
-        const granted = await NotificationService.requestPermission();
-        if (granted) {
-            alert('Notifications Enabled! You will receive alerts when target prices are reached.');
-            document.getElementById('enable-notifications').innerHTML = '<i class="fas fa-check"></i> Alerts Active';
-            document.getElementById('enable-notifications').classList.add('btn-success');
-        } else {
-            alert('Permission denied. Please enable notifications in your browser settings.');
+    const notifBtn = document.getElementById('enable-notifications');
+    if (notifBtn) {
+        // Reflect current permission status on load
+        if (Notification.permission === 'granted') {
+            notifBtn.innerHTML = '<i class="fas fa-check"></i> Alerts Active';
+            notifBtn.classList.add('btn-success');
         }
-    };
+
+        notifBtn.onclick = async () => {
+            if (Notification.permission === 'granted') {
+                alert('Notifications are already enabled for this browser.');
+                return;
+            }
+
+            const granted = await NotificationService.requestPermission();
+            if (granted) {
+                alert('Notifications Enabled! You will receive alerts when target prices are reached.');
+                notifBtn.innerHTML = '<i class="fas fa-check"></i> Alerts Active';
+                notifBtn.classList.add('btn-success');
+            } else if (Notification.permission === 'denied') {
+                alert('Permission denied. Please enable notifications in your browser settings (click the lock icon in address bar).');
+            }
+        };
+    }
     
     const emptyAddBtn = document.getElementById('empty-add-btn');
     if (emptyAddBtn) emptyAddBtn.onclick = () => openModal();

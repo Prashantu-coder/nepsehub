@@ -4,7 +4,7 @@
   top: 0;
   z-index: 1000;
   width: 100%;
-  background-color: var(--background);
+  background: var(--surface-gradient), var(--background);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--surface-border);
@@ -25,7 +25,7 @@
   position: fixed;
   left: -260px; /* Hidden by default */
   top: 0;
-  background: var(--sidebar-bg);
+  background: var(--surface-gradient), var(--sidebar-bg);
   border-right: 1px solid var(--surface-border);
   display: flex;
   flex-direction: column;
@@ -85,8 +85,12 @@
 }
 
 .nav-link.active {
-  color: var(--primary);
-  font-weight: 600;
+  background: var(--theme-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
 }
 
 .market-status {
@@ -192,3 +196,167 @@
     padding: 0 1rem;
   }
 }
+
+/* ── Notifications ── */
+.nav-notification-wrapper {
+  position: relative;
+}
+
+#notification-bell {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+#notification-bell:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.notif-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--danger);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 20px;
+  border: 2px solid var(--background);
+  box-shadow: 0 4px 10px rgba(244, 63, 94, 0.4);
+}
+
+.notif-badge.hidden {
+  display: none;
+}
+
+.notif-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  width: 320px;
+  max-height: 450px;
+  border-radius: 16px;
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideInDown 0.3s ease;
+}
+
+.notif-dropdown.hidden {
+  display: none;
+}
+
+.notif-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--surface-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.notif-header h5 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+#mark-read-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#mark-read-btn:hover {
+  text-decoration: underline;
+}
+
+.notif-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.notif-item {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  display: flex;
+  gap: 0.8rem;
+  transition: background 0.2s;
+  cursor: default;
+}
+
+.notif-item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.notif-item.unread {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.notif-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.notif-icon.buy { background: rgba(16, 185, 129, 0.1); color: var(--secondary); }
+.notif-icon.sell { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+.notif-icon.stoploss { background: rgba(244, 63, 94, 0.1); color: var(--danger); }
+.notif-icon.info { background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); }
+
+.notif-body {
+  flex: 1;
+}
+
+.notif-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.notif-msg {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.notif-time {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.notif-empty {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+

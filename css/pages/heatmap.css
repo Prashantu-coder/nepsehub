@@ -1,0 +1,231 @@
+/* ══════════════════════════════════════════════
+   MARKET HEATMAP — TREEMAP STYLE
+   ══════════════════════════════════════════════ */
+
+/* ── Toolbar ── */
+.heatmap-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.sector-dropdown {
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    padding: 0.5rem 2.2rem 0.5rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    min-width: 160px;
+    transition: border-color 0.2s;
+}
+
+.sector-dropdown:hover,
+.sector-dropdown:focus {
+    border-color: var(--primary);
+}
+
+.sector-dropdown option {
+    background: #1a1a2e;
+    color: white;
+}
+
+.hm-info-text {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ── Treemap Wrapper ── */
+.treemap-wrapper {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 220px);
+    min-height: 450px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.06);
+    background: #111827;
+}
+
+.heatmap-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    z-index: 20;
+    background: #111827;
+}
+
+.heatmap-loading.hidden { display: none; }
+
+/* ── Sector Container (absolute positioned within treemap) ── */
+.tm-sector {
+    position: absolute;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* ── Sector Header Bar ── */
+.tm-sector-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 5;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.tm-sector-header .sh-name {
+    margin-right: 4px;
+}
+
+.tm-sector-header .sh-stats {
+    opacity: 0.85;
+    font-weight: 600;
+}
+
+/* ── Stock Block (absolute positioned within sector) ── */
+.tm-block {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    cursor: pointer;
+    box-sizing: border-box;
+    border: 0.5px solid rgba(0, 0, 0, 0.5);
+    transition: box-shadow 0.12s ease;
+    padding: 2px;
+}
+
+.tm-block:hover {
+    z-index: 50;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.tm-block .bk-symbol {
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tm-block .bk-change {
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+/* ── Tooltip ── */
+.hm-tooltip {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    background: #1e1e32;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+    min-width: 210px;
+    pointer-events: none;
+}
+
+.hm-tooltip.visible { display: block; animation: fadeIn 0.1s ease; }
+
+.hm-tooltip .tt-symbol {
+    font-size: 1rem;
+    font-weight: 800;
+    color: white;
+}
+
+.hm-tooltip .tt-name {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.hm-tooltip .tt-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.76rem;
+    padding: 3px 0;
+}
+
+.hm-tooltip .tt-label { color: var(--text-secondary); }
+.hm-tooltip .tt-val { font-weight: 700; color: var(--text-primary); }
+
+/* ── Legend Bar (Bottom) ── */
+.heatmap-legend-bar {
+    display: flex;
+    margin-top: 0.75rem;
+    border-radius: 6px;
+    overflow: hidden;
+    width: fit-content;
+}
+
+.lg-stop {
+    padding: 4px 14px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+/* ── Animations ── */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .treemap-wrapper {
+        height: calc(100vh - 240px);
+        min-height: 350px;
+    }
+
+    .tm-sector-header {
+        height: 16px;
+        font-size: 0.55rem;
+    }
+
+    .heatmap-toolbar {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+}

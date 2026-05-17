@@ -20,7 +20,7 @@ const DataService = {
                 // Fallback to mock if API fails
                 return this._fetchWithDelay('/data/mockNews.json');
             }
-            
+
             // Normalize to frontend news structure
             return rawAnnouncements.map(item => ({
                 id: item.id,
@@ -45,7 +45,7 @@ const DataService = {
             const response = await fetch(endpoint);
             if (!response.ok) return [];
             const result = await response.json();
-            
+
             // Handle multiple professional schemas
             let data = result;
             if (result.success && result.data) {
@@ -53,7 +53,7 @@ const DataService = {
             } else if (result.content) {
                 data = result.content;
             }
-            
+
             return Array.isArray(data) ? data : [];
         } catch (error) {
             console.error('❌ Announcements Fetch Error:', error);
@@ -62,22 +62,22 @@ const DataService = {
     },
 
     // Professional Backend URL (Update this to your Render URL after deployment)
-    API_BASE: 'https://nepse-hub-backend.onrender.com', // Keeping old one as placeholder for now
+    API_BASE: 'https://nepse-hub-backend.onrender.com',
 
     async getLiveMarket() {
         try {
             const endpoint = `${this.API_BASE}/core/homepage-data`;
             console.log(`📡 Fetching market from: ${endpoint}`);
-            
+
             const response = await fetch(endpoint);
             if (!response.ok) {
                 console.error(`❌ API Error: ${response.status} ${response.statusText}`);
                 return [];
             }
-            
+
             const result = await response.json();
             console.log("📥 API Response Received:", result);
-            
+
             // Handle Mega-Object from ShareHub (find the stock list)
             let rawData = [];
             if (Array.isArray(result)) {
@@ -142,13 +142,13 @@ const DataService = {
         try {
             const endpoint = `${this.API_BASE}/core/market-turnover`;
             console.log(`📡 Fetching summary from: ${endpoint}`);
-            
+
             const response = await fetch(endpoint);
             if (!response.ok) {
                 console.error(`❌ Summary API Error: ${response.status}`);
                 return null;
             }
-            
+
             const result = await response.json();
             console.log("📥 Summary Response Received:", result);
             return result.success ? result.data : result;
@@ -199,7 +199,7 @@ const DataService = {
             const response = await fetch(endpoint);
             if (!response.ok) return [];
             const result = await response.json();
-            
+
             // Handle nested content structure (result.data.content)
             let rawData = [];
             if (result.success && result.data) {
@@ -207,7 +207,7 @@ const DataService = {
             } else {
                 rawData = result;
             }
-            
+
             return Array.isArray(rawData) ? rawData : [];
         } catch (error) {
             console.error('❌ IPO Fetch Error:', error);
@@ -223,7 +223,15 @@ const DataService = {
             const response = await fetch(endpoint);
             if (!response.ok) return [];
             const result = await response.json();
-            return result.success ? result.data : result;
+            const data = result.success ? result.data : result;
+
+            return data.map(item => ({
+                ...item,
+                price: item.close,
+                signalLine: item.signal_line,
+                histogram: item.hist,
+                trend: item.signal
+            }));
         } catch (error) {
             console.error('❌ MACD Fetch Error:', error);
             return [];
@@ -236,7 +244,14 @@ const DataService = {
             const response = await fetch(endpoint);
             if (!response.ok) return [];
             const result = await response.json();
-            return result.success ? result.data : result;
+            const data = result.success ? result.data : result;
+
+            return data.map(item => ({
+                ...item,
+                price: item.close,
+                condition: item.rsi <= 30 ? 'Oversold' : item.rsi >= 70 ? 'Overbought' : 'Neutral',
+                trend: item.rsi <= 30 ? 'Bullish' : item.rsi >= 70 ? 'Bearish' : 'Neutral'
+            }));
         } catch (error) {
             console.error('❌ RSI Fetch Error:', error);
             return [];
@@ -249,7 +264,15 @@ const DataService = {
             const response = await fetch(endpoint);
             if (!response.ok) return [];
             const result = await response.json();
-            return result.success ? result.data : result;
+            const data = result.success ? result.data : result;
+
+            return data.map(item => ({
+                ...item,
+                price: item.close,
+                upperBand: item.upper,
+                lowerBand: item.lower,
+                trend: item.status === 'Oversold' ? 'Bullish' : item.status === 'Overbought' ? 'Bearish' : 'Neutral'
+            }));
         } catch (error) {
             console.error('❌ Bollinger Fetch Error:', error);
             return [];

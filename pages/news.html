@@ -12,6 +12,15 @@
     <link rel="stylesheet" href="../css/pages/news.css">
 </head>
 <body>
+    <!-- Global Splash Loader -->
+    <div id="splash-loader" class="splash-loader">
+        <div class="nepse-spinner-container">
+            <div class="nepse-center-text">NEPSE</div>
+            <div class="ring ring-blue"></div>
+            <div class="ring ring-green"></div>
+        </div>
+        <div class="splash-text">Loading...</div>
+    </div>
     <div id="navbar-container"></div>
     <div class="app-container">
         <div id="sidebar-container"></div>
@@ -22,7 +31,7 @@
                         <h2 style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;">News & Announcements</h2>
                     </div>
                     
-                    <div class="news-table-container">
+                    <div class="news-table-container" style="position: relative; min-height: 400px;">
                         <table class="pro-table">
                             <thead>
                                 <tr>

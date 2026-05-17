@@ -14,8 +14,9 @@ export const Navbar = () => {
             text: 'Market',
             children: [
                 { id: 'live-market', text: 'Live Market', icon: 'fa-broadcast-tower', path: 'pages/market/live.html' },
+                { id: 'heatmap', text: 'Market Heatmap', icon: 'fa-th', path: 'pages/market/heatmap.html' },
                 { id: 'ipo-tracker', text: 'IPO Tracker', icon: 'fa-rocket', path: 'pages/market/ipo-tracker.html' },
-                { id: 'market-analysis', text: 'Market Analysis', icon: 'fa-chart-pie', path: 'pages/market/analysis.html' }
+                { id: 'screener', text: 'Technical Screener', icon: 'fa-robot', path: 'pages/market/screener.html' }
             ]
         },
         { id: 'news', icon: 'fa-newspaper', text: 'Market News', path: 'pages/news.html' },
@@ -86,8 +87,29 @@ export const Navbar = () => {
             </ul>
 
             <div class="nav-actions" style="display: flex; gap: 1rem; align-items: center;">
-                <div class="search-box pc-only">
-                    <input type="text" id="globalSearch" placeholder="Search..." value="${globalState.getState().searchQuery || ''}">
+                <div id="market-status" class="market-status pc-only">
+                    <!-- Loaded by layout.js -->
+                </div>
+                
+                <!-- Notification Bell -->
+                <div class="nav-notification-wrapper">
+                    <button id="notification-bell" class="btn-icon">
+                        <i class="far fa-bell"></i>
+                        <span id="notif-badge" class="notif-badge hidden">0</span>
+                    </button>
+                    <div id="notif-dropdown" class="notif-dropdown glass hidden">
+                        <div class="notif-header">
+                            <h5>Notifications</h5>
+                            <button id="mark-read-btn">Mark all as read</button>
+                        </div>
+                        <div id="notif-list" class="notif-list">
+                            <div class="notif-empty">No notifications in the last 7 days</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="navbar-clock" class="navbar-clock pc-only">
+                    <!-- Loaded by layout.js -->
                 </div>
             </div>
         </nav>

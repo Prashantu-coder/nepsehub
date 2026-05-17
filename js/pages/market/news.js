@@ -65,9 +65,18 @@ export const NewsPage = {
 
     render(news) {
         const tbody = document.getElementById('news-table-body');
+        const loader = document.getElementById('news-loader');
+        
         if (!tbody) {
             console.error("❌ Could not find #news-table-body");
             return;
+        }
+
+        if (news.length > 0 && loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 300);
         }
         
         tbody.innerHTML = news.map(item => {

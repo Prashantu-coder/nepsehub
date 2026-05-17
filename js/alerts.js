@@ -2,9 +2,10 @@ import globalState from './state.js';
 import DataService from '../services/dataService.js';
 import NotificationService from '../services/notificationService.js';
 import StorageService from '../services/storageService.js';
+import PortfolioService from '../services/portfolioService.js';
 
 let alertInterval = null;
-const triggeredAlerts = new Set(); // Keep track of alerts sent in current session to avoid spamming
+const triggeredAlerts = new Set(); // Keep track of alerts sent in current session
 
 export const AlertManager = {
     init() {
@@ -19,43 +20,101 @@ export const AlertManager = {
 
     async checkAlerts() {
         const { watchlist } = globalState.getState();
-        if (!watchlist || watchlist.length === 0) return;
-
+        
         try {
+            // 1. Fetch Latest Market Data
             const marketData = await DataService.getLiveMarket();
             if (!marketData || marketData.length === 0) return;
 
-            watchlist.forEach(item => {
-                const liveStock = marketData.find(s => s.symbol.toUpperCase() === item.symbol.toUpperCase());
-                if (!liveStock) return;
+            // 2. CHECK WATCHLIST TARGETS
+            if (watchlist && watchlist.length > 0) {
+                watchlist.forEach(item => {
+                    const liveStock = marketData.find(s => s.symbol.toUpperCase() === item.symbol.toUpperCase());
+                    if (!liveStock) return;
 
-                const ltp = liveStock.lastTradedPrice;
-                const alertId = `${item.symbol}-${ltp}`;
+                    const ltp = liveStock.lastTradedPrice;
 
-                // Target Buy Check (LTP drops below or equal to target)
-                if (item.target_buy && ltp <= item.target_buy) {
-                    if (!triggeredAlerts.has(`${item.symbol}-buy`)) {
-                        NotificationService.send(
-                            `Buy Alert: ${item.symbol}`,
-                            `${item.symbol} has reached your target buy price of Rs. ${item.target_buy}. Current LTP: Rs. ${ltp}`
-                        );
-                        triggeredAlerts.add(`${item.symbol}-buy`);
+                    // Target Buy Check
+                    if (item.target_buy && ltp <= item.target_buy) {
+                        const key = `${item.symbol}-buy-${item.target_buy}`;
+                        if (!triggeredAlerts.has(key)) {
+                            const title = `Target Reached: Buy ${item.symbol}`;
+                            const msg = `${item.symbol} is at Rs. ${ltp}, which is at or below your target of Rs. ${item.target_buy}.`;
+                            
+                            NotificationService.send(title, msg);
+                            StorageService.addNotification({
+                                title,
+                                message: msg,
+                                type: 'buy',
+                                symbol: item.symbol
+                            });
+                            
+                            triggeredAlerts.add(key);
+                        }
                     }
-                }
 
-                // Target Sell Check (LTP rises above or equal to target)
-                if (item.target_sell && ltp >= item.target_sell) {
-                    if (!triggeredAlerts.has(`${item.symbol}-sell`)) {
-                        NotificationService.send(
-                            `Sell Alert: ${item.symbol}`,
-                            `${item.symbol} has reached your target sell price of Rs. ${item.target_sell}. Current LTP: Rs. ${ltp}`
-                        );
-                        triggeredAlerts.add(`${item.symbol}-sell`);
+                    // Target Sell Check
+                    if (item.target_sell && ltp >= item.target_sell) {
+                        const key = `${item.symbol}-sell-${item.target_sell}`;
+                        if (!triggeredAlerts.has(key)) {
+                            const title = `Target Reached: Sell ${item.symbol}`;
+                            const msg = `${item.symbol} is at Rs. ${ltp}, which is at or above your target of Rs. ${item.target_sell}.`;
+                            
+                            NotificationService.send(title, msg);
+                            StorageService.addNotification({
+                                title,
+                                message: msg,
+                                type: 'sell',
+                                symbol: item.symbol
+                            });
+                            
+                            triggeredAlerts.add(key);
+                        }
                     }
-                }
-            });
+                });
+            }
+
+            // 3. CHECK PORTFOLIO STOP LOSS
+            const transRes = await StorageService.getTransactions();
+            if (transRes.success && transRes.data.length > 0) {
+                const holdings = PortfolioService.computeHoldings(transRes.data);
+                
+                holdings.forEach(h => {
+                    if (!h.stopLoss) return;
+
+                    const liveStock = marketData.find(s => s.symbol.toUpperCase() === h.symbol.toUpperCase());
+                    if (!liveStock) return;
+
+                    const ltp = liveStock.lastTradedPrice;
+                    
+                    if (ltp <= h.stopLoss) {
+                        const key = `${h.symbol}-sl-${h.stopLoss}`;
+                        if (!triggeredAlerts.has(key)) {
+                            const title = `🚨 Stop Loss Breach: ${h.symbol}`;
+                            const msg = `${h.symbol} dropped to Rs. ${ltp}, which is below your Stop Loss of Rs. ${h.stopLoss}. Consider exiting.`;
+                            
+                            NotificationService.send(
+                                title,
+                                msg,
+                                'https://cdn-icons-png.flaticon.com/512/564/564619.png'
+                            );
+
+                            StorageService.addNotification({
+                                title,
+                                message: msg,
+                                type: 'stoploss',
+                                symbol: h.symbol
+                            });
+
+                            triggeredAlerts.add(key);
+                        }
+                    }
+                });
+            }
+
         } catch (error) {
             console.error("Alert check failed:", error);
         }
     }
 };
+

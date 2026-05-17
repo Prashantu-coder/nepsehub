@@ -14,8 +14,9 @@ export const Sidebar = () => {
             text: 'Market',
             children: [
                 { id: 'live-market', text: 'Live Market', icon: 'fa-broadcast-tower', path: 'pages/market/live.html' },
+                { id: 'heatmap', text: 'Market Heatmap', icon: 'fa-th', path: 'pages/market/heatmap.html' },
                 { id: 'ipo-tracker', text: 'IPO Tracker', icon: 'fa-rocket', path: 'pages/market/ipo-tracker.html' },
-                { id: 'market-analysis', text: 'Market Analysis', icon: 'fa-chart-pie', path: 'pages/market/analysis.html' }
+                { id: 'screener', text: 'Technical Screener', icon: 'fa-robot', path: 'pages/market/screener.html' }
             ]
         },
         { id: 'news', icon: 'fa-newspaper', text: 'Market News', path: 'pages/news.html' },
@@ -46,8 +47,8 @@ export const Sidebar = () => {
         <aside class="sidebar" id="sidebar">
             <div class="logo" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <i class="fas fa-chart-line"></i>
-                    <span class="logo-text">NEPSE HUB</span>
+                    <i class="fas fa-chart-line text-gradient"></i>
+                    <span class="logo-text text-gradient">NEPSE HUB</span>
                 </div>
                 <button id="closeSidebar" class="btn-icon" style="background: none; border: none; color: var(--text-secondary); font-size: 1.25rem; cursor: pointer;">
                     <i class="fas fa-times"></i>

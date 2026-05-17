@@ -17,6 +17,10 @@
   --sidebar-bg: #0d1117;
   --card-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5);
   --glass-blur: 16px;
+  
+  /* Theme Gradient */
+  --theme-gradient: linear-gradient(135deg, var(--primary), var(--secondary), var(--danger));
+  --surface-gradient: linear-gradient(135deg, rgba(16, 185, 129, 0.03), rgba(99, 102, 241, 0.03), rgba(244, 63, 94, 0.03));
 
   /* Transitions */
   --transition-fast: 0.15s ease;
@@ -96,12 +100,21 @@ select:focus {
 }
 
 .glass {
-  background: var(--surface);
+  background: var(--surface-gradient), var(--surface);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--surface-border);
   box-shadow: var(--card-shadow);
   color: var(--text-primary);
+}
+
+.text-gradient {
+  background: var(--theme-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
 }
 
 /* Scrollbar styling */
@@ -144,7 +157,7 @@ select:focus {
 
 /* Summary / Stat Cards */
 .summary-card {
-  background: var(--surface-solid);
+  background: var(--surface-gradient), var(--surface-solid);
   padding: 1.25rem 1.5rem;
   border-radius: 16px;
   border: 1px solid var(--surface-border);
@@ -230,7 +243,7 @@ select:focus {
 
 /* Chart Card */
 .chart-card {
-  background: var(--surface-solid);
+  background: var(--surface-gradient), var(--surface-solid);
   padding: 1.5rem;
   border-radius: 20px;
   border: 1px solid var(--surface-border);
