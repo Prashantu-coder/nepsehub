@@ -7,6 +7,9 @@ let marketData = [];
 let marketSummary = null;
 let indexData = null;
 let subindexData = [];
+let mainChart = null;
+let activePeriod = '1D';
+let activeChartSymbol = 'NEPSE';
 
 // ─────────────────────────────────────────────
 // SECTOR COLORS (consistent mapping)
@@ -31,8 +34,146 @@ async function init() {
     globalState.setState({ activePage: 'index' });
     await Layout.init();
     
+    initChartTabs();
     await refresh();
-    setInterval(refresh, 60000);
+    setInterval(refresh, 5000);
+}
+
+function initChartTabs() {
+    const tabContainer = document.getElementById('nepse-chart-tabs');
+    if (tabContainer) {
+        tabContainer.addEventListener('click', (e) => {
+            const tab = e.target.closest('.chart-tab');
+            if (!tab) return;
+
+            const period = tab.dataset.period;
+            if (period === activePeriod) return;
+
+            tabContainer.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            activePeriod = period;
+            renderMainChart();
+        });
+    }
+
+    // Custom dropdown trigger binding
+    const trigger = document.getElementById('dropdown-trigger-btn');
+    const menu = document.getElementById('dropdown-menu-list');
+    const dropdownWrap = document.getElementById('chart-index-dropdown');
+
+    if (trigger && menu) {
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menu.classList.toggle('show');
+            dropdownWrap.classList.toggle('open');
+        });
+
+        // Document click listener to close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            menu.classList.remove('show');
+            dropdownWrap.classList.remove('open');
+        });
+
+        // Click listeners on items inside dropdown menu list
+        menu.addEventListener('click', (e) => {
+            const item = e.target.closest('.dropdown-item');
+            if (!item) return;
+
+            const val = item.dataset.value;
+            if (!val) return;
+
+            activeChartSymbol = val;
+            
+            // Update selected label
+            const labelEl = document.getElementById('selected-index-label');
+            if (labelEl) {
+                labelEl.innerText = item.innerText;
+            }
+
+            // Set active class
+            menu.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+
+            menu.classList.remove('show');
+            dropdownWrap.classList.remove('open');
+
+            renderMainChart();
+        });
+    }
+}
+
+function populateSubindexDropdown() {
+    const subitemsContainer = document.getElementById('custom-subindex-items');
+    if (!subitemsContainer || !subindexData || subindexData.length === 0) return;
+
+    // Only populate once
+    if (subitemsContainer.children.length > 0) return;
+
+    subitemsContainer.innerHTML = subindexData.map(item => {
+        return `<div class="dropdown-item" data-value="${item.indexName}">${item.indexName}</div>`;
+    }).join('');
+}
+
+function updateChartHeader() {
+    let currentVal = 0;
+    let diff = 0;
+    let pct = 0;
+    let dateStr = '';
+
+    const dataObj = findIndexData(activeChartSymbol);
+    if (dataObj) {
+        currentVal = dataObj.indexValue;
+        diff = dataObj.difference;
+        pct = dataObj.percentChange;
+        dateStr = dataObj.asOfDateString || '';
+    }
+
+    const isUp = diff >= 0;
+    const arrow = isUp ? '↑' : '↓';
+    const color = isUp ? '#10b981' : '#ef4444';
+
+    const priceValEl = document.getElementById('chart-price-val');
+    if (priceValEl) {
+        const newVal = currentVal.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        if (priceValEl.innerText !== newVal) {
+            priceValEl.innerText = newVal;
+        }
+        if (priceValEl.style.color !== color) {
+            priceValEl.style.color = color;
+        }
+    }
+
+    const priceDiffEl = document.getElementById('chart-price-diff');
+    if (priceDiffEl) {
+        const newVal = `${isUp ? '+' : ''}${diff.toFixed(2)}`;
+        if (priceDiffEl.innerText !== newVal) {
+            priceDiffEl.innerText = newVal;
+        }
+        if (priceDiffEl.style.color !== color) {
+            priceDiffEl.style.color = color;
+        }
+    }
+
+    const pricePctEl = document.getElementById('chart-price-pct');
+    if (pricePctEl) {
+        const newVal = `${arrow} ${Math.abs(pct).toFixed(2)}%`;
+        if (pricePctEl.innerText !== newVal) {
+            pricePctEl.innerText = newVal;
+        }
+        const newClass = `chart-header-pct-badge ${isUp ? 'up' : 'down'}`;
+        if (pricePctEl.className !== newClass) {
+            pricePctEl.className = newClass;
+        }
+    }
+
+    const timestampEl = document.getElementById('chart-timestamp-val');
+    if (timestampEl) {
+        const newVal = dateStr.replace('As of ', '');
+        if (timestampEl.innerText !== newVal) {
+            timestampEl.innerText = newVal;
+        }
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -40,6 +181,9 @@ async function init() {
 // ─────────────────────────────────────────────
 async function refresh() {
     try {
+        if (marketData.length === 0) {
+            renderSkeletons();
+        }
         const [liveData, summary, indices, subindices] = await Promise.allSettled([
             DataService.getLiveMarket(),
             DataService.getMarketSummary(),
@@ -47,23 +191,150 @@ async function refresh() {
             DataService.getSectorIndices()
         ]);
         
-        marketData = liveData.status === 'fulfilled' ? (liveData.value || []) : [];
-        marketSummary = summary.status === 'fulfilled' ? summary.value : null;
+        // Preserve existing data if the new response is empty or failed
+        if (liveData.status === 'fulfilled' && Array.isArray(liveData.value) && liveData.value.length > 0) {
+            marketData = liveData.value;
+        }
+        
+        if (summary.status === 'fulfilled' && summary.value) {
+            marketSummary = summary.value;
+        }
         
         // Parse index response: { statusCode, message, result: [...] }
+        let indexParsed = null;
         if (indices.status === 'fulfilled' && indices.value) {
             const raw = indices.value;
-            indexData = raw.result || raw.data || (Array.isArray(raw) ? raw : null);
+            indexParsed = raw.result || raw.data || (Array.isArray(raw) ? raw : null);
+        }
+        // Fallback to homepage data index cache if indices API failed or returned empty
+        if (!Array.isArray(indexParsed) || indexParsed.length === 0) {
+            const homepageIndices = DataService.getHomepageIndices();
+            if (Array.isArray(homepageIndices) && homepageIndices.length > 0) {
+                indexParsed = homepageIndices;
+            }
+        }
+        if (Array.isArray(indexParsed) && indexParsed.length > 0) {
+            indexData = normalizeIndexData(indexParsed);
         }
 
+        let subindexParsed = null;
         if (subindices.status === 'fulfilled' && subindices.value) {
             const raw = subindices.value;
-            subindexData = raw.result || raw.data || (Array.isArray(raw) ? raw : []);
+            subindexParsed = raw.result || raw.data || (Array.isArray(raw) ? raw : null);
+        }
+        // Fallback to homepage data subindices cache if subindices API failed or returned empty
+        if (!Array.isArray(subindexParsed) || subindexParsed.length === 0) {
+            const homepageSubindices = DataService.getHomepageSubIndices();
+            if (Array.isArray(homepageSubindices) && homepageSubindices.length > 0) {
+                subindexParsed = homepageSubindices;
+            }
+        }
+        if (Array.isArray(subindexParsed) && subindexParsed.length > 0) {
+            subindexData = normalizeIndexData(subindexParsed);
         }
 
         render();
     } catch (error) {
         console.error('Error refreshing dashboard:', error);
+    }
+}
+
+function renderSkeletons() {
+    const subBody = document.getElementById("subindex-body");
+    const gainersBody = document.getElementById("top-gainers-body");
+    const losersBody = document.getElementById("top-losers-body");
+    const turnoverBody = document.getElementById("top-turnover-body");
+    const volumeBody = document.getElementById("top-volume-body");
+    const miniCards = document.getElementById("mini-index-cards");
+    const watchlistContainer = document.getElementById("hero-watchlist-pills");
+
+    if (subBody) {
+        let html = "";
+        for (let i = 0; i < 4; i++) {
+            html += `
+                <tr class="skeleton-row">
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div class="skeleton-line circle" style="width: 8px; height: 8px; min-width: 8px;"></div>
+                            <div class="skeleton-line" style="width: ${90 + (i % 2) * 20}px;"></div>
+                        </div>
+                    </td>
+                    <td><div class="skeleton-line" style="width: 70px;"></div></td>
+                    <td><div class="skeleton-line" style="width: 50px;"></div></td>
+                    <td><div class="skeleton-line pill"></div></td>
+                    <td class="hide-mobile"><div class="skeleton-line" style="width: 90px;"></div></td>
+                    <td class="hide-mobile"><div class="skeleton-line" style="width: 80px;"></div></td>
+                    <td class="hide-mobile"><div class="skeleton-line" style="width: 40px;"></div></td>
+                </tr>
+            `;
+        }
+        subBody.innerHTML = html;
+    }
+
+    const renderMiniRows = (tbody) => {
+        if (!tbody) return;
+        tbody.innerHTML = `
+            <tr class="skeleton-row">
+                <td><div class="skeleton-line" style="width: 50px;"></div></td>
+                <td><div class="skeleton-line" style="width: 60px;"></div></td>
+                <td><div class="skeleton-line pill" style="width: 50px;"></div></td>
+            </tr>
+            <tr class="skeleton-row">
+                <td><div class="skeleton-line" style="width: 45px;"></div></td>
+                <td><div class="skeleton-line" style="width: 55px;"></div></td>
+                <td><div class="skeleton-line pill" style="width: 50px;"></div></td>
+            </tr>
+            <tr class="skeleton-row">
+                <td><div class="skeleton-line" style="width: 55px;"></div></td>
+                <td><div class="skeleton-line" style="width: 65px;"></div></td>
+                <td><div class="skeleton-line pill" style="width: 50px;"></div></td>
+            </tr>
+        `;
+    };
+
+    renderMiniRows(gainersBody);
+    renderMiniRows(losersBody);
+    renderMiniRows(turnoverBody);
+    renderMiniRows(volumeBody);
+
+    if (miniCards) {
+        miniCards.innerHTML = `
+            <div class="glass mini-idx-card skeleton-card">
+                <div class="mini-idx-info">
+                    <div class="skeleton-line short" style="height: 10px;"></div>
+                    <div class="skeleton-line" style="width: 80px; height: 16px; margin-top: 4px;"></div>
+                </div>
+                <div class="skeleton-line pill"></div>
+            </div>
+            <div class="glass mini-idx-card skeleton-card">
+                <div class="mini-idx-info">
+                    <div class="skeleton-line short" style="height: 10px;"></div>
+                    <div class="skeleton-line" style="width: 80px; height: 16px; margin-top: 4px;"></div>
+                </div>
+                <div class="skeleton-line pill"></div>
+            </div>
+            <div class="glass mini-idx-card skeleton-card">
+                <div class="mini-idx-info">
+                    <div class="skeleton-line short" style="height: 10px;"></div>
+                    <div class="skeleton-line" style="width: 80px; height: 16px; margin-top: 4px;"></div>
+                </div>
+                <div class="skeleton-line pill"></div>
+            </div>
+        `;
+    }
+
+    if (watchlistContainer) {
+        watchlistContainer.innerHTML = `
+            <div class="wl-pill skeleton-card" style="width: 70px; height: 26px; border-radius: 20px;">
+                <div class="skeleton-line" style="width: 100%; height: 100%; border-radius: 20px;"></div>
+            </div>
+            <div class="wl-pill skeleton-card" style="width: 85px; height: 26px; border-radius: 20px;">
+                <div class="skeleton-line" style="width: 100%; height: 100%; border-radius: 20px;"></div>
+            </div>
+            <div class="wl-pill skeleton-card" style="width: 60px; height: 26px; border-radius: 20px;">
+                <div class="skeleton-line" style="width: 100%; height: 100%; border-radius: 20px;"></div>
+            </div>
+        `;
     }
 }
 
@@ -73,6 +344,7 @@ async function refresh() {
 function render() {
     renderIndexHero();
     renderWatchlistCard();
+    renderMainChart();
     renderSubindexTable();
     renderPulseCards();
     renderMarketCards();
@@ -83,6 +355,8 @@ function render() {
 // ─────────────────────────────────────────────
 function renderIndexHero() {
     if (!indexData || !Array.isArray(indexData)) return;
+
+    updateChartHeader();
 
     const nepse = indexData.find(i => i.indexName === 'Nepse');
     if (!nepse) return;
@@ -111,7 +385,7 @@ function renderIndexHero() {
     const others = indexData.filter(i => i.indexName !== 'Nepse');
     const container = document.getElementById('mini-index-cards');
     if (container && others.length > 0) {
-        container.innerHTML = others.map(idx => {
+        const newHtml = others.map(idx => {
             const up = idx.difference >= 0;
             return `
                 <div class="glass mini-idx-card">
@@ -125,6 +399,10 @@ function renderIndexHero() {
                 </div>
             `;
         }).join('');
+
+        if (container.innerHTML !== newHtml) {
+            container.innerHTML = newHtml;
+        }
     }
 }
 
@@ -134,7 +412,10 @@ async function renderWatchlistCard() {
     
     const watchlist = await StorageService.getWatchlist();
     if (!watchlist || watchlist.length === 0) {
-        container.innerHTML = `<div class="text-secondary" style="font-size: 0.75rem;">No stocks in watchlist</div>`;
+        const emptyHtml = `<div class="text-secondary" style="font-size: 0.75rem;">No stocks in watchlist</div>`;
+        if (container.innerHTML !== emptyHtml) {
+            container.innerHTML = emptyHtml;
+        }
         return;
     }
 
@@ -146,14 +427,16 @@ async function renderWatchlistCard() {
         const isUp = change >= 0;
         
         return `
-            <div class="wl-pill" onclick="window.location.href='/pages/technical.html?symbol=${item.symbol}'">
+            <div class="wl-pill" onclick="window.location.href='/pages/watchlist.html'">
                 <span class="wl-sym">${item.symbol}</span>
                 <span class="wl-ltp ${isUp ? 'up' : 'down'}">${ltp.toLocaleString('en-IN', {minimumFractionDigits: 1})}</span>
             </div>
         `;
     }).join('');
 
-    container.innerHTML = pillsHtml;
+    if (container.innerHTML !== pillsHtml) {
+        container.innerHTML = pillsHtml;
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -162,6 +445,9 @@ async function renderWatchlistCard() {
 function renderSubindexTable() {
     const tbody = document.getElementById('subindex-body');
     if (!tbody || !subindexData || subindexData.length === 0) return;
+
+    populateSubindexDropdown();
+    updateChartHeader();
 
     // Update timestamp badge
     if (subindexData[0]?.asOfDateString) {
@@ -172,7 +458,7 @@ function renderSubindexTable() {
     // Sort by turnover descending for prominence
     const sorted = [...subindexData].sort((a, b) => (b.turnover || 0) - (a.turnover || 0));
 
-    tbody.innerHTML = sorted.map(s => {
+    const newHtml = sorted.map(s => {
         const up = s.difference >= 0;
         const color = SECTOR_COLORS[s.indexName] || '#6366f1';
 
@@ -201,6 +487,10 @@ function renderSubindexTable() {
             </tr>
         `;
     }).join('');
+
+    if (tbody.innerHTML !== newHtml) {
+        tbody.innerHTML = newHtml;
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -212,44 +502,74 @@ function renderPulseCards() {
     let scripCount = marketData.length;
     let adv = 0, dec = 0, unc = 0;
 
-    // Use index data for official numbers if available
+    // Calculate advances/declines/unchanged from marketData first
+    marketData.forEach(s => {
+        const cp = parseFloat(s.changePercent) || 0;
+        if (cp > 0) adv++;
+        else if (cp < 0) dec++;
+        else unc++;
+    });
+
+    // Check indexData for official advancing/declining/unchanged metrics
     if (indexData && Array.isArray(indexData)) {
         const nepse = indexData.find(i => i.indexName === 'Nepse');
         if (nepse) {
-            adv = nepse.noOfGainers || 0;
-            dec = nepse.noOfLosers || 0;
-            unc = nepse.noOfUnchanged || 0;
-            totalTurnover = nepse.turnover || 0;
-            totalVolume = nepse.volume || 0;
+            adv = nepse.noOfGainers || adv;
+            dec = nepse.noOfLosers || dec;
+            unc = nepse.noOfUnchanged || unc;
             scripCount = nepse.noOfTradedCompanies || scripCount;
         }
-    } else {
-        // Fallback to market data
-        marketData.forEach(s => {
-            const cp = parseFloat(s.changePercent) || 0;
-            if (cp > 0) adv++;
-            else if (cp < 0) dec++;
-            else unc++;
-            totalTurnover += (parseFloat(s.turnover) || 0);
-            totalVolume += (parseFloat(s.volume) || 0);
-        });
     }
 
-    const sentimentEl = document.getElementById('pulse-sentiment');
-    const turnoverEl = document.getElementById('pulse-turnover');
-    const volumeEl = document.getElementById('pulse-volume');
-    const companiesEl = document.getElementById('pulse-companies');
+    // Direct use of market-turnover API for official total turnover and total volume as requested
+    if (marketSummary && marketSummary.totalTurnover) {
+        totalTurnover = marketSummary.totalTurnover.totalTradedValue || 0;
+        totalVolume = marketSummary.totalTurnover.totalTradedQuantity || 0;
+        scripCount = marketSummary.totalTurnover.scripCount || scripCount;
+    } else {
+        // Fallback to index data or market data sum if marketSummary is unavailable
+        if (indexData && Array.isArray(indexData)) {
+            const nepse = indexData.find(i => i.indexName === 'Nepse');
+            if (nepse) {
+                totalTurnover = nepse.turnover || 0;
+                totalVolume = nepse.volume || 0;
+            }
+        }
+        if (totalTurnover === 0) {
+            marketData.forEach(s => {
+                totalTurnover += (parseFloat(s.turnover) || 0);
+                totalVolume += (parseFloat(s.volume) || 0);
+            });
+        }
+    }
+
+    const sentimentEl = document.getElementById('idx-nepse-sentiment');
+    const turnoverEl = document.getElementById('idx-total-turnover');
+    const volumeEl = document.getElementById('idx-total-volume');
+    const companiesEl = document.getElementById('idx-total-companies');
 
     if (sentimentEl) {
-        sentimentEl.innerHTML = `
+        const sentimentHtml = `
             <span class="price-up">${adv}</span> / 
             <span class="price-down">${dec}</span> / 
             <span style="color:var(--text-secondary)">${unc}</span>
         `;
+        if (sentimentEl.innerHTML !== sentimentHtml) {
+            sentimentEl.innerHTML = sentimentHtml;
+        }
     }
-    if (turnoverEl) turnoverEl.innerText = `Rs. ${formatCurrency(totalTurnover)}`;
-    if (volumeEl) volumeEl.innerText = totalVolume.toLocaleString();
-    if (companiesEl) companiesEl.innerText = scripCount;
+    const formattedTurnover = `Rs. ${formatCurrency(totalTurnover)}`;
+    if (turnoverEl && turnoverEl.innerText !== formattedTurnover) {
+        turnoverEl.innerText = formattedTurnover;
+    }
+    const formattedVolume = totalVolume.toLocaleString();
+    if (volumeEl && volumeEl.innerText !== formattedVolume) {
+        volumeEl.innerText = formattedVolume;
+    }
+    const formattedCompanies = String(scripCount);
+    if (companiesEl && companiesEl.innerText !== formattedCompanies) {
+        companiesEl.innerText = formattedCompanies;
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -286,7 +606,7 @@ function renderMiniTable(containerId, data, type) {
     const tbody = document.getElementById(containerId);
     if (!tbody) return;
 
-    tbody.innerHTML = data.map(stock => {
+    const newHtml = data.map(stock => {
         let valueHtml = '';
         if (type === 'changePercent') {
             const isUp = stock.changePercent >= 0;
@@ -305,6 +625,137 @@ function renderMiniTable(containerId, data, type) {
             </tr>
         `;
     }).join('');
+
+    if (tbody.innerHTML !== newHtml) {
+        tbody.innerHTML = newHtml;
+    }
+}
+
+// ─────────────────────────────────────────────
+// MAIN DASHBOARD CHART (Lightweight Charts)
+// ─────────────────────────────────────────────
+async function renderMainChart() {
+    const canvas = document.getElementById('main-nepse-chart');
+    if (!canvas) return;
+
+    try {
+        const rawData = await DataService.getIndexChart(activeChartSymbol, activePeriod);
+        if (!rawData) return;
+
+        let labels = [];
+        let prices = [];
+
+        if (activePeriod === '1D') {
+            if (!Array.isArray(rawData) || rawData.length === 0) return;
+            labels = rawData.map(item => {
+                const d = new Date(item[0] * 1000);
+                return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            });
+            prices = rawData.map(item => item[1]);
+        } else {
+            const dataList = rawData.success && Array.isArray(rawData.data) ? rawData.data : [];
+            if (dataList.length === 0) return;
+            
+            const chronological = [...dataList].reverse();
+            labels = chronological.map(item => item.date || item.asOfDateString || '');
+            prices = chronological.map(item => item.value || item.indexValue || 0);
+        }
+
+        let isPositive = true;
+        const dataObj = findIndexData(activeChartSymbol);
+        if (dataObj) {
+            isPositive = dataObj.difference >= 0;
+        }
+        const color = isPositive ? '#10b981' : '#ef4444';
+
+        const ctx = canvas.getContext('2d');
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, color + '33');
+        gradient.addColorStop(1, color + '00');
+
+        if (mainChart) {
+            mainChart.data.labels = labels;
+            mainChart.data.datasets[0].data = prices;
+            mainChart.data.datasets[0].borderColor = color;
+            mainChart.data.datasets[0].backgroundColor = gradient;
+            mainChart.update('none');
+        } else {
+            mainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: prices,
+                        borderColor: color,
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: true,
+                        backgroundColor: gradient,
+                        tension: 0.2
+                    }]
+                },
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#94a3b8',
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `Value: ${context.parsed.y.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.02)',
+                            borderColor: 'transparent'
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            font: { family: 'Outfit, sans-serif', size: 10 },
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: activePeriod === '1D' ? 6 : 8
+                        }
+                    },
+                    y: {
+                        position: 'right',
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.02)',
+                            borderColor: 'transparent'
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            font: { family: 'Outfit, sans-serif', size: 10 },
+                            callback: function(val) {
+                                return val.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+                            }
+                        }
+                    }
+                },
+                maintainAspectRatio: false,
+                responsive: true
+            }
+        });
+    }
+
+        // Trigger header update once chart is fully drawn
+        updateChartHeader();
+    } catch (err) {
+        console.error('Error rendering NEPSE line chart:', err);
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -319,7 +770,56 @@ function formatCurrency(val) {
 
 function setText(id, val) {
     const el = document.getElementById(id);
-    if (el) el.innerText = val;
+    const newVal = String(val);
+    if (el && el.innerText !== newVal) {
+        el.innerText = newVal;
+    }
+}
+
+function normalizeIndexData(rawArray) {
+    if (!Array.isArray(rawArray)) return [];
+    return rawArray.map(item => {
+        const indexName = item.indexName || item.name || '';
+        const indexValue = parseFloat(item.indexValue || item.currentValue || 0);
+        const difference = parseFloat(item.difference !== undefined ? item.difference : (item.change !== undefined ? item.change : 0));
+        const percentChange = parseFloat(item.percentChange !== undefined ? item.percentChange : (item.changePercent !== undefined ? item.changePercent : 0));
+        
+        return {
+            ...item,
+            indexName: indexName,
+            indexValue: indexValue,
+            difference: difference,
+            percentChange: percentChange,
+            name: indexName,
+            currentValue: indexValue,
+            change: difference,
+            changePercent: percentChange
+        };
+    });
+}
+
+function findIndexData(symbol) {
+    const isMain = ['NEPSE', 'Sensitive', 'Float', 'SenFloat'].includes(symbol);
+    const matchName = symbol.toLowerCase();
+    
+    if (isMain) {
+        if (!indexData || !Array.isArray(indexData)) return null;
+        return indexData.find(i => {
+            const name = (i.indexName || i.name || '').toLowerCase();
+            if (matchName === 'nepse' && name.includes('nepse')) return true;
+            if (matchName === 'sensitive' && name.includes('sensitive') && !name.includes('float')) return true;
+            if (matchName === 'float' && name.includes('float') && !name.includes('sen') && !name.includes('sensitive')) return true;
+            if (matchName === 'senfloat' && (name.includes('sen. float') || name.includes('sensitive float') || name.includes('senfloat'))) return true;
+            return name === matchName;
+        }) || null;
+    } else {
+        if (!subindexData || !Array.isArray(subindexData)) return null;
+        const normalizedMatch = matchName.replace(/[^a-z0-9]/g, '');
+        return subindexData.find(i => {
+            const name = (i.indexName || i.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            return name === normalizedMatch || name.includes(normalizedMatch) || normalizedMatch.includes(name);
+        }) || null;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', init);

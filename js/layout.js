@@ -4,6 +4,7 @@ import DataService from '../services/dataService.js';
 import { Sidebar } from '../components/sidebar.js';
 import { Navbar } from '../components/navbar.js';
 import { AlertManager } from './alerts.js';
+import NotificationService from '../services/notificationService.js';
 
 export const Layout = {
     async init() {
@@ -12,7 +13,7 @@ export const Layout = {
         const segments = path.split('/').filter(p => p && !p.endsWith('.html') && p !== 'NEPSE%20HUB');
         // Note: 'NEPSE%20HUB' might be part of the path if opened via file system or specific server setup.
         // Let's use a simpler way: check how many '../' we need to get to root.
-        
+
         // Count how many directories deep we are relative to index.html
         // We expect: root, pages/, or pages/calculator/, or pages/trade/, or pages/market/
         let prefix = '';
@@ -23,7 +24,7 @@ export const Layout = {
         }
 
         const page = path.split('/').pop().replace('.html', '') || 'index';
-        globalState.setState({ 
+        globalState.setState({
             activePage: page,
             pathPrefix: prefix
         });
@@ -33,8 +34,8 @@ export const Layout = {
             StorageService.load('nepse_portfolio').then(d => d || []),
             StorageService.load('nepse_watchlist').then(d => d || [])
         ]);
-        
-        globalState.setState({ 
+
+        globalState.setState({
             theme: 'dark',
             portfolio: savedPortfolio,
             watchlist: savedWatchlist
@@ -73,6 +74,9 @@ export const Layout = {
 
         // Initialize Notifications
         this.initNotifications();
+
+        // Initialize Global Search Autocomplete
+        this.setupGlobalSearch();
     },
 
     initNotifications() {
@@ -81,28 +85,51 @@ export const Layout = {
         const badge = document.getElementById('notif-badge');
         const list = document.getElementById('notif-list');
         const markReadBtn = document.getElementById('mark-read-btn');
+        const soundToggle = document.getElementById('sound-toggle-btn');
 
         if (!bell) return;
 
-        const refreshNotifs = async () => {
-            const notifs = await StorageService.getNotifications();
-            const unreadCount = notifs.filter(n => !n.is_read).length;
+        let allNotifs = [];
+        let activeFilter = 'all';
 
-            if (unreadCount > 0) {
-                badge.innerText = unreadCount;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
+        // --- Sound Toggle ---
+        const syncSoundIcon = () => {
+            if (!soundToggle) return;
+            const muted = NotificationService.isSoundMuted();
+            soundToggle.innerHTML = muted
+                ? '<i class="fas fa-volume-mute"></i>'
+                : '<i class="fas fa-volume-up"></i>';
+            soundToggle.classList.toggle('muted', muted);
+            soundToggle.title = muted ? 'Sound muted — click to unmute' : 'Sound on — click to mute';
+        };
+
+        if (soundToggle) {
+            syncSoundIcon();
+            soundToggle.onclick = (e) => {
+                e.stopPropagation();
+                NotificationService.toggleSound();
+                syncSoundIcon();
+            };
+        }
+
+        // --- Render notifications with active filter ---
+        const renderNotifs = () => {
+            let filtered = allNotifs;
+            if (activeFilter !== 'all') {
+                filtered = allNotifs.filter(n => n.type === activeFilter);
             }
 
-            if (notifs.length === 0) {
-                list.innerHTML = '<div class="notif-empty">No notifications in the last 7 days</div>';
+            if (filtered.length === 0) {
+                const emptyMsg = activeFilter === 'all'
+                    ? 'No notifications in the last 7 days'
+                    : `No ${activeFilter} alerts found`;
+                list.innerHTML = `<div class="notif-empty">${emptyMsg}</div>`;
             } else {
-                list.innerHTML = notifs.map(n => {
+                list.innerHTML = filtered.map(n => {
                     const date = new Date(n.created_at);
                     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-                    
+
                     let icon = 'fa-info-circle';
                     if (n.type === 'buy') icon = 'fa-shopping-cart';
                     if (n.type === 'sell') icon = 'fa-hand-holding-usd';
@@ -124,6 +151,36 @@ export const Layout = {
             }
         };
 
+        // --- Fetch & refresh ---
+        const refreshNotifs = async () => {
+            allNotifs = await StorageService.getNotifications();
+            const unreadCount = allNotifs.filter(n => !n.is_read).length;
+
+            if (unreadCount > 0) {
+                badge.innerText = unreadCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            renderNotifs();
+        };
+
+        // --- Filter tabs ---
+        const filterBtns = dropdown?.querySelectorAll('.notif-filter-btn');
+        if (filterBtns) {
+            filterBtns.forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeFilter = btn.dataset.filter;
+                    renderNotifs();
+                };
+            });
+        }
+
+        // --- Bell toggle ---
         bell.onclick = (e) => {
             e.stopPropagation();
             dropdown.classList.toggle('hidden');
@@ -132,12 +189,14 @@ export const Layout = {
             }
         };
 
+        // --- Mark all read ---
         markReadBtn.onclick = async (e) => {
             e.stopPropagation();
             await StorageService.markNotificationsAsRead();
             refreshNotifs();
         };
 
+        // --- Close on outside click ---
         document.addEventListener('click', () => {
             dropdown.classList.add('hidden');
         });
@@ -146,7 +205,104 @@ export const Layout = {
 
         // Initial check and periodic refresh
         refreshNotifs();
-        setInterval(refreshNotifs, 60000); // Check for new ones every minute
+        setInterval(refreshNotifs, 60000);
+    },
+
+    setupGlobalSearch() {
+        const navInput = document.getElementById('nav-global-search');
+        const navResults = document.getElementById('nav-search-results');
+        const sidebarInput = document.getElementById('sidebar-global-search');
+        const sidebarResults = document.getElementById('sidebar-search-results');
+
+        if (!navInput && !sidebarInput) return;
+
+        const handleSearchInput = async (inputEl, resultsEl) => {
+            const query = inputEl.value.toUpperCase().trim();
+            if (query.length === 0) {
+                resultsEl.style.display = 'none';
+                resultsEl.innerHTML = '';
+                return;
+            }
+
+            try {
+                let stocks = globalState.getState().stocks;
+                if (!stocks || typeof stocks.then === 'function' || !Array.isArray(stocks)) {
+                    stocks = await DataService.getStocks();
+                }
+                if (!stocks || !Array.isArray(stocks) || stocks.length === 0) return;
+
+                const matches = stocks.filter(s => 
+                    s.symbol.toUpperCase().includes(query) || 
+                    (s.name && s.name.toUpperCase().includes(query))
+                ).slice(0, 8);
+
+                if (matches.length === 0) {
+                    resultsEl.innerHTML = `
+                        <div style="padding: 12px 16px; color: var(--text-secondary); font-size: 0.8rem; text-align: center;">
+                            No stocks match "${query}"
+                        </div>
+                    `;
+                    resultsEl.style.display = 'block';
+                    return;
+                }
+
+                const prefix = globalState.getState().pathPrefix || '';
+                
+                resultsEl.innerHTML = matches.map(s => {
+                    const priceVal = parseFloat(s.price || 0);
+                    const changeVal = parseFloat(s.changePercent || 0);
+                    const isUp = changeVal >= 0;
+                    
+                    return `
+                        <div class="search-result-item" 
+                             onclick="window.location.href='${prefix}pages/market/stock-details.html?symbol=${s.symbol}'"
+                             style="display: flex; align-items: center; gap: 0.75rem; padding: 10px 16px; cursor: pointer; transition: all 0.2s; border-bottom: 1px solid rgba(255,255,255,0.02);">
+                            
+                            <div class="symbol-logo-wrapper" style="position: relative; width: 28px; height: 28px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <img src="${prefix}images/stocks/${s.symbol.toUpperCase()}.png" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                                     alt="${s.symbol}" 
+                                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                                <div class="symbol-avatar" style="display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border-radius: 50%;">
+                                    ${s.symbol.substring(0, 2)}
+                                </div>
+                            </div>
+                            
+                            <div style="flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between;">
+                                <div style="font-weight: 700; font-size: 0.85rem; color: #fff; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; padding-right: 0.5rem; flex: 1;">
+                                    <span>${s.symbol}</span>
+                                    <span style="font-weight: 400; font-size: 0.75rem; color: var(--text-secondary); margin-left: 0.25rem;">(${s.name || s.symbol})</span>
+                                </div>
+                                <span style="font-size: 0.8rem; font-weight: 700; color: ${isUp ? '#10b981' : '#ef4444'}; flex-shrink: 0;">
+                                    Rs. ${priceVal.toLocaleString('en-IN', {minimumFractionDigits: 1})}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                resultsEl.style.display = 'block';
+
+            } catch (err) {
+                console.error("Search auto-complete failed:", err);
+            }
+        };
+
+        if (navInput && navResults) {
+            navInput.oninput = () => handleSearchInput(navInput, navResults);
+        }
+        if (sidebarInput && sidebarResults) {
+            sidebarInput.oninput = () => handleSearchInput(sidebarInput, sidebarResults);
+        }
+
+        document.addEventListener('click', (e) => {
+            if (navInput && !navInput.contains(e.target) && !navResults.contains(e.target)) {
+                navResults.style.display = 'none';
+            }
+            if (sidebarInput && !sidebarInput.contains(e.target) && !sidebarResults.contains(e.target)) {
+                sidebarResults.style.display = 'none';
+            }
+        });
     },
 
     hideSplash() {
@@ -180,7 +336,7 @@ export const Layout = {
         // 2. Live Updates (WebSocket)
         const connectWS = () => {
             const ws = new WebSocket('wss://marketstatus.onrender.com/ws/market-status');
-            
+
             ws.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
@@ -206,16 +362,16 @@ export const Layout = {
             if (!el) return;
 
             const now = new Date();
-            const options = { 
-                weekday: 'short', 
-                month: 'short', 
+            const options = {
+                weekday: 'short',
+                month: 'short',
                 day: 'numeric',
-                hour: '2-digit', 
-                minute: '2-digit', 
+                hour: '2-digit',
+                minute: '2-digit',
                 second: '2-digit',
-                hour12: true 
+                hour12: true
             };
-            
+
             // Format: Thu, May 14 | 09:32:15 AM
             const str = now.toLocaleString('en-US', options).replace(', ', ', ').replace(' at ', ' | ');
             el.innerHTML = `<i class="far fa-clock" style="margin-right: 0.5rem; color: var(--primary);"></i> ${str}`;
@@ -232,10 +388,19 @@ export const Layout = {
         panel.id = 'quick-view-panel';
         panel.className = 'quick-view-panel glass';
         panel.innerHTML = `
-            <div class="qv-header">
-                <div id="qv-symbol-header">
-                    <h2 id="qv-symbol">SYMBOL</h2>
-                    <p id="qv-name">Company Full Name</p>
+            <div class="qv-header" style="display: flex; align-items: center; gap: 1rem; padding: 1.5rem 2rem;">
+                <div class="symbol-logo-wrapper" id="qv-logo-wrapper" style="position: relative; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <img id="qv-logo-img" src="" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                         alt="" 
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                    <div id="qv-logo-avatar" class="symbol-avatar" style="display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border-radius: 50%; letter-spacing: -0.2px;">
+                      --
+                    </div>
+                </div>
+                <div id="qv-symbol-header" style="flex: 1;">
+                    <h2 id="qv-symbol" style="margin: 0; font-size: 1.6rem; font-weight: 800; color: var(--primary);">SYMBOL</h2>
+                    <p id="qv-name" style="margin: 0.2rem 0 0 0; font-size: 0.85rem; color: var(--text-secondary);">Company Full Name</p>
                 </div>
                 <button id="close-quick-view" class="btn-icon"><i class="fas fa-times"></i></button>
             </div>
@@ -276,17 +441,160 @@ export const Layout = {
             </div>
         `;
         document.body.appendChild(panel);
+        let qvChartInstance = null;
+
+        const renderQuickViewChart = async (symbol, isPositive) => {
+            if (!window.Chart) {
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                    script.onload = resolve;
+                    document.head.appendChild(script);
+                });
+            }
+
+            const canvas = document.getElementById('qv-mini-chart');
+            if (!canvas) return;
+
+            if (qvChartInstance) {
+                qvChartInstance.destroy();
+                qvChartInstance = null;
+            }
+
+            try {
+                const rawData = await DataService.getIndexChart(symbol, '1D');
+                if (!rawData || rawData.length === 0) return;
+
+                let labels = [];
+                let prices = [];
+
+                if (Array.isArray(rawData[0])) {
+                    // Coordinates array schema: [[timestamp, price], ...]
+                    labels = rawData.map(item => {
+                        const d = new Date(item[0] * 1000);
+                        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                    });
+                    prices = rawData.map(item => parseFloat(item[1] || 0));
+                } else {
+                    // Object based schema: [{time: 1779104165, contractRate: 438}, ...] or [{time: "...", price: ...}]
+                    labels = rawData.map(d => {
+                        if (!d.time) return '';
+                        if (typeof d.time === 'number') {
+                            const date = new Date(d.time * 1000);
+                            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                        }
+                        const timeStr = String(d.time);
+                        return timeStr.includes('T') ? timeStr.split('T')[1].substring(0, 5) : timeStr;
+                    });
+                    prices = rawData.map(d => parseFloat(d.contractRate || d.price || d.y || d.value || 0));
+                }
+
+                const ctx = canvas.getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+                if (isPositive) {
+                    gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+                    gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+                } else {
+                    gradient.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
+                    gradient.addColorStop(1, 'rgba(239, 68, 68, 0.0)');
+                }
+
+                const lineColor = isPositive ? '#10b981' : '#ef4444';
+
+                qvChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: prices,
+                            borderColor: lineColor,
+                            borderWidth: 2,
+                            backgroundColor: gradient,
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            pointHoverBackgroundColor: lineColor,
+                            pointHoverBorderColor: '#fff',
+                            pointHoverBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                enabled: true,
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: 'rgba(255, 255, 255, 0.1)',
+                                borderWidth: 1,
+                                padding: 8,
+                                displayColors: false,
+                                callbacks: {
+                                    label: function (context) {
+                                        return `Price: Rs. ${context.parsed.y.toLocaleString()}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { display: false },
+                            y: {
+                                display: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.03)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: { size: 9 },
+                                    maxTicksLimit: 5,
+                                    callback: function (value) {
+                                        return 'Rs. ' + Math.round(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Failed to render quick view chart:", err);
+            }
+        };
 
         // Global function to trigger
         window.showSymbolDetails = async (symbol) => {
             const data = await DataService.getLiveMarket();
             const stock = data.find(s => s.symbol.toUpperCase() === symbol.toUpperCase());
-            
+
             if (stock) {
+                // Dynamically determine asset path prefix based on path depth
+                let prefix = './';
+                const parts = window.location.pathname.split('/');
+                const pathParts = parts.filter(p => p.length > 0);
+                const depth = pathParts.length - 1;
+                if (depth > 0) {
+                    prefix = '../'.repeat(depth);
+                }
+
+                const imgEl = document.getElementById('qv-logo-img');
+                const avatarEl = document.getElementById('qv-logo-avatar');
+                if (imgEl && avatarEl) {
+                    imgEl.src = `${prefix}images/stocks/${stock.symbol.toUpperCase()}.png`;
+                    imgEl.style.display = 'block'; // reset in case previously hidden
+                    avatarEl.style.display = 'none';
+                    avatarEl.innerText = stock.symbol.substring(0, 2);
+                }
+
                 document.getElementById('qv-symbol').innerText = stock.symbol;
                 document.getElementById('qv-name').innerText = stock.name || stock.symbol;
                 document.getElementById('qv-ltp').innerText = `Rs. ${(stock.price || 0).toLocaleString()}`;
-                
+
                 const change = stock.changePercent || 0;
                 const changeEl = document.getElementById('qv-change');
                 changeEl.innerText = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
@@ -300,18 +608,25 @@ export const Layout = {
                 document.getElementById('qv-sector').innerText = stock.sector || 'N/A';
 
                 panel.classList.add('active');
+
+                // Render dynamic 1D chart
+                renderQuickViewChart(stock.symbol, change >= 0);
             }
         };
 
         document.getElementById('close-quick-view').onclick = () => {
             panel.classList.remove('active');
+            if (qvChartInstance) {
+                qvChartInstance.destroy();
+                qvChartInstance = null;
+            }
         };
     },
 
     renderComponents() {
         const navbarContainer = document.getElementById('navbar-container');
         const sidebarContainer = document.getElementById('sidebar-container');
-        
+
         if (navbarContainer) navbarContainer.innerHTML = Navbar();
         if (sidebarContainer) sidebarContainer.innerHTML = Sidebar();
     },

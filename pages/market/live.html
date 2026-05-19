@@ -167,13 +167,13 @@
       }
 
       .summary-item {
-        padding: 0.6rem 1.25rem;
+        padding: 0.35rem 0.75rem;
         border-radius: 8px;
         font-size: 0.85rem;
         font-weight: 600;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid var(--surface-border);
-        min-width: 120px;
+        min-width: 95px;
         text-align: center;
       }
 
@@ -208,6 +208,60 @@
       .summary-item.active {
         box-shadow: 0 0 0 2px var(--primary);
         transform: translateY(-2px);
+      }
+
+      /* Ticker Row Glowing Updates */
+      @keyframes green-flash {
+        0% { background-color: rgba(16, 185, 129, 0.25); }
+        100% { background-color: transparent; }
+      }
+
+      @keyframes red-flash {
+        0% { background-color: rgba(239, 68, 68, 0.25); }
+        100% { background-color: transparent; }
+      }
+
+      .flash-up {
+        animation: green-flash 1s ease-out;
+      }
+
+      .flash-down {
+        animation: red-flash 1s ease-out;
+      }
+
+      /* Row Background Color Overrides based on Market Status */
+      .market-table tr {
+        transition: all 0.3s ease;
+      }
+
+      .tr-up {
+        background: linear-gradient(90deg, rgba(16, 185, 129, 0.04) 0%, rgba(16, 185, 129, 0.005) 100%) !important;
+      }
+
+      .tr-down {
+        background: linear-gradient(90deg, rgba(239, 68, 68, 0.04) 0%, rgba(239, 68, 68, 0.005) 100%) !important;
+      }
+
+      .tr-neutral {
+        background: linear-gradient(90deg, rgba(59, 130, 246, 0.04) 0%, rgba(59, 130, 246, 0.005) 100%) !important;
+      }
+
+      /* Hover effects */
+      .tr-up:hover {
+        background: linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%) !important;
+      }
+      .tr-down:hover {
+        background: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.02) 100%) !important;
+      }
+      .tr-neutral:hover {
+        background: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.02) 100%) !important;
+      }
+
+      /* Style Symbol (Company Name) Cell */
+      .symbol-cell, .symbol-cell div {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        padding-left: 3px !important;
       }
     </style>
   </head>

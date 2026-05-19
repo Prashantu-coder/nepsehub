@@ -147,7 +147,7 @@ async function init() {
     };
 
     await refresh();
-    setInterval(refresh, 60000);
+    setInterval(refresh, 5000);
 }
 
 async function refresh() {

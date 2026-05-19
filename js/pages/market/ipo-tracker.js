@@ -5,6 +5,8 @@ import DataService from '../../../services/dataService.js';
 let currentPage = 1;
 let totalPages = 1;
 let currentStatus = 'all';
+let currentOfferingType = 'ipo/general';
+let activeIPOs = []; // Stored list for search/filter operations
 
 async function init() {
     globalState.setState({ activePage: 'ipo-tracker' });
@@ -12,6 +14,18 @@ async function init() {
 
     // Initial fetch
     await fetchAndRenderIPOs();
+
+    // Event Listeners for Offering Types
+    const offeringBtns = document.querySelectorAll('.offering-tab-btn');
+    offeringBtns.forEach(btn => {
+        btn.onclick = async () => {
+            offeringBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentOfferingType = btn.dataset.type;
+            currentPage = 1;
+            await fetchAndRenderIPOs();
+        };
+    });
 
     // Event Listeners for Filters
     const filterBtns = document.querySelectorAll('.tab-btn');
@@ -44,26 +58,38 @@ async function init() {
 async function fetchAndRenderIPOs() {
     const container = document.getElementById('ipo-list');
     
-    // Show loading
-    container.innerHTML = `
-        <div class="loading-placeholder" style="grid-column: 1/-1; text-align: center; padding: 4rem;">
-            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem; display: block;"></i>
-            <p>Updating IPO list...</p>
+    // Show premium shimmering skeletons
+    container.innerHTML = Array(3).fill(0).map(() => `
+        <div class="ipo-card skeleton-card" style="min-height: 320px; padding: 1.75rem; display: flex; flex-direction: column; gap: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 24px; border: 1px solid var(--surface-border);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+               <div class="skeleton" style="width: 50px; height: 50px; border-radius:14px;"></div>
+               <div class="skeleton" style="width: 80px; height: 24px; border-radius:8px;"></div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+               <div class="skeleton" style="width: 75%; height: 1.25rem; border-radius:4px;"></div>
+               <div class="skeleton" style="width: 45%; height: 0.85rem; border-radius:4px;"></div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+               <div class="skeleton" style="height: 45px; border-radius:12px;"></div>
+               <div class="skeleton" style="height: 45px; border-radius:12px;"></div>
+            </div>
+            <div class="skeleton" style="height: 50px; border-radius:14px; margin-top:auto;"></div>
         </div>
-    `;
+    `).join('');
 
     try {
-        const rawItems = await DataService.getIPOs();
+        const rawItems = await DataService.getIPOs(currentOfferingType);
+        activeIPOs = rawItems || [];
         
-        if (!rawItems || rawItems.length === 0) {
-            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-secondary);">No active IPOs found at the moment.</div>`;
+        if (!activeIPOs || activeIPOs.length === 0) {
+            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-secondary);">No offerings found in this category.</div>`;
             return;
         }
 
         // Handle filtering based on currentStatus
-        let filteredItems = rawItems;
+        let filteredItems = activeIPOs;
         if (currentStatus !== 'all') {
-            filteredItems = rawItems.filter(item => {
+            filteredItems = activeIPOs.filter(item => {
                 const status = (item.status || "").toLowerCase();
                 if (currentStatus === 'open') return status === 'open';
                 if (currentStatus === 'closed') return status === 'closed';
@@ -74,7 +100,7 @@ async function fetchAndRenderIPOs() {
 
         renderCards(filteredItems);
         
-        // Update Pagination Info (Static for now since API returns all)
+        // Update Pagination Info
         const pageInfo = document.getElementById('page-info');
         if (pageInfo) pageInfo.innerText = `Showing ${filteredItems.length} items`;
         
@@ -93,7 +119,7 @@ function renderCards(items) {
     const container = document.getElementById('ipo-list');
     
     if (items.length === 0) {
-        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-secondary);">No IPOs found for this category.</div>`;
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-secondary);">No offerings found for this status.</div>`;
         return;
     }
 
@@ -114,7 +140,7 @@ function renderCards(items) {
         const closingDateStr = closeDateObj ? closeDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD';
         
         let statusLabel = 'Upcoming';
-        let statusClass = 'status-upcoming';
+        let statusClass = 'status-comingsoon';
         let btnText = 'Application Not Open';
         let btnClass = 'btn-disabled';
         let isApplyOpen = false;
@@ -136,7 +162,7 @@ function renderCards(items) {
                 const diffTime = openDateObj - now;
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 statusLabel = 'Coming Soon';
-                statusClass = 'status-upcoming';
+                statusClass = 'status-comingsoon';
                 btnText = `Open in ${diffDays} days`;
                 btnClass = 'btn-disabled';
                 isApplyOpen = false;
@@ -155,7 +181,7 @@ function renderCards(items) {
                         }
                     </div>
                     <div>
-                        <div class="ipo-company-name">${name}</div>
+                        <div class="ipo-company-name" title="${name}">${name}</div>
                         <div class="ipo-symbol-info">${symbol} • ${sector}</div>
                     </div>
                 </div>
@@ -171,7 +197,7 @@ function renderCards(items) {
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Issue Manager</span>
-                        <span class="detail-value" style="font-size: 0.7rem; line-height: 1.2;">${manager}</span>
+                        <span class="detail-value" style="font-size: 0.7rem; line-height: 1.2;" title="${manager}">${manager}</span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Total Amount</span>
@@ -200,12 +226,6 @@ function renderCards(items) {
             </div>
         `;
     }).join('');
-}
-
-function updatePaginationControls(data) {
-    document.getElementById('prev-page').disabled = currentPage === 1;
-    document.getElementById('next-page').disabled = currentPage === totalPages;
-    document.getElementById('page-info').innerText = `Page ${currentPage} of ${totalPages}`;
 }
 
 document.addEventListener('DOMContentLoaded', init);

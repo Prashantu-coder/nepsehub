@@ -49,35 +49,19 @@
 .market-table th.sortable {
     cursor: pointer;
     user-select: none;
-    position: relative;
-    padding-right: 1.5rem;
+    transition: all 0.2s ease;
 }
 
 .market-table th.sortable:hover {
-    color: var(--primary);
-    background: rgba(99, 102, 241, 0.05);
+    color: var(--primary) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
 }
 
-.market-table th.sortable::after {
-    content: '\f0dc';
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    position: absolute;
-    right: 0.5rem;
-    font-size: 0.7rem;
-    opacity: 0.3;
-}
-
-.market-table th.sortable.asc::after {
-    content: '\f0de';
-    opacity: 1;
-    color: var(--primary);
-}
-
-.market-table th.sortable.desc::after {
-    content: '\f0dd';
-    opacity: 1;
-    color: var(--primary);
+/* Active Sorting Header Highlight */
+.market-table th.sortable.asc,
+.market-table th.sortable.desc {
+    color: var(--primary) !important;
+    background: rgba(250, 204, 21, 0.05) !important; /* Soft yellow tint for active column */
 }
 
 /* Sticky Header */

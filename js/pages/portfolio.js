@@ -12,7 +12,7 @@ let marketData = [];
 let allTransactions = [];      // Full ledger from DB
 let computedHoldings = [];     // Derived: unsold units per symbol
 let currentSellSymbol = null;
-let performanceChart, sectorChart;
+let performanceChart, sectorChart, growthChart;
 
 
 
@@ -218,14 +218,20 @@ function renderHoldings() {
         return `
         <tr>
             <td>
-                <div style="display:flex; align-items:center; gap:0.75rem;">
-                    <div class="symbol-avatar" style="background: ${pnl >= 0 ? 'rgba(16,185,129,0.1)' : 'rgba(244,63,94,0.1)'}; color: ${pnl >= 0 ? 'var(--secondary)' : 'var(--danger)'};">
-                        ${h.symbol[0]}
+                <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <img src="../images/stocks/${h.symbol.toUpperCase()}.png" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                         alt="${h.symbol}" 
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                    <div class="symbol-avatar" style="display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border-radius: 50%; letter-spacing: -0.2px;">
+                      ${h.symbol.substring(0, 2)}
                     </div>
-                    <div>
-                        <div style="font-weight:800; cursor:pointer; color:var(--text-primary); font-size:1rem;" onclick="showSymbolDetails('${h.symbol}')">${h.symbol}</div>
-                        <div style="font-size:0.7rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">${stock ? stock.sector : 'Other'}</div>
-                    </div>
+                  </div>
+                  <div>
+                    <div style="font-weight:800; cursor:pointer; color:var(--text-primary); font-size:1rem;" onclick="showSymbolDetails('${h.symbol}')">${h.symbol}</div>
+                    <div style="font-size:0.7rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">${stock ? stock.sector : 'Other'}</div>
+                  </div>
                 </div>
             </td>
             <td style="font-weight:600;">${h.quantity.toFixed(0)}</td>
@@ -455,7 +461,22 @@ function renderTransactions() {
                     ${t.type}
                 </span>
             </td>
-            <td style="font-weight:700; cursor:pointer; color:var(--primary);" onclick="showSymbolDetails('${t.symbol}')">${t.symbol}</td>
+            <td style="cursor:pointer;" onclick="showSymbolDetails('${t.symbol}')">
+                <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <img src="../images/stocks/${t.symbol.toUpperCase()}.png" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                         alt="${t.symbol}" 
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                    <div class="symbol-avatar" style="display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border-radius: 50%; letter-spacing: -0.2px;">
+                      ${t.symbol.substring(0, 2)}
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 700; color: var(--primary);">${t.symbol}</span>
+                  </div>
+                </div>
+            </td>
             <td>${t.quantity}</td>
             <td>Rs. ${t.price.toFixed(2)}</td>
             <td style="color:var(--text-secondary);">Rs. ${fees.toFixed(2)}</td>
@@ -636,7 +657,22 @@ function renderTaxReport() {
 
     tbody.innerHTML = reportData.reverse().map(row => `
         <tr>
-            <td style="font-weight:700;color:var(--primary);">${row.symbol}</td>
+            <td style="cursor:pointer;" onclick="showSymbolDetails('${row.symbol}')">
+                <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <img src="../images/stocks/${row.symbol.toUpperCase()}.png" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                         alt="${row.symbol}" 
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                    <div class="symbol-avatar" style="display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border-radius: 50%; letter-spacing: -0.2px;">
+                      ${row.symbol.substring(0, 2)}
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 700; color: var(--primary);">${row.symbol}</span>
+                  </div>
+                </div>
+            </td>
             <td>${row.sellDate}</td>
             <td>
                 <span class="badge ${row.holdDays > 365 ? 'badge-success' : 'badge-warning'}" style="font-size:0.65rem;">
@@ -786,6 +822,185 @@ function renderRiskAnalytics() {
             `).join('');
         }
     }
+
+    renderGrowthAndCAGR();
+}
+
+function renderGrowthAndCAGR() {
+    const canvas = document.getElementById('historicalGrowthChart');
+    if (!canvas) return;
+
+    if (growthChart) {
+        growthChart.destroy();
+    }
+
+    if (allTransactions.length === 0) {
+        canvas.parentElement.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);font-size:0.85rem;">Add buy transactions to see your growth curve & CAGR.</div>`;
+        setText('stat-cagr-value', '0.00% CAGR');
+        setText('analytics-total-invested', 'Rs. 0.00');
+        setText('analytics-time-horizon', '0.00 Years');
+        setText('analytics-alltime-perf', '0.00%');
+        return;
+    }
+
+    // Sort transactions chronologically
+    const sortedTx = [...allTransactions].sort((a,b) => new Date(a.transaction_date) - new Date(b.transaction_date));
+    
+    // Calculations
+    const earliestDate = new Date(sortedTx[0].transaction_date);
+    const timeHorizonYears = Math.max(0.01, (new Date() - earliestDate) / (1000 * 60 * 60 * 24 * 365.25));
+
+    let totalInvested = 0;
+    let totalCurrentValue = 0;
+    computedHoldings.forEach(h => {
+        totalInvested += h.totalInvested;
+        const stock = marketData.find(s => s.symbol.toUpperCase() === h.symbol.toUpperCase());
+        const ltp = stock ? stock.price : h.wacc;
+        totalCurrentValue += ltp * h.quantity;
+    });
+
+    const absoluteReturn = totalInvested > 0 ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 : 0;
+    let cagr = 0;
+    if (totalInvested > 0 && totalCurrentValue > 0) {
+        cagr = (Math.pow((totalCurrentValue / totalInvested), (1 / timeHorizonYears)) - 1) * 100;
+    }
+
+    // Set texts
+    const cagrEl = document.getElementById('stat-cagr-value');
+    if (cagrEl) {
+        cagrEl.innerText = `${cagr >= 0 ? '+' : ''}${cagr.toFixed(2)}% CAGR`;
+        cagrEl.style.color = cagr >= 0 ? 'var(--secondary)' : 'var(--danger)';
+    }
+    setText('analytics-total-invested', `Rs. ${fmt(totalInvested)}`);
+    setText('analytics-time-horizon', `${timeHorizonYears.toFixed(2)} Years`);
+    
+    const perfEl = document.getElementById('analytics-alltime-perf');
+    if (perfEl) {
+        perfEl.innerText = `${absoluteReturn >= 0 ? '+' : ''}${absoluteReturn.toFixed(2)}%`;
+        perfEl.style.color = absoluteReturn >= 0 ? 'var(--secondary)' : 'var(--danger)';
+    }
+
+    // Prepare chart data
+    let runningInvested = 0;
+    let runningQty = {};
+    let labels = [];
+    let investedData = [];
+    let valuationData = [];
+
+    sortedTx.forEach(tx => {
+        const dateStr = new Date(tx.transaction_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        labels.push(dateStr);
+
+        const sym = tx.symbol.toUpperCase();
+        if (tx.type?.toUpperCase() === 'BUY') {
+            runningInvested += tx.total_amount;
+            runningQty[sym] = (runningQty[sym] || 0) + tx.quantity;
+        } else if (tx.type?.toUpperCase() === 'SELL') {
+            const avgCost = runningQty[sym] > 0 ? (runningInvested / runningQty[sym]) : 0;
+            runningInvested = Math.max(0, runningInvested - (tx.quantity * (tx.wacc || avgCost)));
+            runningQty[sym] = Math.max(0, (runningQty[sym] || 0) - tx.quantity);
+        }
+
+        investedData.push(runningInvested);
+
+        let currentVal = 0;
+        Object.entries(runningQty).forEach(([s, q]) => {
+            const stock = marketData.find(st => st.symbol.toUpperCase() === s);
+            const ltp = stock ? stock.price : 0;
+            currentVal += ltp * q;
+        });
+        valuationData.push(currentVal);
+    });
+
+    const ctx = canvas.getContext('2d');
+    
+    // Gradient fills
+    const investedGrad = ctx.createLinearGradient(0, 0, 0, 240);
+    investedGrad.addColorStop(0, 'rgba(99, 102, 241, 0.25)');
+    investedGrad.addColorStop(1, 'rgba(99, 102, 241, 0.00)');
+
+    const valuationGrad = ctx.createLinearGradient(0, 0, 0, 240);
+    valuationGrad.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
+    valuationGrad.addColorStop(1, 'rgba(16, 185, 129, 0.00)');
+
+    growthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Invested Capital',
+                    data: investedData,
+                    borderColor: '#6366f1',
+                    borderWidth: 2,
+                    backgroundColor: investedGrad,
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 2,
+                    pointHoverRadius: 5
+                },
+                {
+                    label: 'Portfolio Valuation',
+                    data: valuationData,
+                    borderColor: '#10b981',
+                    borderWidth: 2,
+                    backgroundColor: valuationGrad,
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 2,
+                    pointHoverRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#8b949e',
+                        font: { size: 10, weight: '600' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#cbd5e1',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    borderWidth: 1,
+                    padding: 10,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: Rs. ${Number(context.raw).toLocaleString('en-IN', { maximumFractionDigits: 1 })}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#8b949e', font: { size: 9 } },
+                    grid: { display: false }
+                },
+                y: {
+                    ticks: {
+                        color: '#8b949e',
+                        font: { size: 9 },
+                        callback: (v) => v >= 1000 ? v / 1000 + 'k' : v
+                    },
+                    grid: { color: 'rgba(255, 255, 255, 0.04)' }
+                }
+            }
+        }
+    });
+}
+
+function computeHoldingsWithRisk(transactions) {
+    return PortfolioService.computeHoldings(transactions).map(h => ({
+        ...h,
+        quantity: h.qty
+    }));
 }
 
 function calculateRealizedData(transactions) {

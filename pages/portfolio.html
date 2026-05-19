@@ -233,6 +233,35 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- Portfolio Growth & CAGR Module -->
+                <div class="glass" style="padding: 1.5rem; border-radius: 20px; margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                   <h4 style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+                      <span><i class="fas fa-arrow-trend-up" style="margin-right: 0.5rem; color: var(--secondary);"></i> Historical Growth & CAGR</span>
+                      <span id="stat-cagr-value" style="font-weight: 800; font-size: 1.25rem; color: var(--secondary);">0.00% CAGR</span>
+                   </h4>
+                   <div class="growth-insights-grid" style="display: grid; grid-template-columns: 1.8fr 1fr; gap: 1.5rem; min-height: 250px;">
+                      <!-- Chart on Left -->
+                      <div style="position: relative; height: 260px;">
+                         <canvas id="historicalGrowthChart"></canvas>
+                      </div>
+                      <!-- Performance Insights & Stats on Right -->
+                      <div style="display: flex; flex-direction: column; justify-content: center; gap: 1rem; padding-left: 1rem; border-left: 1px solid rgba(255,255,255,0.06);">
+                         <div class="glass" style="padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.03);">
+                            <div style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Total Invested Cashflow</div>
+                            <div id="analytics-total-invested" style="font-weight: 800; font-size: 1.1rem; color: var(--text-primary); margin-top: 2px;">Rs. 0.00</div>
+                         </div>
+                         <div class="glass" style="padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.03);">
+                            <div style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">CAGR Time Horizon</div>
+                            <div id="analytics-time-horizon" style="font-weight: 800; font-size: 1.1rem; color: var(--text-primary); margin-top: 2px;">0.00 Years</div>
+                         </div>
+                         <div class="glass" style="padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.03);">
+                            <div style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">All-Time Net Performance</div>
+                            <div id="analytics-alltime-perf" style="font-weight: 800; font-size: 1.1rem; color: var(--secondary); margin-top: 2px;">0.00%</div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
               </div>
             </div>
 

@@ -18,7 +18,7 @@ async function init() {
     }
 
     await refreshData();
-    setInterval(refreshData, 30000); // Auto-refresh every 30s
+    setInterval(refreshData, 5000); // Auto-refresh every 5s
 
     // Event Listeners for Movers Tabs
     const tabBtns = document.querySelectorAll('.mover-tab-btn');

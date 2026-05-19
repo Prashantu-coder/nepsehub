@@ -4,6 +4,7 @@ import DataService from "../../../services/dataService.js";
 import StorageService from "../../../services/storageService.js";
 
 let marketData = [];
+let prevMarketPrices = {}; // Cache to track previous prices for row flashing
 let filteredData = [];
 let watchlistSymbols = [];
 let currentCategory = "all";
@@ -17,9 +18,40 @@ async function fetchMarket() {
   ]);
   
   if (data && data.length > 0) {
+    // Keep track of current prices for flash detection
+    const newPrices = {};
+    data.forEach(s => {
+      newPrices[s.symbol] = parseFloat(s.price) || 0;
+    });
+
+    // Check for price changes to trigger flashes
+    const flashTriggers = {};
+    if (Object.keys(prevMarketPrices).length > 0) {
+      data.forEach(s => {
+        const oldPrice = prevMarketPrices[s.symbol];
+        const newPrice = newPrices[s.symbol];
+        if (oldPrice !== undefined && oldPrice !== newPrice) {
+          flashTriggers[s.symbol] = newPrice > oldPrice ? 'up' : 'down';
+        }
+      });
+    }
+
     marketData = data;
-    watchlistSymbols = watchlist;
+    prevMarketPrices = newPrices;
+    watchlistSymbols = watchlist || [];
     applyFilter();
+
+    // Trigger row level visual flash animations
+    setTimeout(() => {
+      Object.keys(flashTriggers).forEach(sym => {
+        const cell = document.getElementById(`price-cell-${sym}`);
+        if (cell) {
+          cell.classList.remove('flash-up', 'flash-down');
+          void cell.offsetWidth; // Trigger reflow
+          cell.classList.add(flashTriggers[sym] === 'up' ? 'flash-up' : 'flash-down');
+        }
+      });
+    }, 100);
   }
 }
 
@@ -86,30 +118,97 @@ window.renderTable = function() {
   if (declinesCount) declinesCount.textContent = marketData.filter(s => parseFloat(s.change) < 0).length;
   if (neutralCount) neutralCount.textContent = marketData.filter(s => parseFloat(s.change) === 0).length;
 
+  // Differential in-place update check to prevent layout flashing
+  const currentRows = Array.from(body.querySelectorAll('tr'));
+  const currentSymbols = currentRows.map(tr => tr.dataset.symbol);
+  const newSymbols = filteredData.map(s => s.symbol);
+  const isSameOrder = currentSymbols.length === newSymbols.length && currentSymbols.every((s, i) => s === newSymbols[i]);
+
+  if (isSameOrder) {
+      filteredData.forEach(stock => {
+          const row = document.getElementById(`row-${stock.symbol}`);
+          if (!row) return;
+
+          const change = parseFloat(stock.change) || 0;
+          const changeClass = change >= 0 ? "price-up" : "price-down";
+          
+          // Apply dynamic row class based on percent change
+          const rowClass = change > 0 ? "tr-up" : (change < 0 ? "tr-down" : "tr-neutral");
+          if (!row.classList.contains(rowClass)) {
+              row.classList.remove("tr-up", "tr-down", "tr-neutral");
+              row.classList.add(rowClass);
+          }
+
+          // Update each visible field individually without recreating the DOM
+          visibleCols.forEach(col => {
+              if (col === 'symbol') return;
+              
+              const cell = row.querySelector(`td[data-field="${col}"]`);
+              if (!cell) return;
+
+              let newContent = "";
+              if (col === 'price') {
+                  newContent = stock.price;
+              } else if (col === 'ltq') {
+                  newContent = stock.ltq;
+              } else if (col === 'changePercent') {
+                  newContent = `${stock.change} (${stock.changePercent}%)`;
+                  if (cell.className !== changeClass) cell.className = changeClass;
+              } else if (col === 'open') {
+                  newContent = stock.open;
+              } else if (col === 'high') {
+                  newContent = stock.high;
+              } else if (col === 'low') {
+                  newContent = stock.low;
+              } else if (col === 'volume') {
+                  newContent = parseInt(stock.volume || 0).toLocaleString();
+              } else if (col === 'previousClose') {
+                  newContent = stock.previousClose;
+              }
+
+              if (cell.innerHTML !== newContent) {
+                  cell.innerHTML = newContent;
+              }
+          });
+      });
+      return;
+  }
+
+  // Full table render only if filtering or sorting changes the rows
   body.innerHTML = filteredData.map((stock) => {
-      const change = parseFloat(stock.change);
+      const change = parseFloat(stock.change) || 0;
       const changeClass = change >= 0 ? "price-up" : "price-down";
-      const inWatchlist = watchlistSymbols.includes(stock.symbol);
-      const starClass = inWatchlist ? 'fas active' : 'far';
+      const rowClass = change > 0 ? "tr-up" : (change < 0 ? "tr-down" : "tr-neutral");
 
       const cols = {
           symbol: `
               <td class="symbol-cell" title="${stock.name}">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                  ${stock.symbol}
+                <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <img src="../../images/stocks/${stock.symbol}.png" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                         alt="${stock.symbol}" 
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                    <div class="symbol-avatar" style="display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border-radius: 50%; letter-spacing: -0.2px;">
+                      ${stock.symbol.substring(0, 2)}
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 700; color: #fff; padding-left: 3px;">${stock.symbol}</span>
+                  </div>
                 </div>
               </td>`,
-          price: `<td style="font-weight: 700;">${stock.price}</td>`,
-          ltq: `<td>${stock.ltq}</td>`,
-          changePercent: `<td class="${changeClass}">${stock.change} (${stock.changePercent}%)</td>`,
-          open: `<td>${stock.open}</td>`,
-          high: `<td>${stock.high}</td>`,
-          low: `<td>${stock.low}</td>`,
-          volume: `<td>${parseInt(stock.volume).toLocaleString()}</td>`,
-          previousClose: `<td>${stock.previousClose}</td>`
+          price: `<td id="price-cell-${stock.symbol}" data-field="price" style="font-weight: 700;">${stock.price}</td>`,
+          ltq: `<td data-field="ltq">${stock.ltq}</td>`,
+          changePercent: `<td class="${changeClass}" data-field="changePercent">${stock.change} (${stock.changePercent}%)</td>`,
+          open: `<td data-field="open">${stock.open}</td>`,
+          high: `<td data-field="high">${stock.high}</td>`,
+          low: `<td data-field="low">${stock.low}</td>`,
+          volume: `<td data-field="volume">${parseInt(stock.volume).toLocaleString()}</td>`,
+          previousClose: `<td data-field="previousClose">${stock.previousClose}</td>`
       };
 
-      return `<tr class="fade-in" onclick="window.openQuickPanel('${stock.symbol}')" style="cursor: pointer;">
+      return `<tr id="row-${stock.symbol}" data-symbol="${stock.symbol}" class="fade-in ${rowClass}" onclick="window.openQuickPanel('${stock.symbol}')" style="cursor: pointer;">
           ${Object.keys(cols).filter(k => visibleCols.includes(k)).map(k => cols[k]).join('')}
       </tr>`;
   }).join("");
@@ -126,8 +225,21 @@ window.openQuickPanel = async function(symbol) {
 
   content.innerHTML = `
     <div style="margin-top: 1rem;">
-      <h3 style="color: var(--primary); margin-bottom: 0.2rem;">${stock.symbol}</h3>
-      <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.5rem;">${stock.name}</p>
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="symbol-logo-wrapper" style="position: relative; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <img src="../../images/stocks/${stock.symbol.toUpperCase()}.png" 
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+               alt="${stock.symbol}" 
+               style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+          <div class="symbol-avatar" style="display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border-radius: 50%; letter-spacing: -0.2px;">
+            ${stock.symbol.substring(0, 2)}
+          </div>
+        </div>
+        <div style="flex: 1;">
+          <h3 style="color: var(--primary); margin: 0; font-weight: 800; font-size: 1.5rem; line-height: 1.2;">${stock.symbol}</h3>
+          <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.4; margin: 0.2rem 0 0 0;">${stock.name}</p>
+        </div>
+      </div>
       
       <div class="glass" style="padding: 1rem; margin-bottom: 1.5rem;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
@@ -292,7 +404,7 @@ async function init() {
   await fetchMarket();
 
   // Refresh every 30 seconds
-  setInterval(fetchMarket, 30000);
+  setInterval(fetchMarket, 5000);
 }
 
 document.addEventListener("DOMContentLoaded", init);

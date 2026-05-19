@@ -14,7 +14,7 @@ export const AlertManager = {
         // Start checking every 30 seconds
         if (!alertInterval) {
             this.checkAlerts(); // Run once immediately
-            alertInterval = setInterval(() => this.checkAlerts(), 30000);
+            alertInterval = setInterval(() => this.checkAlerts(), 5000);
         }
     },
 
@@ -41,7 +41,7 @@ export const AlertManager = {
                             const title = `Target Reached: Buy ${item.symbol}`;
                             const msg = `${item.symbol} is at Rs. ${ltp}, which is at or below your target of Rs. ${item.target_buy}.`;
                             
-                            NotificationService.send(title, msg);
+                            NotificationService.send(title, msg, '/assets/logo.png', 'buy');
                             StorageService.addNotification({
                                 title,
                                 message: msg,
@@ -60,7 +60,7 @@ export const AlertManager = {
                             const title = `Target Reached: Sell ${item.symbol}`;
                             const msg = `${item.symbol} is at Rs. ${ltp}, which is at or above your target of Rs. ${item.target_sell}.`;
                             
-                            NotificationService.send(title, msg);
+                            NotificationService.send(title, msg, '/assets/logo.png', 'sell');
                             StorageService.addNotification({
                                 title,
                                 message: msg,
@@ -93,11 +93,7 @@ export const AlertManager = {
                             const title = `🚨 Stop Loss Breach: ${h.symbol}`;
                             const msg = `${h.symbol} dropped to Rs. ${ltp}, which is below your Stop Loss of Rs. ${h.stopLoss}. Consider exiting.`;
                             
-                            NotificationService.send(
-                                title,
-                                msg,
-                                'https://cdn-icons-png.flaticon.com/512/564/564619.png'
-                            );
+                            NotificationService.send(title, msg, '/assets/logo.png', 'stoploss');
 
                             StorageService.addNotification({
                                 title,

@@ -65,7 +65,7 @@ async function init() {
 
     // Initial load
     await refresh();
-    setInterval(refresh, 30000);
+    setInterval(refresh, 5000);
 }
 
 // ─────────────────────────────────────────────
@@ -102,7 +102,7 @@ function render() {
     }
     if (emptyDiv) emptyDiv.style.display = 'none';
 
-    body.innerHTML = watchlistData.map(w => {
+    const newHtml = watchlistData.map(w => {
         const stock  = marketData.find(s => s.symbol.toUpperCase() === w.symbol.toUpperCase());
         const ltp    = stock ? parseFloat(stock.price) : null;
         const change = stock ? parseFloat(stock.changePercent) : null;
@@ -139,7 +139,22 @@ function render() {
 
         return `
         <tr style="border-left: 3px solid ${buyHit ? '#10b981' : sellHit ? '#f43f5e' : 'transparent'};">
-            <td style="font-weight:700; color:var(--primary); cursor:pointer;" onclick="showSymbolDetails('${w.symbol}')">${w.symbol}</td>
+            <td style="cursor:pointer;" onclick="showSymbolDetails('${w.symbol}')">
+                <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <img src="../images/stocks/${w.symbol}.png" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                         alt="${w.symbol}" 
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                    <div class="symbol-avatar" style="display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border-radius: 50%; letter-spacing: -0.2px;">
+                      ${w.symbol.substring(0, 2)}
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 700; color: var(--primary);">${w.symbol}</span>
+                  </div>
+                </div>
+            </td>
             <td>${ltpHtml}</td>
             <td>${changeHtml}</td>
             <td>${targetBuyHtml}</td>
@@ -159,6 +174,10 @@ function render() {
             </td>
         </tr>`;
     }).join('');
+
+    if (body.innerHTML !== newHtml) {
+        body.innerHTML = newHtml;
+    }
 }
 
 // ─────────────────────────────────────────────

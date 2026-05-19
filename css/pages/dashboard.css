@@ -1,29 +1,30 @@
 /* ══════════════════════════════════════════════
-   NEPSE INDEX HERO SECTION
+   DASHBOARD MAIN HERO LAYOUT (SIDE-BY-SIDE)
    ══════════════════════════════════════════════ */
-.index-hero-section {
-    margin-bottom: 0.8rem;
+.dashboard-main-hero-grid {
     display: grid;
-    grid-template-columns: minmax(220px, 280px) minmax(250px, 320px) 1fr;
+    grid-template-columns: minmax(0, 1.8fr) minmax(360px, 1.2fr);
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+}
+
+.dashboard-stats-column {
+    display: flex;
+    flex-direction: column;
     gap: 0.8rem;
 }
 
-.index-hero-card {
-    background: var(--surface-gradient), var(--surface-solid);
-    padding: 1.5rem 2rem;
-    border-radius: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    height: 100%;
+/* Make watchlist card tighter inside the column */
+.dashboard-stats-column .watchlist-hero-card {
+    padding: 1.25rem 1.5rem;
+    height: auto;
+    min-height: 120px;
+    flex: 1;
 }
 
-.hero-left {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    width: 100%;
+.dashboard-stats-column .mini-index-grid,
+.dashboard-stats-column .summary-pulse-grid {
+    flex-shrink: 0;
 }
 
 /* ── Watchlist Card ── */
@@ -406,6 +407,271 @@
     font-weight: 600;
 }
 
+
+/* ══════════════════════════════════════════════
+   MAIN DASHBOARD CHART
+   ══════════════════════════════════════════════ */
+.dashboard-chart-card {
+    background: var(--surface-gradient), var(--surface-solid);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    animation: slideUp 0.5s ease-out forwards;
+    opacity: 0;
+    animation-delay: 0.15s;
+}
+
+.chart-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    padding-bottom: 1rem;
+}
+
+.chart-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.chart-header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.6rem;
+}
+
+.chart-index-selector-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+/* ── Custom Dropdown Menu ── */
+.custom-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: color 0.2s;
+    user-select: none;
+}
+
+.dropdown-trigger:hover {
+    color: var(--primary);
+}
+
+.dropdown-chevron {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+}
+
+.custom-dropdown.open .dropdown-chevron {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu-list {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    min-width: 200px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 0.4rem;
+    display: none;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.dropdown-menu-list::-webkit-scrollbar {
+    width: 4px;
+}
+.dropdown-menu-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.dropdown-menu-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.dropdown-menu-list.show {
+    display: block;
+}
+
+.dropdown-group-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    padding: 0.35rem 0.5rem;
+    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 4px;
+    margin: 0.25rem 0 0.15rem 0;
+}
+
+.dropdown-item {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 0.4rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.dropdown-item:hover {
+    background: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+}
+
+.dropdown-item.active {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    font-weight: 700;
+    border-left: 3px solid #10b981;
+    border-radius: 0 4px 4px 0;
+    padding-left: 0.4rem;
+}
+
+.chart-selector-arrow {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.chart-selector-arrow:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.chart-header-price-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.1rem;
+}
+
+.chart-header-price {
+    font-size: 1.6rem;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+}
+
+.chart-header-diff {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.chart-header-pct-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.chart-header-pct-badge.up {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.chart-header-pct-badge.down {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.chart-header-status-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+}
+
+.chart-header-status-badge.close {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.chart-header-status-badge.open {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.chart-timestamp {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-family: 'Outfit', sans-serif;
+}
+
+.chart-tabs {
+    display: flex;
+    gap: 1.25rem;
+}
+
+.chart-tab {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding-bottom: 0.4rem;
+    position: relative;
+    transition: color 0.2s ease, border-color 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.chart-tab:hover {
+    color: var(--text-primary);
+}
+
+.chart-tab.active {
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+}
+
+.main-chart-container {
+    width: 100%;
+    height: 380px;
+    position: relative;
+}
+
 /* ══════════════════════════════════════════════
    ANIMATIONS
    ══════════════════════════════════════════════ */
@@ -483,4 +749,44 @@
     .summary-pulse-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* ══════════════════════════════════════════════
+   SHIMMERING SKELETON LOADER
+   ══════════════════════════════════════════════ */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton-row td, .skeleton-card {
+    pointer-events: none;
+}
+
+.skeleton-line {
+    display: inline-block;
+    height: 12px;
+    width: 80%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+}
+
+.skeleton-line.short { width: 40%; }
+.skeleton-line.medium { width: 60%; }
+.skeleton-line.pill {
+    height: 24px;
+    width: 65px;
+    border-radius: 8px;
+}
+.skeleton-line.circle {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+}
+.skeleton-line.card {
+    height: 60px;
+    width: 100%;
+    border-radius: 12px;
 }
