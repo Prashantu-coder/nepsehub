@@ -24,6 +24,7 @@ export const Sidebar = () => {
                 { id: 'stocks-today', text: 'Stocks Today', icon: 'fa-chart-line', path: 'pages/market/stocks-today.html' },
                 { id: 'heatmap', text: 'Market Heatmap', icon: 'fa-th', path: 'pages/market/heatmap.html' },
                 { id: 'todays-top', text: "Today's Top", icon: 'fa-crown', path: 'pages/market/todays-top.html' },
+                { id: 'circuit-level', text: 'Daily Circuit Level', icon: 'fa-bolt', path: 'pages/market/circuit-level.html' },
                 { id: 'news', text: 'Announcements', icon: 'fa-bullhorn', path: 'pages/news.html' }
             ]
         },

@@ -11,12 +11,105 @@ let currentCategory = "all";
 let currentSector = "all";
 let sortConfig = { key: null, direction: 'asc' };
 
+// Formatting helpers (en-IN for Nepali lakhs/crores formatting)
+const formatPrice = (val) => parseFloat(val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const formatVolume = (val) => parseInt(val || 0).toLocaleString('en-IN');
+const formatPercent = (val) => {
+  const num = parseFloat(val || 0);
+  const sign = num >= 0 ? '+' : '';
+  return `${sign}${num.toFixed(2)}%`;
+};
+const formatPointChange = (val) => {
+  const num = parseFloat(val || 0);
+  return num.toFixed(2);
+};
+
+function formatTimestamp(lastUpdatedStr) {
+  if (!lastUpdatedStr) {
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    return `As of: ${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()} ${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+  }
+  try {
+    const date = new Date(lastUpdatedStr);
+    if (isNaN(date.getTime())) {
+      return `As of: ${lastUpdatedStr}`;
+    }
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `As of: ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()} ${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+  } catch (e) {
+    return `As of: ${lastUpdatedStr}`;
+  }
+}
+
+async function updateMarketStatus() {
+  const dot = document.getElementById("marketStatusDot");
+  const title = document.querySelector(".live-market-title");
+  if (!dot) return;
+
+  const setStatus = (isOpen, isFallback = false) => {
+    const titleText = isFallback ? " (Fallback Check)" : "";
+    if (isOpen) {
+      dot.className = "status-dot-indicator status-dot-open";
+      dot.setAttribute("title", `Market is Open${titleText}`);
+      if (title) {
+        title.classList.remove("text-status-closed");
+        title.classList.add("text-status-open");
+      }
+    } else {
+      dot.className = "status-dot-indicator status-dot-closed";
+      dot.setAttribute("title", `Market is Closed${titleText}`);
+      if (title) {
+        title.classList.remove("text-status-open");
+        title.classList.add("text-status-closed");
+      }
+    }
+  };
+
+  try {
+    const response = await fetch("https://marketstatus.onrender.com/market-status");
+    if (response.ok) {
+      const statusData = await response.json();
+      if (statusData && statusData.status) {
+        const statusStr = statusData.status.toLowerCase();
+        const isOpen = statusStr.includes("open") || statusStr === "open";
+        setStatus(isOpen, false);
+        return;
+      }
+    }
+  } catch (e) {
+    console.warn("⚠️ Market status fetch failed, falling back to time check:", e);
+  }
+
+  // Fallback to dynamic timezone checks
+  const nepalDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kathmandu" }));
+  const day = nepalDate.getDay();
+  const hour = nepalDate.getHours();
+  const min = nepalDate.getMinutes();
+  const timeVal = hour * 60 + min;
+
+  // Trading days: Sunday (0) to Thursday (4). Trading hours: 11:00 AM (660) to 3:00 PM (900)
+  const isTradingDay = (day >= 0 && day <= 4);
+  const isTradingHours = (timeVal >= 660 && timeVal <= 900);
+  const isOpen = isTradingDay && isTradingHours;
+
+  setStatus(isOpen, true);
+}
+
 async function fetchMarket() {
   const [data, watchlist] = await Promise.all([
     DataService.getLiveMarket(),
     StorageService.getWatchlist()
   ]);
-  
+
   if (data && data.length > 0) {
     // Keep track of current prices for flash detection
     const newPrices = {};
@@ -52,6 +145,13 @@ async function fetchMarket() {
         }
       });
     }, 100);
+
+    // Update timestamp from first item
+    const timestampEl = document.getElementById("liveTimestamp");
+    if (timestampEl) {
+      timestampEl.textContent = formatTimestamp(data[0].lastUpdated);
+    }
+    updateMarketStatus();
   }
 }
 
@@ -78,7 +178,7 @@ function applyFilter() {
   if (sortConfig.key) {
     sortData(sortConfig.key, sortConfig.direction);
   }
-  
+
   renderTable();
 }
 
@@ -101,7 +201,7 @@ function sortData(key, direction) {
   });
 }
 
-window.renderTable = function() {
+window.renderTable = function () {
   const body = document.getElementById("marketBody");
   const totalCount = document.getElementById("totalCount");
   const filteredCount = document.getElementById("filteredCount");
@@ -125,64 +225,65 @@ window.renderTable = function() {
   const isSameOrder = currentSymbols.length === newSymbols.length && currentSymbols.every((s, i) => s === newSymbols[i]);
 
   if (isSameOrder) {
-      filteredData.forEach(stock => {
-          const row = document.getElementById(`row-${stock.symbol}`);
-          if (!row) return;
+    filteredData.forEach(stock => {
+      const row = document.getElementById(`row-${stock.symbol}`);
+      if (!row) return;
 
-          const change = parseFloat(stock.change) || 0;
-          const changeClass = change >= 0 ? "price-up" : "price-down";
-          
-          // Apply dynamic row class based on percent change
-          const rowClass = change > 0 ? "tr-up" : (change < 0 ? "tr-down" : "tr-neutral");
-          if (!row.classList.contains(rowClass)) {
-              row.classList.remove("tr-up", "tr-down", "tr-neutral");
-              row.classList.add(rowClass);
-          }
+      const change = parseFloat(stock.change) || 0;
 
-          // Update each visible field individually without recreating the DOM
-          visibleCols.forEach(col => {
-              if (col === 'symbol') return;
-              
-              const cell = row.querySelector(`td[data-field="${col}"]`);
-              if (!cell) return;
+      // Apply dynamic row class based on percent change
+      const rowClass = change > 0 ? "tr-up" : (change < 0 ? "tr-down" : "tr-neutral");
+      if (!row.classList.contains(rowClass)) {
+        row.classList.remove("tr-up", "tr-down", "tr-neutral");
+        row.classList.add(rowClass);
+      }
 
-              let newContent = "";
-              if (col === 'price') {
-                  newContent = stock.price;
-              } else if (col === 'ltq') {
-                  newContent = stock.ltq;
-              } else if (col === 'changePercent') {
-                  newContent = `${stock.change} (${stock.changePercent}%)`;
-                  if (cell.className !== changeClass) cell.className = changeClass;
-              } else if (col === 'open') {
-                  newContent = stock.open;
-              } else if (col === 'high') {
-                  newContent = stock.high;
-              } else if (col === 'low') {
-                  newContent = stock.low;
-              } else if (col === 'volume') {
-                  newContent = parseInt(stock.volume || 0).toLocaleString();
-              } else if (col === 'previousClose') {
-                  newContent = stock.previousClose;
-              }
+      // Update each visible field individually without recreating the DOM
+      visibleCols.forEach(col => {
+        if (col === 'symbol') return;
 
-              if (cell.innerHTML !== newContent) {
-                  cell.innerHTML = newContent;
-              }
-          });
+        const cell = row.querySelector(`td[data-field="${col}"]`);
+        if (!cell) return;
+
+        let newContent = "";
+        if (col === 'price') {
+          newContent = formatPrice(stock.price);
+        } else if (col === 'ltq') {
+          newContent = formatPrice(stock.ltq);
+        } else if (col === 'change') {
+          newContent = formatPointChange(stock.change);
+        } else if (col === 'changePercent') {
+          newContent = formatPercent(stock.changePercent);
+        } else if (col === 'open') {
+          newContent = formatPrice(stock.open);
+        } else if (col === 'high') {
+          newContent = formatPrice(stock.high);
+        } else if (col === 'low') {
+          newContent = formatPrice(stock.low);
+        } else if (col === 'previousClose') {
+          newContent = formatPrice(stock.previousClose);
+        } else if (col === 'volume') {
+          newContent = formatVolume(stock.volume);
+        } else if (col === 'turnover') {
+          newContent = formatPrice(stock.turnover);
+        }
+
+        if (cell.innerHTML !== newContent) {
+          cell.innerHTML = newContent;
+        }
       });
-      return;
+    });
+    return;
   }
 
   // Full table render only if filtering or sorting changes the rows
   body.innerHTML = filteredData.map((stock) => {
-      const change = parseFloat(stock.change) || 0;
-      const changeClass = change >= 0 ? "price-up" : "price-down";
-      const rowClass = change > 0 ? "tr-up" : (change < 0 ? "tr-down" : "tr-neutral");
+    const change = parseFloat(stock.change) || 0;
+    const rowClass = change > 0 ? "tr-up" : (change < 0 ? "tr-down" : "tr-neutral");
 
-      const cols = {
-          symbol: `
-              <td class="symbol-cell" title="${stock.name}">
+    const cols = {
+      symbol: `
+              <td class="symbol-cell">
                 <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
                   <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                     <img src="../../images/stocks/${stock.symbol}.png" 
@@ -198,30 +299,31 @@ window.renderTable = function() {
                   </div>
                 </div>
               </td>`,
-          price: `<td id="price-cell-${stock.symbol}" data-field="price" style="font-weight: 700;">${stock.price}</td>`,
-          ltq: `<td data-field="ltq">${stock.ltq}</td>`,
-          changePercent: `<td class="${changeClass}" data-field="changePercent">${stock.change} (${stock.changePercent}%)</td>`,
-          open: `<td data-field="open">${stock.open}</td>`,
-          high: `<td data-field="high">${stock.high}</td>`,
-          low: `<td data-field="low">${stock.low}</td>`,
-          volume: `<td data-field="volume">${parseInt(stock.volume).toLocaleString()}</td>`,
-          previousClose: `<td data-field="previousClose">${stock.previousClose}</td>`
-      };
+      price: `<td id="price-cell-${stock.symbol}" data-field="price" style="font-weight: 700;">${formatPrice(stock.price)}</td>`,
+      ltq: `<td data-field="ltq">${formatPrice(stock.ltq)}</td>`,
+      change: `<td data-field="change">${formatPointChange(stock.change)}</td>`,
+      changePercent: `<td data-field="changePercent">${formatPercent(stock.changePercent)}</td>`,
+      open: `<td data-field="open">${formatPrice(stock.open)}</td>`,
+      high: `<td data-field="high">${formatPrice(stock.high)}</td>`,
+      low: `<td data-field="low">${formatPrice(stock.low)}</td>`,
+      previousClose: `<td data-field="previousClose">${formatPrice(stock.previousClose)}</td>`,
+      volume: `<td data-field="volume">${formatVolume(stock.volume)}</td>`,
+      turnover: `<td data-field="turnover">${formatPrice(stock.turnover)}</td>`
+    };
 
-      return `<tr id="row-${stock.symbol}" data-symbol="${stock.symbol}" class="fade-in ${rowClass}" onclick="window.openQuickPanel('${stock.symbol}')" style="cursor: pointer;">
+    return `<tr id="row-${stock.symbol}" data-symbol="${stock.symbol}" class="fade-in ${rowClass}" onclick="window.openQuickPanel('${stock.symbol}')" style="cursor: pointer;" title="${stock.name}">
           ${Object.keys(cols).filter(k => visibleCols.includes(k)).map(k => cols[k]).join('')}
       </tr>`;
   }).join("");
 };
 
-window.openQuickPanel = async function(symbol) {
+window.openQuickPanel = async function (symbol) {
   const stock = marketData.find(s => s.symbol === symbol);
   if (!stock) return;
 
   const panel = document.getElementById('quickPanel');
   const overlay = document.getElementById('panelOverlay');
   const content = document.getElementById('panelContent');
-  const inWatchlist = await StorageService.isInWatchlist(stock.symbol);
 
   content.innerHTML = `
     <div style="margin-top: 1rem;">
@@ -244,11 +346,11 @@ window.openQuickPanel = async function(symbol) {
       <div class="glass" style="padding: 1rem; margin-bottom: 1.5rem;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
           <span style="color: var(--text-secondary);">LTP</span>
-          <span style="font-weight: 700;">Rs. ${stock.price}</span>
+          <span style="font-weight: 700;">Rs. ${formatPrice(stock.price)}</span>
         </div>
         <div style="display: flex; justify-content: space-between;">
           <span style="color: var(--text-secondary);">Change</span>
-          <span class="${parseFloat(stock.change) >= 0 ? 'price-up' : 'price-down'}">${stock.change} (${stock.changePercent}%)</span>
+          <span class="${parseFloat(stock.change) >= 0 ? 'price-up' : 'price-down'}">${formatPointChange(stock.change)} (${formatPercent(stock.changePercent)})</span>
         </div>
       </div>
 
@@ -273,33 +375,31 @@ window.openQuickPanel = async function(symbol) {
   overlay.classList.add('active');
 }
 
-// Note: Watchlist is now managed from the Watchlist page directly.
-
 function closeQuickPanel() {
   document.getElementById('quickPanel').classList.remove('active');
   document.getElementById('panelOverlay').classList.remove('active');
 }
 
 // Column Customization Logic
-let visibleCols = ['symbol', 'price', 'ltq', 'changePercent', 'open', 'high', 'low', 'volume', 'previousClose'];
+let visibleCols = ['symbol', 'price', 'ltq', 'change', 'changePercent', 'open', 'high', 'low', 'previousClose', 'volume', 'turnover'];
 
 async function initColumnVisibility() {
-    const saved = await StorageService.load('market_visible_cols');
-    if (saved) visibleCols = saved;
-    applyColumnVisibility();
+  const saved = await StorageService.load('market_visible_cols');
+  if (saved) visibleCols = saved;
+  applyColumnVisibility();
 }
 
 function applyColumnVisibility() {
-    // Header visibility
-    document.querySelectorAll('th[data-sort]').forEach(th => {
-        const col = th.dataset.sort;
-        th.style.display = visibleCols.includes(col) ? 'table-cell' : 'none';
-    });
-    // Symbol is always visible
-    const symbolTh = document.querySelector('th[data-sort="symbol"]');
-    if (symbolTh) symbolTh.style.display = 'table-cell';
-    
-    renderTable();
+  // Header visibility
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    const col = th.dataset.sort;
+    th.style.display = visibleCols.includes(col) ? 'table-cell' : 'none';
+  });
+  // Symbol is always visible
+  const symbolTh = document.querySelector('th[data-sort="symbol"]');
+  if (symbolTh) symbolTh.style.display = 'table-cell';
+
+  renderTable();
 }
 
 async function init() {
@@ -307,8 +407,27 @@ async function init() {
   await Layout.init();
   await initColumnVisibility();
 
+  // Search filter typing
   const searchInput = document.getElementById("marketSearch");
   if (searchInput) searchInput.addEventListener("input", applyFilter);
+
+  // Search button click
+  const searchBtn = document.getElementById("searchBtn");
+  if (searchBtn) searchBtn.addEventListener("click", applyFilter);
+
+  // Clear button click
+  const clearBtn = document.getElementById("clearBtn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "";
+      const sectorFilter = document.getElementById('sectorFilter');
+      if (sectorFilter) sectorFilter.value = "all";
+      currentSector = "all";
+      currentCategory = "all";
+      document.querySelectorAll(".badge").forEach(b => b.classList.remove("active"));
+      applyFilter();
+    });
+  }
 
   // Header Sorting
   document.querySelectorAll('th.sortable').forEach(th => {
@@ -324,7 +443,7 @@ async function init() {
       // Update UI classes
       document.querySelectorAll('th.sortable').forEach(h => h.classList.remove('asc', 'desc'));
       th.classList.add(sortConfig.direction);
-      
+
       applyFilter();
     });
   });
@@ -347,64 +466,77 @@ async function init() {
   // Column Customization Logic
   const settingsBtn = document.getElementById('columnSettingsBtn');
   const settingsPopup = document.getElementById('columnSettingsPopup');
-  
+
   if (settingsBtn) {
     settingsBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        settingsPopup.classList.toggle('active');
+      e.stopPropagation();
+      settingsPopup.classList.toggle('active');
     });
   }
 
   document.addEventListener('click', (e) => {
-      if (settingsPopup && !settingsPopup.contains(e.target)) settingsPopup.classList.remove('active');
+    if (settingsPopup && !settingsPopup.contains(e.target)) settingsPopup.classList.remove('active');
   });
 
   document.querySelectorAll('.column-option input').forEach(cb => {
-      const col = cb.dataset.col;
-      cb.checked = visibleCols.includes(col);
-      
-      cb.addEventListener('change', () => {
-          if (cb.checked) {
-              if (!visibleCols.includes(col)) visibleCols.push(col);
-          } else {
-              visibleCols = visibleCols.filter(c => c !== col);
-          }
-          StorageService.save('market_visible_cols', visibleCols);
-          applyColumnVisibility();
-      });
-  });
+    const col = cb.dataset.col;
+    cb.checked = visibleCols.includes(col);
 
-  // Category filtering
-  document.querySelectorAll(".summary-item").forEach((item) => {
-    item.addEventListener("click", () => {
-      document
-        .querySelectorAll(".summary-item")
-        .forEach((i) => i.classList.remove("active"));
-      item.classList.add("active");
-      
-      currentCategory = item.classList.contains("advances")
-        ? "advances"
-        : item.classList.contains("declines")
-        ? "declines"
-        : item.classList.contains("neutral")
-        ? "neutral"
-        : "all";
-
-      applyFilter();
+    cb.addEventListener('change', () => {
+      if (cb.checked) {
+        if (!visibleCols.includes(col)) visibleCols.push(col);
+      } else {
+        visibleCols = visibleCols.filter(c => c !== col);
+      }
+      StorageService.save('market_visible_cols', visibleCols);
+      applyColumnVisibility();
     });
   });
 
+  // Badge Category Filtering (Advances, Declines, Neutral)
+  const setupBadgeFilter = (id, category) => {
+    const badge = document.getElementById(id);
+    if (badge) {
+      badge.addEventListener("click", () => {
+        const isActive = badge.classList.contains("active");
+        document.querySelectorAll(".badge").forEach(b => b.classList.remove("active"));
+        if (isActive) {
+          currentCategory = "all";
+        } else {
+          badge.classList.add("active");
+          currentCategory = category;
+        }
+        applyFilter();
+      });
+    }
+  };
+  setupBadgeFilter("filterAdvances", "advances");
+  setupBadgeFilter("filterDeclines", "declines");
+  setupBadgeFilter("filterNeutral", "neutral");
+
   applyColumnVisibility();
+  updateMarketStatus();
 
   // Initial fetch
   const marketBody = document.getElementById("marketBody");
   if (marketBody) {
-    marketBody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 3rem;"><i class="fas fa-spinner fa-spin"></i> Loading live market data...</td></tr>`;
+    marketBody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 3rem;"><i class="fas fa-spinner fa-spin"></i> Loading live market data...</td></tr>`;
   }
   await fetchMarket();
 
-  // Refresh every 30 seconds
+  // Refresh market data every 5 seconds (5000ms)
   setInterval(fetchMarket, 5000);
+
+  // Sync Market Status check to exactly the top of the minute (00.00s)
+  const syncMarketStatusTimer = () => {
+    const now = new Date();
+    const msUntilNextMinute = 60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
+    setTimeout(() => {
+      updateMarketStatus();
+      setInterval(updateMarketStatus, 60000);
+    }, msUntilNextMinute);
+  };
+  syncMarketStatusTimer();
 }
 
 document.addEventListener("DOMContentLoaded", init);

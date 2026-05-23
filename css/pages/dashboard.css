@@ -400,7 +400,7 @@
 
 .mini-table .symbol-cell {
     font-weight: 700;
-    color: var(--primary);
+    color: var(--text-primary);
 }
 
 .mini-table .price-cell {
@@ -698,7 +698,16 @@
 /* ══════════════════════════════════════════════
    RESPONSIVE
    ══════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+    .dashboard-main-hero-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
+    .dashboard-main-hero-grid {
+        grid-template-columns: 1fr;
+    }
     .index-hero-section {
         grid-template-columns: 1fr;
     }

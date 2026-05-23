@@ -140,13 +140,13 @@ const DataService = {
         if (this._liveMarketPromise) {
             return this._liveMarketPromise;
         }
-        if (this._liveMarketCache && (now - this._liveMarketLastFetched < 2500)) {
+        if (this._liveMarketCache && (now - this._liveMarketLastFetched < 5000)) {
             return this._liveMarketCache;
         }
 
         this._liveMarketPromise = (async () => {
             try {
-                const endpoint = `${this.API_BASE}/core/homepage-data`;
+                const endpoint = `${this.API_BASE}/core/live-nepse`;
                 console.log(`📡 Fetching market from: ${endpoint}`);
 
                 const response = await fetch(endpoint);
@@ -231,7 +231,7 @@ const DataService = {
     async getMarketSummary() {
         const now = Date.now();
         if (this._marketSummaryPromise) return this._marketSummaryPromise;
-        if (this._marketSummaryCache && (now - this._marketSummaryLastFetched < 2500)) {
+        if (this._marketSummaryCache && (now - this._marketSummaryLastFetched < 1000)) {
             return this._marketSummaryCache;
         }
 
@@ -266,7 +266,7 @@ const DataService = {
     async getIndices() {
         const now = Date.now();
         if (this._indicesPromise) return this._indicesPromise;
-        if (this._indicesCache && (now - this._indicesLastFetched < 2500)) {
+        if (this._indicesCache && (now - this._indicesLastFetched < 5000)) {
             return this._indicesCache;
         }
 
@@ -292,7 +292,7 @@ const DataService = {
     async getSectorIndices() {
         const now = Date.now();
         if (this._subindicesPromise) return this._subindicesPromise;
-        if (this._subindicesCache && (now - this._subindicesLastFetched < 2500)) {
+        if (this._subindicesCache && (now - this._subindicesLastFetched < 5000)) {
             return this._subindicesCache;
         }
 
@@ -417,14 +417,14 @@ const DataService = {
     async getIndexChart(symbol, period = '1D') {
         try {
             const upperSymbol = symbol.toUpperCase();
-            const isIndex = ['NEPSE', 'SENSITIVE', 'FLOAT', 'SENFLOAT', 'SENSITIVE FLOAT'].includes(upperSymbol) || upperSymbol.includes('INDEX');
+            const isIndex = ['NEPSE', 'SENSITIVE', 'FLOAT', 'SENFLOAT', 'SENSITIVE FLOAT', 'BANKING', 'DEVELOPMENT BANK', 'FINANCE', 'HOTELS AND TOURISM', 'HYDROPOWER', 'INVESTMENT', 'LIFE INSURANCE', 'MANU.& PRO.', 'MICROFINANCE', 'MUTUAL FUND', 'NON LIFE INSURANCE', 'OTHERS', 'TRADING'].includes(upperSymbol) || upperSymbol.includes('INDEX');
 
             let endpoint;
             if (isIndex && period === '1D') {
-                endpoint = `${this.API_BASE}/charts/stock-chart/index/1D/${symbol}`;
+                endpoint = `${this.API_BASE}/charts/stock-chart/index/1D/${encodeURIComponent(symbol)}?_t=${Date.now()}`;
             } else {
                 const mappedPeriod = period === 'ALL' ? '5Y' : period;
-                endpoint = `${this.API_BASE}/charts/stock-chart/${symbol}?time=${mappedPeriod}`;
+                endpoint = `${this.API_BASE}/charts/stock-chart/${encodeURIComponent(symbol)}?time=${mappedPeriod}&_t=${Date.now()}`;
             }
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error('Network response was not ok');

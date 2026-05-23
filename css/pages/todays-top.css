@@ -372,3 +372,60 @@ tr:nth-child(3) .rank-badge {
   width: 65px;
   border-radius: 8px;
 }
+
+/* ── Responsive Overrides ── */
+@media (max-width: 768px) {
+  .todays-top-hero {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .hero-title-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .refresh-status-pills {
+    justify-content: center;
+  }
+  
+  .sub-nav-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+  
+  .sub-nav-btn {
+    flex-shrink: 0;
+  }
+  
+  .filter-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-controls-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  
+  .premium-select {
+    width: 100% !important;
+    min-width: unset;
+  }
+  
+  .search-wrapper {
+    width: 100%;
+  }
+  
+  .premium-search {
+    width: 100% !important;
+  }
+}
+

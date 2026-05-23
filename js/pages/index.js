@@ -36,6 +36,17 @@ async function init() {
     
     initChartTabs();
     await refresh();
+    
+    // Reload Market Turnover API every 1 second
+    setInterval(async () => {
+        const summary = await DataService.getMarketSummary();
+        if (summary) {
+            marketSummary = summary;
+            renderPulseCards();
+        }
+    }, 1000);
+
+    // Reload Homepage Data, Index Live, Subindex Live, Chart 1D API every 5 seconds
     setInterval(refresh, 5000);
 }
 
@@ -374,6 +385,8 @@ function renderIndexHero() {
     setText('idx-nepse-pct', `(${isUp ? '+' : ''}${nepse.percentChange.toFixed(2)}%)`);
     setText('idx-nepse-meta', nepse.asOfDateString || '');
 
+
+
     setText('idx-nepse-high', nepse.dayHigh.toLocaleString());
     setText('idx-nepse-low', nepse.dayLow.toLocaleString());
     setText('idx-nepse-turnover', formatCurrency(nepse.turnover));
@@ -570,6 +583,8 @@ function renderPulseCards() {
     if (companiesEl && companiesEl.innerText !== formattedCompanies) {
         companiesEl.innerText = formattedCompanies;
     }
+
+
 }
 
 // ─────────────────────────────────────────────

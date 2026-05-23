@@ -1,7 +1,7 @@
 /* ── Sticky Navbar Wrapper ── */
 #navbar-container {
   position: sticky;
-  top: 0;
+  top: 65px;
   z-index: 1000;
   width: 100%;
   background: var(--surface-gradient), var(--background);
@@ -13,9 +13,11 @@
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 80px);   /* subtract navbar height */
+  min-height: calc(100vh - 80px);
+  /* subtract navbar height */
   width: 100%;
-  background-color: var(--background);
+  /* background-color: var(--background); */
+  background: linear-gradient(150deg, #0D1B2A 0%, #163352 100%) !important;
 }
 
 /* Sidebar Layout - Hidden by default on PC, Off-canvas on Mobile */
@@ -23,7 +25,8 @@
   width: 260px;
   height: 100vh;
   position: fixed;
-  left: -260px; /* Hidden by default */
+  left: -260px;
+  /* Hidden by default */
   top: 0;
   background: var(--surface-gradient), var(--sidebar-bg);
   border-right: 1px solid var(--surface-border);
@@ -40,7 +43,8 @@
 /* Main Content Layout */
 .main-content {
   flex: 1;
-  padding: 2rem;          /* Even padding on all 4 sides */
+  padding: 2rem;
+  /* Even padding on all 4 sides */
   min-height: calc(100vh - 80px);
   width: 100%;
   box-sizing: border-box;
@@ -49,16 +53,16 @@
 
 /* Top Navbar */
 .navbar {
-  height: 80px;
+  height: 39px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
+  padding: 0.1rem 2rem;
   z-index: 1000;
 }
 
 .navbar .logo {
-  display: none; /* Shown on PC */
+  display: flex;
   padding: 0;
 }
 
@@ -138,9 +142,17 @@
 }
 
 @keyframes pulse-green {
-  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+
+  70% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
 
 .navbar-clock-sub {
@@ -183,6 +195,7 @@
   .navbar .logo {
     display: flex;
   }
+
   .burger-menu {
     display: none !important;
   }
@@ -192,12 +205,16 @@
   .navbar-menu {
     display: none;
   }
+
   .burger-menu {
     display: block;
   }
+
   .main-content {
-    padding: 1.5rem;     /* Even on all sides for mobile too */
+    padding: 1.5rem;
+    /* Even on all sides for mobile too */
   }
+
   .pc-only {
     display: none !important;
   }
@@ -206,6 +223,18 @@
 @media (max-width: 768px) {
   .navbar {
     padding: 0 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .logo-text {
+    display: none !important;
   }
 }
 
@@ -333,10 +362,25 @@
   font-size: 0.9rem;
 }
 
-.notif-icon.buy { background: rgba(16, 185, 129, 0.1); color: var(--secondary); }
-.notif-icon.sell { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
-.notif-icon.stoploss { background: rgba(244, 63, 94, 0.1); color: var(--danger); }
-.notif-icon.info { background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); }
+.notif-icon.buy {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--secondary);
+}
+
+.notif-icon.sell {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+}
+
+.notif-icon.stoploss {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--danger);
+}
+
+.notif-icon.info {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
 
 .notif-body {
   flex: 1;
@@ -368,8 +412,15 @@
 }
 
 @keyframes slideInDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -396,7 +447,7 @@
   border-radius: 16px;
   background: var(--surface-solid);
   border: 1px solid var(--surface-border);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(20px);
   animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -415,17 +466,28 @@
   border-radius: 3px 0 0 3px;
 }
 
-.toast-item.toast-buy::before { background: var(--secondary); }
-.toast-item.toast-sell::before { background: var(--primary); }
-.toast-item.toast-stoploss::before { background: var(--danger); }
-.toast-item.toast-info::before { background: rgba(255,255,255,0.2); }
+.toast-item.toast-buy::before {
+  background: var(--secondary);
+}
+
+.toast-item.toast-sell::before {
+  background: var(--primary);
+}
+
+.toast-item.toast-stoploss::before {
+  background: var(--danger);
+}
+
+.toast-item.toast-info::before {
+  background: rgba(255, 255, 255, 0.2);
+}
 
 .toast-item.exiting {
   animation: toastSlideOut 0.35s cubic-bezier(0.55, 0, 1, 0.45) forwards;
 }
 
 .toast-item:hover {
-  border-color: rgba(255,255,255,0.12);
+  border-color: rgba(255, 255, 255, 0.12);
   transform: translateX(-4px);
 }
 
@@ -440,12 +502,30 @@
   font-size: 0.85rem;
 }
 
-.toast-icon.buy { background: rgba(16, 185, 129, 0.12); color: #10b981; }
-.toast-icon.sell { background: rgba(99, 102, 241, 0.12); color: #818cf8; }
-.toast-icon.stoploss { background: rgba(244, 63, 94, 0.12); color: #fb7185; }
-.toast-icon.info { background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); }
+.toast-icon.buy {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
 
-.toast-body { flex: 1; min-width: 0; }
+.toast-icon.sell {
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+}
+
+.toast-icon.stoploss {
+  background: rgba(244, 63, 94, 0.12);
+  color: #fb7185;
+}
+
+.toast-icon.info {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+
+.toast-body {
+  flex: 1;
+  min-width: 0;
+}
 
 .toast-title {
   font-size: 0.8rem;
@@ -479,7 +559,9 @@
   flex-shrink: 0;
 }
 
-.toast-close:hover { opacity: 1; }
+.toast-close:hover {
+  opacity: 1;
+}
 
 .toast-progress {
   position: absolute;
@@ -490,24 +572,54 @@
   animation: toastProgress 5s linear forwards;
 }
 
-.toast-buy .toast-progress { background: var(--secondary); }
-.toast-sell .toast-progress { background: var(--primary); }
-.toast-stoploss .toast-progress { background: var(--danger); }
-.toast-info .toast-progress { background: rgba(255,255,255,0.2); }
+.toast-buy .toast-progress {
+  background: var(--secondary);
+}
+
+.toast-sell .toast-progress {
+  background: var(--primary);
+}
+
+.toast-stoploss .toast-progress {
+  background: var(--danger);
+}
+
+.toast-info .toast-progress {
+  background: rgba(255, 255, 255, 0.2);
+}
 
 @keyframes toastSlideIn {
-  from { opacity: 0; transform: translateX(100px) scale(0.9); }
-  to   { opacity: 1; transform: translateX(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateX(100px) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
 @keyframes toastSlideOut {
-  from { opacity: 1; transform: translateX(0) scale(1); }
-  to   { opacity: 0; transform: translateX(100px) scale(0.85); }
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(100px) scale(0.85);
+  }
 }
 
 @keyframes toastProgress {
-  from { width: 100%; }
-  to   { width: 0%; }
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -518,7 +630,7 @@
   gap: 0.25rem;
   padding: 0.5rem 0.75rem;
   border-bottom: 1px solid var(--surface-border);
-  background: rgba(255,255,255,0.01);
+  background: rgba(255, 255, 255, 0.01);
   overflow-x: auto;
 }
 
@@ -537,7 +649,7 @@
 
 .notif-filter-btn:hover {
   color: var(--text-primary);
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .notif-filter-btn.active {
@@ -566,11 +678,10 @@
 
 .sound-toggle:hover {
   color: var(--text-primary);
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .sound-toggle.muted {
   color: var(--danger);
   opacity: 0.7;
 }
-

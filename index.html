@@ -1,27 +1,31 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEPSE HUB | Market Dashboard</title>
-    
+
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Premium NEPSE Stock Dashboard for real-time market analysis, portfolio tracking, and latest market news.">
+    <meta name="description"
+        content="Premium NEPSE Stock Dashboard for real-time market analysis, portfolio tracking, and latest market news.">
     <meta name="keywords" content="NEPSE, Nepal Stock Exchange, Stock Dashboard, Portfolio Tracker, Nepal Finance">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/easy.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/themes.css">
     <link rel="stylesheet" href="css/pages/dashboard.css">
 </head>
+
 <body>
     <!-- Global Splash Loader -->
     <div id="splash-loader" class="splash-loader">
@@ -32,6 +36,79 @@
         </div>
         <div class="splash-text">Loading...</div>
     </div>
+
+    <header class="sticky">
+        <div style="display: flex; flex-direction: row; justify-content: space-between; width: 100%;">
+            <!-- logo -->
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <div id="burgerMenu" class="burger-menu">
+                    <i class="fas fa-bars"></i>
+                </div>
+
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="logo-text">NEPSE HUB</span>
+                </div>
+            </div>
+
+            <!-- nepse values -->
+            <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 6px;">
+                <div id="marketDot" class="blinking-dot"></div>
+                <div>
+                    <h6 class="nepse">NEPSE</h6>
+                </div>
+                <div id="index-value">
+                    <div class="flex-col">
+                        <span id="header-nepse-val" style="font-weight: 700; font-size: 1rem; color: var(--text-primary);">—</span>
+                        <span id="header-nepse-change" style="font-size: 0.78rem; font-weight: 600; margin-right: 0.5rem;">—</span>
+                    </div>
+                    <span class="pc-only" style="height: 12px; width: 1px; background: rgba(255, 255, 255, 0.15);"></span>
+                    <div class="flex-col">
+                            <span class="pc-only font-1rem text-secondary">Turnover: <strong id="header-nepse-turnover" class="text-primary">—</strong></span>
+                        <span class="pc-only font-1rem text-secondary">Volume: <strong id="header-nepse-volume" class="text-primary">—</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- clock and notification -->
+            <div style="display: flex; gap: 5px; padding: 0.5rem 0rem; padding-right: 1rem;">
+                <!-- Combined Market Status & Clock Pill -->
+                <div class="market-status-pill pc-only">
+                    <div id="navbar-clock" class="navbar-clock-sub"></div>
+                    <div id="market-status" class="market-status-sub"></div>
+                </div>
+
+                <!-- Notification Bell -->
+                <div class="nav-notification-wrapper">
+                    <button id="notification-bell" class="btn-icon">
+                        <i class="far fa-bell"></i>
+                        <span id="notif-badge" class="notif-badge hidden">0</span>
+                    </button>
+                    <div id="notif-dropdown" class="notif-dropdown glass hidden">
+                        <div class="notif-header">
+                            <h5>Notifications</h5>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <button id="sound-toggle-btn" class="sound-toggle" title="Toggle alert sound">
+                                    <i class="fas fa-volume-up"></i>
+                                </button>
+                                <button id="mark-read-btn">Mark all as read</button>
+                            </div>
+                        </div>
+                        <div class="notif-filters">
+                            <button class="notif-filter-btn active" data-filter="all">All</button>
+                            <button class="notif-filter-btn" data-filter="buy">Buy Signals</button>
+                            <button class="notif-filter-btn" data-filter="sell">Sell Signals</button>
+                            <button class="notif-filter-btn" data-filter="stoploss">Stop Loss</button>
+                        </div>
+                        <div id="notif-list" class="notif-list">
+                            <div class="notif-empty">No notifications in the last 7 days</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
     <div id="navbar-container"></div>
     <div class="app-container">
         <div id="sidebar-container"></div>
@@ -55,7 +132,7 @@
                                             <div class="dropdown-item" data-value="Sensitive">Sensitive</div>
                                             <div class="dropdown-item" data-value="Float">Float</div>
                                             <div class="dropdown-item" data-value="SenFloat">Sen. Float</div>
-                                            
+
                                             <div class="dropdown-group-label">Sub Indices</div>
                                             <div class="dropdown-sub-items" id="custom-subindex-items">
                                                 <!-- Dynamically populated from JS -->
@@ -93,7 +170,7 @@
                         <!-- Watchlist Card -->
                         <div class="glass watchlist-hero-card">
                             <div class="hero-watchlist-title">
-                                <i class="fas fa-star" style="color: var(--warning);"></i> 
+                                <i class="fas fa-star" style="color: var(--warning);"></i>
                                 Watchlist Overview
                             </div>
                             <div class="watchlist-pills" id="hero-watchlist-pills">
@@ -107,28 +184,32 @@
                         <!-- Pulse Summary Grid -->
                         <div class="summary-pulse-grid">
                             <div class="glass pulse-card" id="pulse-sentiment">
-                                <div class="pulse-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i class="fas fa-balance-scale"></i></div>
+                                <div class="pulse-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i
+                                        class="fas fa-balance-scale"></i></div>
                                 <div class="pulse-info">
                                     <div class="pulse-label">Sentiment</div>
                                     <div class="pulse-val" id="idx-nepse-sentiment">0/0/0</div>
                                 </div>
                             </div>
                             <div class="glass pulse-card" id="pulse-turnover">
-                                <div class="pulse-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;"><i class="fas fa-coins"></i></div>
+                                <div class="pulse-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;"><i
+                                        class="fas fa-coins"></i></div>
                                 <div class="pulse-info">
                                     <div class="pulse-label">Total Turnover</div>
                                     <div class="pulse-val" id="idx-total-turnover">—</div>
                                 </div>
                             </div>
                             <div class="glass pulse-card" id="pulse-volume">
-                                <div class="pulse-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;"><i class="fas fa-chart-line"></i></div>
+                                <div class="pulse-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;"><i
+                                        class="fas fa-chart-line"></i></div>
                                 <div class="pulse-info">
                                     <div class="pulse-label">Total Volume</div>
                                     <div class="pulse-val" id="idx-total-volume">—</div>
                                 </div>
                             </div>
                             <div class="glass pulse-card" id="pulse-companies">
-                                <div class="pulse-icon" style="background: rgba(244, 63, 94, 0.1); color: #f43f5e;"><i class="fas fa-building"></i></div>
+                                <div class="pulse-icon" style="background: rgba(244, 63, 94, 0.1); color: #f43f5e;"><i
+                                        class="fas fa-building"></i></div>
                                 <div class="pulse-info">
                                     <div class="pulse-label">Companies</div>
                                     <div class="pulse-val" id="idx-total-companies">—</div>
@@ -160,44 +241,83 @@
                                 <tr class="skeleton-row">
                                     <td>
                                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                            <div class="skeleton-line circle" style="width: 8px; height: 8px; min-width: 8px;"></div>
+                                            <div class="skeleton-line circle"
+                                                style="width: 8px; height: 8px; min-width: 8px;"></div>
                                             <div class="skeleton-line" style="width: 110px;"></div>
                                         </div>
                                     </td>
-                                    <td><div class="skeleton-line" style="width: 70px;"></div></td>
-                                    <td><div class="skeleton-line" style="width: 50px;"></div></td>
-                                    <td><div class="skeleton-line pill"></div></td>
-                                    <td class="hide-mobile"><div class="skeleton-line" style="width: 90px;"></div></td>
-                                    <td class="hide-mobile"><div class="skeleton-line" style="width: 80px;"></div></td>
-                                    <td class="hide-mobile"><div class="skeleton-line" style="width: 40px;"></div></td>
+                                    <td>
+                                        <div class="skeleton-line" style="width: 70px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-line" style="width: 50px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-line pill"></div>
+                                    </td>
+                                    <td class="hide-mobile">
+                                        <div class="skeleton-line" style="width: 90px;"></div>
+                                    </td>
+                                    <td class="hide-mobile">
+                                        <div class="skeleton-line" style="width: 80px;"></div>
+                                    </td>
+                                    <td class="hide-mobile">
+                                        <div class="skeleton-line" style="width: 40px;"></div>
+                                    </td>
                                 </tr>
                                 <tr class="skeleton-row">
                                     <td>
                                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                            <div class="skeleton-line circle" style="width: 8px; height: 8px; min-width: 8px;"></div>
+                                            <div class="skeleton-line circle"
+                                                style="width: 8px; height: 8px; min-width: 8px;"></div>
                                             <div class="skeleton-line" style="width: 90px;"></div>
                                         </div>
                                     </td>
-                                    <td><div class="skeleton-line" style="width: 65px;"></div></td>
-                                    <td><div class="skeleton-line" style="width: 45px;"></div></td>
-                                    <td><div class="skeleton-line pill"></div></td>
-                                    <td class="hide-mobile"><div class="skeleton-line" style="width: 85px;"></div></td>
-                                    <td class="hide-mobile"><div class="skeleton-line" style="width: 75px;"></div></td>
-                                    <td class="hide-mobile"><div class="skeleton-line" style="width: 35px;"></div></td>
+                                    <td>
+                                        <div class="skeleton-line" style="width: 65px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-line" style="width: 45px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-line pill"></div>
+                                    </td>
+                                    <td class="hide-mobile">
+                                        <div class="skeleton-line" style="width: 85px;"></div>
+                                    </td>
+                                    <td class="hide-mobile">
+                                        <div class="skeleton-line" style="width: 75px;"></div>
+                                    </td>
+                                    <td class="hide-mobile">
+                                        <div class="skeleton-line" style="width: 35px;"></div>
+                                    </td>
                                 </tr>
                                 <tr class="skeleton-row">
                                     <td>
                                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                            <div class="skeleton-line circle" style="width: 8px; height: 8px; min-width: 8px;"></div>
+                                            <div class="skeleton-line circle"
+                                                style="width: 8px; height: 8px; min-width: 8px;"></div>
                                             <div class="skeleton-line" style="width: 120px;"></div>
                                         </div>
                                     </td>
-                                    <td><div class="skeleton-line" style="width: 75px;"></div></td>
-                                    <td><div class="skeleton-line" style="width: 55px;"></div></td>
-                                    <td><div class="skeleton-line pill"></div></td>
-                                    <td class="hide-mobile"><div class="skeleton-line" style="width: 95px;"></div></td>
-                                    <td class="hide-mobile"><div class="skeleton-line" style="width: 85px;"></div></td>
-                                    <td class="hide-mobile"><div class="skeleton-line" style="width: 45px;"></div></td>
+                                    <td>
+                                        <div class="skeleton-line" style="width: 75px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-line" style="width: 55px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-line pill"></div>
+                                    </td>
+                                    <td class="hide-mobile">
+                                        <div class="skeleton-line" style="width: 95px;"></div>
+                                    </td>
+                                    <td class="hide-mobile">
+                                        <div class="skeleton-line" style="width: 85px;"></div>
+                                    </td>
+                                    <td class="hide-mobile">
+                                        <div class="skeleton-line" style="width: 45px;"></div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -222,19 +342,37 @@
                                 </thead>
                                 <tbody id="top-gainers-body">
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 50px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 60px;"></div></td>
-                                        <td><div class="skeleton-line pill" style="width: 50px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 50px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 60px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line pill" style="width: 50px;"></div>
+                                        </td>
                                     </tr>
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 45px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 55px;"></div></td>
-                                        <td><div class="skeleton-line pill" style="width: 50px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 45px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 55px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line pill" style="width: 50px;"></div>
+                                        </td>
                                     </tr>
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 55px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 65px;"></div></td>
-                                        <td><div class="skeleton-line pill" style="width: 50px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 55px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 65px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line pill" style="width: 50px;"></div>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -257,19 +395,37 @@
                                 </thead>
                                 <tbody id="top-losers-body">
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 50px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 60px;"></div></td>
-                                        <td><div class="skeleton-line pill" style="width: 50px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 50px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 60px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line pill" style="width: 50px;"></div>
+                                        </td>
                                     </tr>
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 45px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 55px;"></div></td>
-                                        <td><div class="skeleton-line pill" style="width: 50px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 45px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 55px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line pill" style="width: 50px;"></div>
+                                        </td>
                                     </tr>
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 55px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 65px;"></div></td>
-                                        <td><div class="skeleton-line pill" style="width: 50px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 55px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 65px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line pill" style="width: 50px;"></div>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -292,19 +448,37 @@
                                 </thead>
                                 <tbody id="top-turnover-body">
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 50px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 60px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 70px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 50px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 60px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 70px;"></div>
+                                        </td>
                                     </tr>
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 45px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 55px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 65px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 45px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 55px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 65px;"></div>
+                                        </td>
                                     </tr>
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 55px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 65px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 75px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 55px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 65px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 75px;"></div>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -327,19 +501,37 @@
                                 </thead>
                                 <tbody id="top-volume-body">
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 50px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 60px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 65px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 50px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 60px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 65px;"></div>
+                                        </td>
                                     </tr>
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 45px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 55px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 60px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 45px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 55px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 60px;"></div>
+                                        </td>
                                     </tr>
                                     <tr class="skeleton-row">
-                                        <td><div class="skeleton-line" style="width: 55px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 65px;"></div></td>
-                                        <td><div class="skeleton-line" style="width: 70px;"></div></td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 55px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 65px;"></div>
+                                        </td>
+                                        <td>
+                                            <div class="skeleton-line" style="width: 70px;"></div>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -353,4 +545,5 @@
     <!-- Initialization Script -->
     <script type="module" src="./js/pages/index.js"></script>
 </body>
+
 </html>

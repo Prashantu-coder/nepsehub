@@ -1,3 +1,5 @@
+import DataService from '../services/dataService.js';
+
 /**
  * State Management System
  * Uses Subscribe/Notify pattern
@@ -12,9 +14,20 @@ class State {
             theme: 'light',
             activePage: 'dashboard',
             isLoading: false,
-            searchQuery: ''
+            searchQuery: '',
+            nepseIndex: null,
+            marketSummary: null
         };
         this.listeners = [];
+
+        // Watch for DOM loaded to apply any cached state to header
+        if (typeof document !== 'undefined') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.updateHeaderDOM();
+            });
+        }
+
+        this.initHeaderUpdates();
     }
 
     getState() {
@@ -23,6 +36,7 @@ class State {
 
     setState(newState) {
         this.state = { ...this.state, ...newState };
+        this.updateHeaderDOM();
         this.notify();
     }
 
@@ -37,7 +51,229 @@ class State {
     notify() {
         this.listeners.forEach(listener => listener(this.state));
     }
+
+    updateHeaderDOM() {
+        if (typeof document === 'undefined') return;
+
+        const nepse = this.state.nepseIndex;
+        const summary = this.state.marketSummary;
+
+        if (nepse) {
+            const isUp = nepse.difference >= 0;
+            const prefix = isUp ? '+' : '';
+
+            const headerVal = document.getElementById('header-nepse-val');
+            if (headerVal) {
+                const newVal = nepse.indexValue.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                if (headerVal.innerText !== newVal) {
+                    headerVal.innerText = newVal;
+                }
+            }
+
+            const headerChange = document.getElementById('header-nepse-change');
+            if (headerChange) {
+                const newChangeText = `${prefix}${nepse.difference.toFixed(2)} (${prefix}${nepse.percentChange.toFixed(2)}%)`;
+                if (headerChange.innerText !== newChangeText) {
+                    headerChange.innerText = newChangeText;
+                }
+                const newClass = isUp ? 'price-up' : 'price-down';
+                if (headerChange.className !== newClass) {
+                    headerChange.className = newClass;
+                }
+            }
+        }
+
+        if (summary && summary.totalTurnover) {
+            const totalTurnover = summary.totalTurnover.totalTradedValue || 0;
+            const totalVolume = summary.totalTurnover.totalTradedQuantity || 0;
+
+            const headerTurnoverEl = document.getElementById('header-nepse-turnover');
+            if (headerTurnoverEl) {
+                const formattedTurnoverVal = `Rs. ${this.formatCurrency(totalTurnover)}`;
+                if (headerTurnoverEl.innerText !== formattedTurnoverVal) {
+                    headerTurnoverEl.innerText = formattedTurnoverVal;
+                }
+            }
+
+            const headerVolumeEl = document.getElementById('header-nepse-volume');
+            if (headerVolumeEl) {
+                const formattedVolumeVal = totalVolume.toLocaleString('en-IN');
+                if (headerVolumeEl.innerText !== formattedVolumeVal) {
+                    headerVolumeEl.innerText = formattedVolumeVal;
+                }
+            }
+        } else if (nepse) {
+            // Fallback to nepse object turnover/volume
+            const totalTurnover = nepse.turnover || 0;
+            const totalVolume = nepse.volume || 0;
+
+            const headerTurnoverEl = document.getElementById('header-nepse-turnover');
+            if (headerTurnoverEl) {
+                const formattedTurnoverVal = `Rs. ${this.formatCurrency(totalTurnover)}`;
+                if (headerTurnoverEl.innerText !== formattedTurnoverVal) {
+                    headerTurnoverEl.innerText = formattedTurnoverVal;
+                }
+            }
+
+            const headerVolumeEl = document.getElementById('header-nepse-volume');
+            if (headerVolumeEl) {
+                const formattedVolumeVal = totalVolume.toLocaleString();
+                if (headerVolumeEl.innerText !== formattedVolumeVal) {
+                    headerVolumeEl.innerText = formattedVolumeVal;
+                }
+            }
+        }
+    }
+
+    formatCurrency(val) {
+        return val.toLocaleString('en-IN', {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2
+        });
+    }
+
+    initHeaderUpdates() {
+        const fetchHeaderData = async () => {
+            try {
+                const [indices, summary] = await Promise.allSettled([
+                    DataService.getIndices(),
+                    DataService.getMarketSummary()
+                ]);
+
+                let nepseIndex = null;
+                if (indices.status === 'fulfilled' && indices.value) {
+                    const raw = indices.value;
+                    const indexParsed = raw.result || raw.data || (Array.isArray(raw) ? raw : null);
+                    if (Array.isArray(indexParsed) && indexParsed.length > 0) {
+                        nepseIndex = indexParsed.map(item => {
+                            const indexName = item.indexName || item.name || '';
+                            const indexValue = parseFloat(item.indexValue || item.currentValue || 0);
+                            const difference = parseFloat(item.difference !== undefined ? item.difference : (item.change !== undefined ? item.change : 0));
+                            const percentChange = parseFloat(item.percentChange !== undefined ? item.percentChange : (item.changePercent !== undefined ? item.changePercent : 0));
+                            return {
+                                ...item,
+                                indexName,
+                                indexValue,
+                                difference,
+                                percentChange
+                            };
+                        }).find(i => i.indexName.toLowerCase() === 'nepse');
+                    }
+                }
+
+                let marketSummary = null;
+                if (summary.status === 'fulfilled' && summary.value) {
+                    marketSummary = summary.value;
+                }
+
+                this.setState({ nepseIndex, marketSummary });
+            } catch (err) {
+                console.error('Error fetching header values:', err);
+            }
+        };
+
+        // Run immediately and then every 5 seconds
+        fetchHeaderData();
+        setInterval(fetchHeaderData, 5000);
+    }
 }
+
+(function () {
+    // API endpoint (CORS-enabled on Render should be fine)
+    const API_URL = 'https://marketstatus.onrender.com/market-status';
+
+    // DOM elements
+    const dotElement = document.getElementById('marketDot');
+
+    // Helper: remove existing animation classes from dot
+    function resetDotAnimations() {
+        dotElement.classList.remove('dot-open', 'dot-closed');
+    }
+
+    // Helper: update UI based on status string (must be 'market open' or 'market close')
+    function updateMarketDisplay(statusStr, fetchTime) {
+        // normalise string: trim & lower case comparison but keep original for display
+        const normalized = statusStr.trim().toLowerCase();
+        let displayText = '';
+        let isOpen = false;
+
+        if (normalized === 'market open') {
+            isOpen = true;
+            displayText = '🟢 MARKET OPEN';
+        }
+        else if (normalized === 'market close') {
+            isOpen = false;
+            displayText = '🔴 MARKET CLOSED';
+        }
+        else {
+            // unexpected response (neither exact match) - treat as unknown, dot grey with no blink? but we handle gracefully
+            console.warn('Unexpected status:', statusStr);
+        }
+
+        // apply proper blinking class & colors
+        resetDotAnimations();
+        if (isOpen) {
+            dotElement.classList.add('dot-open');
+            statusMessageSpan.innerHTML = '🟢';
+        } else {
+            dotElement.classList.add('dot-closed');
+            statusMessageSpan.innerHTML = '🔴';
+        }
+    }
+
+    // main function to fetch market status
+    async function fetchMarketStatus() {
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 7000); // 7 sec timeout
+
+            const response = await fetch(API_URL, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            // expected data structure: { "status": "market open" }  or { "status": "market close" }
+            if (data && typeof data === 'object' && 'status' in data) {
+                const marketStatusText = String(data.status);
+                const fetchCompleteTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                updateMarketDisplay(marketStatusText, fetchCompleteTime);
+            } else {
+                throw new Error('Invalid API format: missing "status" key');
+            }
+
+        } catch (err) {
+            let userFriendlyMsg = '';
+            if (err.name === 'AbortError') {
+                userFriendlyMsg = 'Request timeout (server slow)';
+            } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+                userFriendlyMsg = 'Network error / CORS or API unreachable';
+            } else {
+                userFriendlyMsg = err.message;
+            }
+            const errorTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            handleFetchError(userFriendlyMsg, errorTime);
+        }
+    }
+
+    // initial fetch when page loads
+    fetchMarketStatus();
+
+    // set interval to auto-refresh every 60 seconds (good balance)
+    let intervalId = setInterval(() => {
+        fetchMarketStatus();
+    }, 60000);
+
+    // small console info
+    console.log('Market Status Monitor started · blinking dot will adapt to "market open" (green blink) or "market close" (red blink)');
+})();
 
 // Singleton instance
 const globalState = new State();

@@ -8,7 +8,8 @@
     background: var(--surface-solid);
     border: 1px solid var(--surface-border);
     border-radius: 20px;
-    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Watchlist table — left-align first col, right-align the rest */

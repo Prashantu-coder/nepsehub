@@ -9,6 +9,7 @@ let wlSymbolSearch; // Watchlist modal symbol search instance
 
 let marketData = [];
 let watchlistData = []; // full rows from DB
+let watchlistLoaded = false; // flag to only load once from Supabase
 
 // ─────────────────────────────────────────────
 // INIT
@@ -64,20 +65,30 @@ async function init() {
     if (symInput) symInput.oninput = () => { symInput.value = symInput.value.toUpperCase(); };
 
     // Initial load
-    await refresh();
-    setInterval(refresh, 5000);
+    await refresh(true);
+    setInterval(() => refresh(false), 5000);
 }
 
 // ─────────────────────────────────────────────
 // DATA REFRESH
 // ─────────────────────────────────────────────
-async function refresh() {
+async function refresh(forceFetchWatchlist = false) {
+    let wlPromise;
+    if (!watchlistLoaded || forceFetchWatchlist) {
+        wlPromise = StorageService.getWatchlist();
+    } else {
+        wlPromise = Promise.resolve(watchlistData);
+    }
+
     const [watchlist, stocks] = await Promise.allSettled([
-        StorageService.getWatchlist(),
+        wlPromise,
         DataService.getLiveMarket()
     ]);
 
-    watchlistData = watchlist.status === 'fulfilled' ? (watchlist.value || []) : [];
+    if (!watchlistLoaded || forceFetchWatchlist) {
+        watchlistData = watchlist.status === 'fulfilled' ? (watchlist.value || []) : [];
+        watchlistLoaded = true;
+    }
     marketData    = stocks.status === 'fulfilled'    ? (stocks.value   || []) : [];
 
     render();
@@ -233,7 +244,7 @@ async function handleSave() {
 
     document.getElementById('wl-modal').style.display = 'none';
     wlSymbolSearch?.clear();
-    await refresh();
+    await refresh(true);
 }
 
 // ─────────────────────────────────────────────
@@ -247,7 +258,7 @@ window.editWatchlistItem = (id) => {
 window.removeFromWatchlist = async (symbol) => {
     if (!confirm(`Remove ${symbol} from watchlist?`)) return;
     await StorageService.removeFromWatchlist(symbol);
-    await refresh();
+    await refresh(true);
 };
 
 document.addEventListener('DOMContentLoaded', init);

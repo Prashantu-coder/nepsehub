@@ -758,7 +758,15 @@ async function loadBrokerAnalytics(days = 1) {
                 const card = document.createElement('div');
                 card.className = 'broker-card';
                 card.innerHTML = `
-                    <div class="broker-avatar">B${item.buyer}</div>
+                    <div class="broker-image-container">
+                        <img class="broker-photo" 
+                             src="../../images/brokers/Broker no. ${item.buyer}.png" 
+                             onload="this.style.display='block'; document.getElementById('avatar-fallback-${item.buyer}').style.display='none';"
+                             onerror="this.onerror=null; this.src='../../images/brokers/Broker no. ${item.buyer}.jpg'; this.onerror=function(){ this.onerror=null; this.src='../../images/brokers/Broker no. ${item.buyer}.jpeg'; this.onerror=function(){ this.style.display='none'; document.getElementById('avatar-fallback-${item.buyer}').style.display='flex'; } }"
+                             alt="Broker ${item.buyer}"
+                             style="display: none;" />
+                        <div class="broker-avatar" id="avatar-fallback-${item.buyer}">B${item.buyer}</div>
+                    </div>
                     <div class="broker-info">
                         <div class="broker-name-title">Broker No. ${item.buyer}</div>
                         <div class="broker-metric-row">

@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Average Price Calculator (DCA) | NEPSE HUB</title>
+    <title>Trade Planner | NEPSE HUB</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -12,33 +12,7 @@
     <link rel="stylesheet" href="../../css/layout.css" />
     <link rel="stylesheet" href="../../css/components.css" />
     <link rel="stylesheet" href="../../css/themes.css" />
-    <link rel="stylesheet" href="../../css/easy.css">
-    <style>
-      .entry-row {
-        display: grid;
-        grid-template-columns: 2fr 2fr 1fr;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        align-items: center;
-      }
-      .remove-btn {
-        color: var(--danger);
-        cursor: pointer;
-        font-size: 1.2rem;
-        transition: var(--transition-fast);
-        text-align: center;
-      }
-      .remove-btn:hover {
-        transform: scale(1.1);
-      }
-      .summary-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--surface-border);
-        padding: 1.5rem;
-        border-radius: 16px;
-        margin-top: 2rem;
-      }
-    </style>
+    <link rel="stylesheet" href="../../css/easy.css" />
   </head>
   <body>
     <header class="sticky">
@@ -119,10 +93,7 @@
         <div id="app">
           <div class="fade-in">
             <div class="section-header">
-              <h2>Average Price Calculator (DCA)</h2>
-              <button id="addEntryBtn" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add Entry
-              </button>
+              <h2>Trade Planner & Approval System</h2>
             </div>
 
             <div
@@ -133,11 +104,11 @@
                 gap: 1.5rem;
               "
             >
-              <!-- Entries Section -->
+              <!-- Input Section -->
               <div
                 class="glass"
                 style="
-                  padding: 1.5rem;
+                  padding: 2rem;
                   border-radius: 20px;
                   border: 1px solid rgba(255, 255, 255, 0.2);
                 "
@@ -147,56 +118,125 @@
                     display: flex;
                     align-items: center;
                     gap: 1rem;
-                    margin-bottom: 1.5rem;
+                    margin-bottom: 2rem;
                   "
                 >
                   <div
                     style="
                       background: var(--primary);
                       color: white;
-                      width: 40px;
-                      height: 40px;
+                      width: 45px;
+                      height: 45px;
                       border-radius: 12px;
                       display: flex;
                       align-items: center;
                       justify-content: center;
+                      font-size: 1.2rem;
                     "
                   >
-                    <i class="fas fa-list"></i>
+                    <i class="fas fa-edit"></i>
                   </div>
-                  <h3 style="font-weight: 700">Buy Transactions</h3>
+                  <h3 style="font-weight: 700">Setup Parameters</h3>
                 </div>
 
-                <div id="entries-container">
-                  <div class="entry-row">
-                    <div class="form-group" style="margin-bottom: 0">
-                      <label style="font-size: 0.75rem">Price (NPR)</label>
-                      <input
-                        type="number"
-                        class="buy-price"
-                        placeholder="e.g. 100"
-                        value=""
-                      />
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0">
-                      <label style="font-size: 0.75rem">Quantity</label>
-                      <input
-                        type="number"
-                        class="buy-qty"
-                        placeholder="e.g. 10"
-                        value=""
-                      />
-                    </div>
-                    <div style="margin-top: 1.2rem"></div>
+                <div class="form-group">
+                  <label>Stock Symbol / Name</label>
+                  <input
+                    type="text"
+                    id="stockName"
+                    list="stockList"
+                    placeholder="Search e.g. NICA..."
+                    value=""
+                  />
+                  <datalist id="stockList"></datalist>
+                </div>
+
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1rem;
+                  "
+                >
+                  <div class="form-group">
+                    <label>Entry Price (NPR)</label>
+                    <input
+                      type="number"
+                      id="entryPrice"
+                      placeholder="500"
+                      value=""
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Stop Loss (NPR)</label>
+                    <input
+                      type="number"
+                      id="stopLoss"
+                      placeholder="480"
+                      value=""
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Target Price (NPR)</label>
+                  <input
+                    type="number"
+                    id="targetPrice"
+                    placeholder="550"
+                    value=""
+                  />
+                </div>
+
+                <div
+                  class="form-group"
+                  style="
+                    margin-top: 1.5rem;
+                    padding-top: 1.5rem;
+                    border-top: 1px solid var(--surface-border);
+                  "
+                >
+                  <label>Total Trading Capital (NPR)</label>
+                  <inputW
+                    type="number"
+                    id="capital"
+                    placeholder="100000"
+                    value=""
+                  />
+                </div>
+
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1rem;
+                  "
+                >
+                  <div class="form-group">
+                    <label>Risk Mode</label>
+                    <select id="riskMode">
+                      <option value="percent">Percentage (%)</option>
+                      <option value="fixed">Fixed NPR</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label id="riskLabel">Risk Amount</label>
+                    <input
+                      type="number"
+                      id="riskValue"
+                      placeholder="1"
+                      value="1"
+                      step="0.1"
+                    />
                   </div>
                 </div>
               </div>
 
-              <!-- Results Section -->
+              <!-- Result Section -->
               <div
                 class="glass"
                 style="
-                  padding: 1.5rem;
+                  padding: 2rem;
                   border-radius: 20px;
                   border: 1px solid rgba(255, 255, 255, 0.2);
                 "
@@ -206,49 +246,61 @@
                     display: flex;
                     align-items: center;
                     gap: 1rem;
-                    margin-bottom: 1.5rem;
+                    margin-bottom: 2rem;
                   "
                 >
                   <div
                     style="
                       background: var(--secondary);
                       color: white;
-                      width: 40px;
-                      height: 40px;
+                      width: 45px;
+                      height: 45px;
                       border-radius: 12px;
                       display: flex;
                       align-items: center;
                       justify-content: center;
+                      font-size: 1.2rem;
                     "
                   >
-                    <i class="fas fa-calculator"></i>
+                    <i class="fas fa-check-double"></i>
                   </div>
-                  <h3 style="font-weight: 700">Weighted Summary</h3>
+                  <h3 style="font-weight: 700">Approval Results</h3>
                 </div>
 
-                <div id="dcaResults" class="calculator-results">
-                  <!-- Results injected here -->
+                <div id="plannerResults" class="calculator-results">
+                  <!-- Results here -->
                 </div>
 
                 <div
-                  class="form-group"
+                  id="decisionBadge"
                   style="
                     margin-top: 2rem;
-                    border-top: 1px solid var(--surface-border);
-                    padding-top: 1.5rem;
+                    padding: 1.5rem;
+                    border-radius: 16px;
+                    text-align: center;
+                    font-weight: 800;
+                    font-size: 1.25rem;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
                   "
                 >
-                  <label>Current LTP (for Gain/Loss analysis)</label>
-                  <input
-                    type="number"
-                    id="currentLtp"
-                    placeholder="e.g. 550"
-                    value=""
-                  />
+                  <!-- Decision here -->
                 </div>
 
-                <div id="profitAnalysis" style="margin-top: 1rem">
-                  <!-- Analysis injected here -->
+                <div
+                  id="warningArea"
+                  style="
+                    margin-top: 1rem;
+                    color: var(--danger);
+                    font-size: 0.85rem;
+                    text-align: center;
+                  "
+                ></div>
+
+                <div style="margin-top: 2rem;">
+                  <button id="savePlanBtn" class="btn btn-primary" style="width: 100%; padding: 1rem;" disabled>
+                    <i class="fas fa-save"></i> Save Trade Plan
+                  </button>
                 </div>
               </div>
             </div>
@@ -257,7 +309,7 @@
       </main>
     </div>
 
-    <script type="module" src="../../js/pages/calculator/average.js"></script>
+    <script type="module" src="../../js/pages/trade/planner.js"></script>
     </script>
   </body>
 </html>

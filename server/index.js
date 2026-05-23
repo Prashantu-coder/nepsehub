@@ -74,6 +74,10 @@ app.delete('/api/trade-plans/:id', (req, res) => {
     res.json({ success: true });
 });
 
+// --- CDSC IPO Proxy Routes ---
+const ipoRouter = require('./ipoRouter');
+app.use('/api/ipo', ipoRouter);
+
 app.listen(port, () => {
     console.log(`NEPSE Hub Backend running at http://localhost:${port}`);
 });

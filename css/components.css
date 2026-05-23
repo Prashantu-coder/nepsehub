@@ -41,8 +41,13 @@
     font-weight: 600;
 }
 
-.positive { color: var(--secondary); }
-.negative { color: var(--danger); }
+.positive {
+    color: var(--secondary);
+}
+
+.negative {
+    color: var(--danger);
+}
 
 /* Chart Container */
 .chart-container {
@@ -81,7 +86,8 @@
 /* Table */
 .data-table-container {
     border-radius: 16px;
-    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .data-table {
@@ -89,7 +95,8 @@
     border-collapse: collapse;
 }
 
-.data-table th, .data-table td {
+.data-table th,
+.data-table td {
     padding: 1rem 1.5rem;
     text-align: left;
     border-bottom: 1px solid var(--surface-border);
@@ -149,7 +156,7 @@
 
 /* Logo */
 .logo {
-    padding: 2rem;
+    padding: 0.5rem 2rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -232,7 +239,8 @@
     font-weight: 500;
 }
 
-.form-group input, .form-group select {
+.form-group input,
+.form-group select {
     width: 100%;
 }
 
@@ -461,13 +469,23 @@
 }
 
 @keyframes spin-clockwise {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes spin-counter-clockwise {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(-360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(-360deg);
+    }
 }
 
 .splash-text {
@@ -479,8 +497,17 @@
 }
 
 @keyframes loading-pulse {
-    0%, 100% { opacity: 0.5; transform: translateY(0); }
-    50% { opacity: 1; transform: translateY(-2px); }
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: translateY(0);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
 }
 
 @media (max-width: 480px) {

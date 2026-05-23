@@ -21,7 +21,7 @@ const StorageService = {
                 .select('*')
                 .order('created_at', { ascending: false });
             if (error) throw error;
-            return data; // full rows: { id, symbol, target_buy, target_sell, notes }
+            return data || []; // full rows: { id, symbol, target_buy, target_sell, notes }
         } catch (err) {
             console.error('Watchlist Error:', err.message);
             return [];
@@ -35,6 +35,7 @@ const StorageService = {
                 .upsert({ symbol, target_buy, target_sell, notes }, { onConflict: 'symbol' });
             return !error;
         } catch (err) {
+            console.error('AddToWatchlist Error:', err.message);
             return false;
         }
     },
@@ -47,22 +48,36 @@ const StorageService = {
                 .eq('id', id);
             return !error;
         } catch (err) {
+            console.error('UpdateWatchlistItem Error:', err.message);
             return false;
         }
     },
 
     async removeFromWatchlist(symbol) {
         try {
-            await supabase
+            const { error } = await supabase
                 .from('watchlist')
                 .delete()
                 .eq('symbol', symbol);
-        } catch (err) {}
+            return !error;
+        } catch (err) {
+            console.error('RemoveFromWatchlist Error:', err.message);
+            return false;
+        }
     },
 
     async isInWatchlist(symbol) {
-        const list = await this.getWatchlist();
-        return list.some(w => w.symbol === symbol);
+        try {
+            const { data, error } = await supabase
+                .from('watchlist')
+                .select('symbol')
+                .eq('symbol', symbol);
+            if (error) throw error;
+            return data && data.length > 0;
+        } catch (err) {
+            console.error('IsInWatchlist Error:', err.message);
+            return false;
+        }
     },
 
     // --- Trade Plans (Supabase) ---
@@ -72,10 +87,10 @@ const StorageService = {
                 .from('trade_plans')
                 .select('*')
                 .order('created_at', { ascending: false });
-            
             if (error) throw error;
-            return data;
+            return data || [];
         } catch (err) {
+            console.error('Trade Plans Fetch Error:', err.message);
             return [];
         }
     },
@@ -86,11 +101,24 @@ const StorageService = {
                 .from('trade_plans')
                 .insert([plan])
                 .select();
-            
             if (error) throw error;
-            return { success: true, data };
+            return { success: true, data: data[0] };
         } catch (err) {
+            console.error('Save Trade Plan Error:', err.message);
             return { success: false, error: err.message };
+        }
+    },
+
+    async deleteTradePlan(id) {
+        try {
+            const { error } = await supabase
+                .from('trade_plans')
+                .delete()
+                .eq('id', id);
+            return !error;
+        } catch (err) {
+            console.error('Delete Trade Plan Error:', err.message);
+            return false;
         }
     },
 
@@ -102,21 +130,23 @@ const StorageService = {
                 .select('*')
                 .order('transaction_date', { ascending: false });
             if (error) throw error;
-            return { success: true, data };
+            return { success: true, data: data || [] };
         } catch (err) {
-            return { success: false, data: [], error: err.message };
+            console.error('Transactions Fetch Error:', err.message);
+            return { success: false, error: err.message, data: [] };
         }
     },
 
-    async addTransaction(details) {
+    async addTransaction(tx) {
         try {
             const { data, error } = await supabase
                 .from('transactions')
-                .insert([details])
+                .insert([tx])
                 .select();
             if (error) throw error;
-            return { success: true, data };
+            return { success: true, data: data[0] };
         } catch (err) {
+            console.error('Add Transaction Error:', err.message);
             return { success: false, error: err.message };
         }
     },
@@ -129,10 +159,11 @@ const StorageService = {
                 .eq('id', id);
             return !error;
         } catch (err) {
+            console.error('Delete Transaction Error:', err.message);
             return false;
         }
     },
-    
+
     // --- Notifications (Supabase) ---
     async getNotifications() {
         try {
@@ -166,6 +197,7 @@ const StorageService = {
                 }]);
             return !error;
         } catch (err) {
+            console.error('AddNotification Error:', err.message);
             return false;
         }
     },
@@ -178,6 +210,7 @@ const StorageService = {
                 .eq('is_read', false);
             return !error;
         } catch (err) {
+            console.error('MarkNotificationsAsRead Error:', err.message);
             return false;
         }
     },

@@ -118,7 +118,8 @@
   background: var(--surface-solid);
   border: 1px solid var(--surface-border);
   border-radius: 20px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .holdings-table-wrap h4 {
   padding: 1.25rem 1.5rem;

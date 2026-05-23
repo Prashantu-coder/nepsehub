@@ -709,6 +709,25 @@ h2.shimmer-bg {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
+.broker-image-container {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+}
+
+.broker-photo {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    background: #fff;
+    object-fit: contain;
+    padding: 3px;
+    box-shadow: 0 0 12px rgba(var(--primary-rgb, 129, 140, 248), 0.2);
+    flex-shrink: 0;
+}
+
 .broker-avatar {
     width: 56px;
     height: 56px;
@@ -827,4 +846,102 @@ h2.shimmer-bg {
     color: #ef4444 !important;
     font-weight: 600;
 }
+
+/* ══════════════════════════════════════════════
+   MOBILE & TABLET RESPONSIVENESS OVERRIDES
+   ══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .details-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem 1rem;
+        gap: 1.5rem;
+    }
+    
+    .header-left {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .header-ltp-container {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: none;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .header-actions-container {
+        width: 100%;
+        align-items: center;
+    }
+    
+    .btn-watchlist-custom,
+    .btn-calc-custom {
+        max-width: 280px;
+    }
+    
+    .sub-navbar {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 0.75rem 1rem;
+        -webkit-overflow-scrolling: touch;
+        gap: 1.25rem;
+    }
+    
+    .sub-navbar .tab-link {
+        display: inline-block;
+        flex-shrink: 0;
+    }
+    
+    /* Stacking broker and financial rows */
+    .broker-holdings-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .detail-symbol-title {
+        font-size: 1.6rem;
+    }
+    
+    .price-ltp-text {
+        font-size: 1.8rem;
+    }
+    
+    .chart-canvas-container {
+        height: 280px;
+    }
+    
+    .card-header-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .chart-timeframes-flex {
+        width: 100%;
+        gap: 4px;
+    }
+    
+    .timeframe-btn {
+        flex: 1;
+        text-align: center;
+        padding: 6px 2px;
+        font-size: 0.7rem;
+    }
+    
+    .broker-analytics-card {
+        padding: 1.25rem;
+    }
+    
+    .financials-table th, 
+    .financials-table td {
+        padding: 8px 10px;
+        font-size: 0.78rem;
+    }
+}
+
 

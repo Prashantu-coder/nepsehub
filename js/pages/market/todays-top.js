@@ -158,19 +158,19 @@ function updateTableHeader() {
 
     switch (currentTab) {
         case "volume":
-            dynamicHeader.textContent = "Volume (Qty) ▾";
+            dynamicHeader.textContent = "Volume (Qty)";
             break;
         case "turnover":
-            dynamicHeader.textContent = "Turnover (Rs.)";
+            dynamicHeader.textContent = "Volume (Qty)";
             break;
         case "transactions":
-            dynamicHeader.textContent = "Trades ▾";
+            dynamicHeader.textContent = "Volume (Qty)";
             break;
         case "gainer":
-            dynamicHeader.textContent = "% Change ▾";
+            dynamicHeader.textContent = "Volume (Qty)";
             break;
         case "loser":
-            dynamicHeader.textContent = "% Change ▴";
+            dynamicHeader.textContent = "Volume (Qty)";
             break;
         default:
             dynamicHeader.textContent = "Volume (Qty)";
@@ -239,10 +239,10 @@ function renderTopTable() {
         const change = parseFloat(stock.changePercent) || 0;
         const changeClass = change >= 0 ? "up" : "down";
         const iconClass = change >= 0 ? "fa-caret-up" : "fa-caret-down";
-        const formattedPrice = (parseFloat(stock.price) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
-        const formattedChange = (parseFloat(stock.change) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
-        const formattedTurnover = (parseFloat(stock.turnover) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 });
-        const formattedVolume = (parseFloat(stock.volume) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 });
+        const formattedPrice = (parseFloat(stock.price) || 0).toLocaleString("en-In", { minimumFractionDigits: 2 });
+        const formattedChange = (parseFloat(stock.change) || 0).toLocaleString("en-In", { minimumFractionDigits: 2 });
+        const formattedTurnover = (parseFloat(stock.turnover) || 0).toLocaleString("en-In", { minimumFractionDigits: 2 });
+        const formattedVolume = (parseFloat(stock.volume) || 0).toLocaleString("en-In", { maximumFractionDigits: 0 });
         const formattedTrades = (parseInt(stock.trades) || 0).toLocaleString();
 
         const inWatchlist = watchlistSymbols.includes(stock.symbol);
