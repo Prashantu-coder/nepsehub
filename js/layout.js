@@ -23,6 +23,16 @@ export const Layout = {
             prefix = '../';
         }
 
+        // Dynamically inject favicon
+        let faviconLink = document.querySelector("link[rel~='icon']");
+        if (!faviconLink) {
+            faviconLink = document.createElement('link');
+            faviconLink.rel = 'icon';
+            document.head.appendChild(faviconLink);
+        }
+        faviconLink.href = `${prefix}images/website/favicon.png`;
+        faviconLink.type = 'image/png';
+
         const page = path.split('/').pop().replace('.html', '') || 'index';
         globalState.setState({
             activePage: page,
