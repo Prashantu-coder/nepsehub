@@ -2,6 +2,9 @@ import globalState from '../../state.js';
 import { Layout } from '../../layout.js';
 import DataService from '../../../services/dataService.js';
 
+const AVAILABLE_LOGOS = new Set(["ACLBSL","ADBL","AHL","AHPC","AKJCL","AKPL","ALBSL","ALICL","ANLB","API","Appolo Hydropower Limited","AVYAN","BANDIPUR","BARUN","BBC","BEDC","BFC","BGWT","BHCL","BHDC","BHL","BHNC","BHPL","BJHL","BNHC","BNL","BNT","BPCL","BUNGAL","CBBL","CBLD88","CFCL","CGH","CHCL","CHDC","CHL","CIT","CITY","CKHL","CLI","CORBL","CREST","CYCL","CZBIL","DDBL","DHEL","DHPL","DLBS","DOLTI","DORDI","EBL","EBLD85","EBLD86","EBLD91","EBLEB89","EDBL","EHPL","ENL","FMDBL","FOWAD","GBBD85","GBBL","GBIME","GBLBS","GCIL","GFCL","GHL","GILB","GLBSL","GLH","GMFBS","GMFIL","GMLI","GRDBL","GUFL","GVL","HATHY","HBL","HBLD83","HBLD86","HDHPC","HDL","HEI","HEIP","HFIN","HHL","HIDCL","HIDCLP","HIMSTAR","HLBSL","HLI","HPPL","HRL","HURJA","ICFC","ICFCD88","ICFCD89","IGI","IHL","ILBS","ILI","JBBL","JBLB","JFL","JHAPA","JOSHI","JSLBB","JSLBBP","Kalanga Hydro Limited","Kalinchock Hydropower Limited","KBL","KBLD90","KBSH","KDL","KHPL","KKHC","KMCDB","KPCL","KSBBL","KSBBLD87","LBBL","LBLD86","LBLD88","LEC","LICN","LLBS","LSL","MABEL","MAKAR","MANDU","MATRI","MBJC","MBL","MBLD2085","MCHL","MDB","MEHL","MEL","MEN","MERO","MFIL","MFLD85","MHCL","MHL","MHNL","MKCL","MKHC","MKHL","MKJC","MLBBL","MLBL","MLBS","MLBSL","MMKJL","MNBBL","MPFL","MSHL","MSLB","NABBC","NABIL","NABILD2089","NADEP","NBL","NBLD82","NBLD85","NCCD86","NESDO","NFS","NGPL","NHDL","NHPC","NIBD84","NICA","NICAD2091","NICD88","NICL","NICLBSL","NIFRA","NIFRAGED","NIL","NIMB","NIMBD90","NIMBPO","NLG","NLIC","NLICL","NMB","NMBD2085","NMBMF","NMFBS","NMIC","NMLBBL","NRIC","NRM","NRN","NTC","NUBL","NWCL","NYADI","OHL","OMPL","PBD88","PBLD86","PCBL","PCIL","PFL","PHCL","PMHPL","PMLI","PPCL","PPL","PRIN","PROFL","PRVU","PURE","RADHI","RAWA","RBBD2088","RBBD83","RBCL","RBCLPO","RFPL","RHGCL","RHPL","RIDI","RLEL","RLFL","RNLI","RSDC","RSML","RURU","SABBL","SADBL","SAGAR","SAGF","SAHAS","SAIL","SALICO","SAND2085","Sanigad Hydro Limited","SANIMA","SANVI","SAPDBL","SARBTM","SBD87","SBI","SBID83","SBL","SBLD2091","SBLD89","SCB","SCBD","SDBD87","SFCL","SFEF","SGHC","SGIC","SHEL","Shikhar Power Development Limited","SHINE","SHIVM","SHL","SHLB","SHPC","SICL","SIFC","SIKLES","SINDU","SIPD","SJCL","SJLIC","SKBBL","SKHEL","SKHL","SLBBL","SLBSL","SLCF","SMATA","SMB","SMFBS","SMH","SMHL","SMJC","SMPDA","SNLI","Snow Rivers Limited","SOHL","SONA","SOPAN","SPC","SPDL","SPHL","SPIL","SPL","SRBLD83","SRLI","SSHL","STC","SWASTIK","SWBBL","SWMF","SYPNL","Taksar Pikhuwa Khola Hydropower Limited","TAMOR","TPC","TRH","TSHL","TTL","TVCL","UAIL","UHEWA","ULBSL","ULHC","UMHL","UMRH","UNHPL","UNL","UNLB","UPCL","UPPER","USHEC","USHL","USLB","VLBS","VLUCL","WNLB","Yambaling Hydropower Limited", "SARVOTTAM", "MEPDL", "BENI", "ECL"]);
+
+
 let currentPage = 1;
 let totalPages = 1;
 let currentStatus = 'all';
@@ -132,6 +135,14 @@ function renderCards(items) {
         const manager = item.issueManager || item.manager || 'N/A';
         const sector = item.sector || item.category || 'N/A';
         
+        const symbolUpper = symbol.toUpperCase();
+        let logoUrl = '';
+        if (AVAILABLE_LOGOS.has(symbolUpper)) {
+            logoUrl = `../../images/stocks/${symbolUpper}.png`;
+        } else if (AVAILABLE_LOGOS.has(name)) {
+            logoUrl = `../../images/stocks/${name}.png`;
+        }
+
         const openDateObj = item.openingDate ? new Date(item.openingDate) : null;
         const closeDateObj = item.closingDate ? new Date(item.closingDate) : null;
         const now = new Date();
@@ -174,11 +185,18 @@ function renderCards(items) {
                 <span class="ipo-status-badge ${statusClass}">${statusLabel}</span>
                 
                 <div class="ipo-header">
-                    <div class="ipo-icon-wrap">
-                        ${item.iconUrl 
-                            ? `<img src="${item.iconUrl.startsWith('http') ? item.iconUrl : 'https://sharehubnepal.com/' + item.iconUrl}" class="ipo-icon" onerror="this.src='https://ui-avatars.com/api/?name=${symbol}&background=161b22&color=10b981&bold=true'">` 
-                            : `<div class="ipo-icon"><i class="fas fa-building"></i></div>`
-                        }
+                    <div class="ipo-icon-wrap" style="position: relative; width: 56px; height: 56px; flex-shrink: 0;">
+                        <div class="ipo-icon" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; background: linear-gradient(135deg, var(--surface-hover), var(--surface-solid)); color: var(--primary); z-index: 1; margin: 0;">
+                            ${symbolUpper.substring(0, 2)}
+                        </div>
+                        ${logoUrl ? `
+                        <img src="${logoUrl}" 
+                             class="ipo-icon" 
+                             style="opacity: 0; transition: opacity 0.2s; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; margin: 0; background: transparent; z-index: 2;" 
+                             onload="this.style.opacity=1; if(this.previousElementSibling) this.previousElementSibling.style.display='none';" 
+                             onerror="this.style.display='none';" 
+                             alt="${symbolUpper}">
+                        ` : ''}
                     </div>
                     <div>
                         <div class="ipo-company-name" title="${name}">${name}</div>

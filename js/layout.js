@@ -29,6 +29,20 @@ export const Layout = {
             pathPrefix: prefix
         });
 
+        // Ensure auth.js is loaded dynamically if window.auth is not present
+        if (!window.auth) {
+            await new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = `${prefix}js/auth.js`;
+                script.onload = () => resolve();
+                script.onerror = () => {
+                    console.error('Failed to load auth.js dynamically');
+                    resolve();
+                };
+                document.head.appendChild(script);
+            });
+        }
+
         // Load basic state
         const [savedPortfolio, savedWatchlist] = await Promise.all([
             StorageService.load('nepse_portfolio').then(d => d || []),
@@ -74,6 +88,9 @@ export const Layout = {
 
         // Initialize Notifications
         this.initNotifications();
+
+        // Initialize User Profile Dropdown
+        this.initUserProfile();
 
         // Initialize Global Search Autocomplete
         this.setupGlobalSearch();
@@ -206,6 +223,71 @@ export const Layout = {
         // Initial check and periodic refresh
         refreshNotifs();
         setInterval(refreshNotifs, 60000);
+    },
+
+    initUserProfile() {
+        // Populate the static profile HTML already in index.html
+        const btn = document.getElementById('user-profile-btn');
+        const dropdown = document.getElementById('profile-dropdown');
+
+        // If the static elements don't exist, nothing to do
+        if (!btn || !dropdown) return;
+
+        // Populate user data if logged in
+        if (window.auth && window.auth.isLoggedIn()) {
+            const user = window.auth.getUser();
+            if (user) {
+                const username = user.username || 'User';
+                const email = user.email || '';
+                const code = user.code || '';
+                const initial = username.charAt(0).toUpperCase();
+
+                // Update avatar initial
+                const avatarInitial = document.getElementById('user-avatar-initial');
+                if (avatarInitial) avatarInitial.textContent = initial;
+
+                // Update dropdown header
+                const avatarLarge = dropdown.querySelector('.profile-avatar-large');
+                if (avatarLarge) avatarLarge.textContent = initial;
+
+                const nameEl = dropdown.querySelector('.profile-meta h5');
+                if (nameEl) nameEl.textContent = username;
+
+                const codeEl = dropdown.querySelector('.profile-meta span');
+                if (codeEl) codeEl.textContent = `Code: ${code}`;
+
+                const emailEl = dropdown.querySelector('.profile-info-item span');
+                if (emailEl) emailEl.textContent = email;
+            }
+        }
+
+        // Bind toggle event on the avatar button
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('notif-dropdown')?.classList.add('hidden');
+            dropdown.classList.toggle('hidden');
+        };
+
+        // Prevent clicks inside dropdown from closing it
+        dropdown.onclick = (e) => e.stopPropagation();
+
+        // Close on outside click
+        document.addEventListener('click', () => {
+            dropdown.classList.add('hidden');
+        });
+
+        // Logout button
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.onclick = async (e) => {
+                e.stopPropagation();
+                if (confirm('Are you sure you want to logout?')) {
+                    if (window.auth) await window.auth.logout();
+                    const prefix = globalState.getState().pathPrefix || '';
+                    window.location.href = `${prefix}pages/login.html`;
+                }
+            };
+        }
     },
 
     setupGlobalSearch() {

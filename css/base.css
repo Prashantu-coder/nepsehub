@@ -641,3 +641,8 @@ header {
   color: #f43f5e;
   border: 1px solid rgba(244, 63, 94, 0.2);
 }
+
+/* Global Hidden Utility Class */
+.hidden {
+  display: none !important;
+}

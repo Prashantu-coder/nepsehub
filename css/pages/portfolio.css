@@ -393,3 +393,116 @@
     height: 300px;
     width: 100%;
 }
+
+/* ── Shimmer / Data tbody visibility helpers ── */
+.portfolio-shimmer-body { display: table-row-group; }
+.portfolio-data-body.pf-loading { display: none; }
+
+/* ══════════════════════════════════════════════
+   PORTFOLIO EMPTY STATE CARD
+══════════════════════════════════════════════ */
+.pf-empty-card {
+    display: none; /* shown via JS as flex */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    margin-top: 1.5rem;
+    border-radius: 24px;
+    border: 1px dashed rgba(99, 102, 241, 0.25);
+    background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.06) 0%, transparent 65%);
+    position: relative;
+    overflow: hidden;
+    gap: 0;
+}
+
+/* Glowing ambient background blob */
+.pf-empty-glow {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
+    pointer-events: none;
+    filter: blur(20px);
+}
+
+/* Icon circle */
+.pf-empty-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(59,130,246,0.15) 100%);
+    border: 1px solid rgba(99,102,241,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: #6366f1;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 0 24px rgba(99,102,241,0.2);
+    animation: pf-empty-float 4s ease-in-out infinite;
+}
+
+@keyframes pf-empty-float {
+    0%, 100% { transform: translateY(0);   }
+    50%       { transform: translateY(-6px); }
+}
+
+.pf-empty-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 0.6rem;
+}
+
+.pf-empty-sub {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0 0 1.5rem;
+}
+
+/* Inspirational quote block */
+.pf-empty-quote {
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    max-width: 420px;
+    padding: 0.9rem 1.25rem;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.pf-empty-btn {
+    padding: 0.75rem 2rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    box-shadow: 0 0 24px rgba(99,102,241,0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pf-empty-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 36px rgba(99,102,241,0.5);
+}
+
+/* Smaller variant used for the Transactions empty state */
+.pf-empty-sm {
+    padding: 3rem 2rem;
+    border-style: solid;
+    border-color: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.015);
+}

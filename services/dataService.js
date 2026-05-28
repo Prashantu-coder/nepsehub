@@ -92,7 +92,7 @@ const DataService = {
     async getAnnouncements() {
         try {
             const endpoint = `${this.API_BASE}/market-info/announcements`;
-            console.log(`📡 Fetching announcements from: ${endpoint}`);
+            // console.log(`📡 Fetching announcements from: ${endpoint}`);
             const response = await fetch(endpoint);
             if (!response.ok) return [];
             const result = await response.json();
@@ -147,7 +147,7 @@ const DataService = {
         this._liveMarketPromise = (async () => {
             try {
                 const endpoint = `${this.API_BASE}/core/live-nepse`;
-                console.log(`📡 Fetching market from: ${endpoint}`);
+                // console.log(`📡 Fetching market from: ${endpoint}`);
 
                 const response = await fetch(endpoint);
                 if (!response.ok) {
@@ -156,7 +156,7 @@ const DataService = {
                 }
 
                 const result = await response.json();
-                console.log("📥 API Response Received:", result);
+                // console.log("📥 API Response Received:", result);
 
                 if (result.indices && Array.isArray(result.indices)) {
                     this._homepageIndicesCache = result.indices;
@@ -238,7 +238,7 @@ const DataService = {
         this._marketSummaryPromise = (async () => {
             try {
                 const endpoint = `${this.API_BASE}/core/market-turnover`;
-                console.log(`📡 Fetching summary from: ${endpoint}`);
+                // console.log(`📡 Fetching summary from: ${endpoint}`);
 
                 const response = await fetch(endpoint);
                 if (!response.ok) {
@@ -247,7 +247,7 @@ const DataService = {
                 }
 
                 const result = await response.json();
-                console.log("📥 Summary Response Received:", result);
+                // console.log("📥 Summary Response Received:", result);
                 const data = result.success ? result.data : result;
                 this._marketSummaryCache = data;
                 this._marketSummaryLastFetched = Date.now();

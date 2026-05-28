@@ -5,11 +5,28 @@ import StorageService from '../../services/storageService.js';
 import NotificationService from '../../services/notificationService.js';
 import { SymbolSearch } from '../components/symbolSearch.js';
 
-let wlSymbolSearch; // Watchlist modal symbol search instance
+let wlSymbolSearch;   // SymbolSearch instance for modal
 
-let marketData = [];
-let watchlistData = []; // full rows from DB
-let watchlistLoaded = false; // flag to only load once from Supabase
+let marketData      = [];
+let watchlistData   = [];
+let watchlistLoaded = false;
+
+// ─────────────────────────────────────────────
+// SHIMMER HELPERS — operate on HTML tbody elements
+// ─────────────────────────────────────────────
+function showShimmer() {
+    const shimmer = document.getElementById('shimmer-body');
+    const data    = document.getElementById('watchlistBody');
+    if (shimmer) shimmer.classList.remove('loaded');   // show skeleton rows
+    if (data)    data.classList.add('loading');        // hide real rows
+}
+
+function hideShimmer() {
+    const shimmer = document.getElementById('shimmer-body');
+    const data    = document.getElementById('watchlistBody');
+    if (shimmer) shimmer.classList.add('loaded');      // hide skeleton rows
+    if (data)    data.classList.remove('loading');     // show real rows
+}
 
 // ─────────────────────────────────────────────
 // INIT
@@ -18,67 +35,95 @@ async function init() {
     globalState.setState({ activePage: 'watchlist' });
     await Layout.init();
 
-    // Initialize SymbolSearch (mounts into #wl-symbol-search)
+    // Symbol search inside the modal
     wlSymbolSearch = new SymbolSearch({
         wrapperId:   'wl-symbol-search',
         inputId:     'wl-symbol',
         placeholder: 'Type symbol or company name...'
     });
 
-    // Modal
+    // ── Modal wiring ──
     const modal = document.getElementById('wl-modal');
-    document.getElementById('open-wl-modal').onclick     = () => openModal();
-    document.getElementById('close-wl-modal').onclick    = () => modal.style.display = 'none';
-    document.getElementById('cancel-wl-modal').onclick   = () => modal.style.display = 'none';
-    document.getElementById('save-wl-btn').onclick       = handleSave;
-    
+    document.getElementById('open-wl-modal').onclick   = () => openModal();
+    document.getElementById('close-wl-modal').onclick  = () => modal.style.display = 'none';
+    document.getElementById('cancel-wl-modal').onclick = () => modal.style.display = 'none';
+    document.getElementById('save-wl-btn').onclick     = handleSave;
+
+    // ── Empty-state add button ──
+    const emptyAddBtn = document.getElementById('empty-add-btn');
+    if (emptyAddBtn) emptyAddBtn.onclick = () => openModal();
+
+    // ── Enable-Notifications button ──
     const notifBtn = document.getElementById('enable-notifications');
     if (notifBtn) {
-        // Reflect current permission status on load
         if (Notification.permission === 'granted') {
             notifBtn.innerHTML = '<i class="fas fa-check"></i> Alerts Active';
             notifBtn.classList.add('btn-success');
         }
-
         notifBtn.onclick = async () => {
             if (Notification.permission === 'granted') {
                 alert('Notifications are already enabled for this browser.');
                 return;
             }
-
             const granted = await NotificationService.requestPermission();
             if (granted) {
                 alert('Notifications Enabled! You will receive alerts when target prices are reached.');
                 notifBtn.innerHTML = '<i class="fas fa-check"></i> Alerts Active';
                 notifBtn.classList.add('btn-success');
             } else if (Notification.permission === 'denied') {
-                alert('Permission denied. Please enable notifications in your browser settings (click the lock icon in address bar).');
+                alert('Permission denied. Please enable notifications in your browser settings.');
             }
         };
     }
-    
-    const emptyAddBtn = document.getElementById('empty-add-btn');
-    if (emptyAddBtn) emptyAddBtn.onclick = () => openModal();
 
-    // Symbol input → uppercase
-    const symInput = document.getElementById('wl-symbol');
-    if (symInput) symInput.oninput = () => { symInput.value = symInput.value.toUpperCase(); };
+    // ── Columns dropdown toggle — starts HIDDEN in HTML ──
+    const toggleColsBtn = document.getElementById('toggle-columns-btn');
+    const colsDropdown  = document.getElementById('columns-dropdown');
+    if (toggleColsBtn && colsDropdown) {
+        toggleColsBtn.onclick = (e) => {
+            e.stopPropagation();
+            colsDropdown.classList.toggle('hidden');
+        };
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!toggleColsBtn.contains(e.target) && !colsDropdown.contains(e.target)) {
+                colsDropdown.classList.add('hidden');
+            }
+        });
+    }
 
-    // Initial load
+    // ── CSV download ──
+    const csvBtn = document.getElementById('download-csv-btn');
+    if (csvBtn) csvBtn.onclick = downloadCSV;
+
+    // ── Column checkboxes — restore saved prefs ──
+    const colCheckboxes = document.querySelectorAll('.col-toggle-input');
+    const savedCols     = JSON.parse(localStorage.getItem('watchlist_visible_cols') || '{}');
+
+    colCheckboxes.forEach(cb => {
+        const col = cb.dataset.col;
+        if (savedCols[col] !== undefined) cb.checked = savedCols[col];
+
+        cb.onchange = () => {
+            savedCols[col] = cb.checked;
+            localStorage.setItem('watchlist_visible_cols', JSON.stringify(savedCols));
+            applyColumnVisibility();
+        };
+    });
+
+    // ── Initial load & auto-refresh ──
+    showShimmer();
     await refresh(true);
-    setInterval(() => refresh(false), 5000);
+    setInterval(() => refresh(false), 30000);
 }
 
 // ─────────────────────────────────────────────
 // DATA REFRESH
 // ─────────────────────────────────────────────
 async function refresh(forceFetchWatchlist = false) {
-    let wlPromise;
-    if (!watchlistLoaded || forceFetchWatchlist) {
-        wlPromise = StorageService.getWatchlist();
-    } else {
-        wlPromise = Promise.resolve(watchlistData);
-    }
+    let wlPromise = (!watchlistLoaded || forceFetchWatchlist)
+        ? StorageService.getWatchlist()
+        : Promise.resolve(watchlistData);
 
     const [watchlist, stocks] = await Promise.allSettled([
         wlPromise,
@@ -86,25 +131,82 @@ async function refresh(forceFetchWatchlist = false) {
     ]);
 
     if (!watchlistLoaded || forceFetchWatchlist) {
-        watchlistData = watchlist.status === 'fulfilled' ? (watchlist.value || []) : [];
+        watchlistData   = watchlist.status === 'fulfilled' ? (watchlist.value || []) : [];
         watchlistLoaded = true;
     }
-    marketData    = stocks.status === 'fulfilled'    ? (stocks.value   || []) : [];
+    marketData = stocks.status === 'fulfilled' ? (stocks.value || []) : [];
 
     render();
+    hideShimmer();  // hide skeleton, reveal data tbody
 }
 
 // ─────────────────────────────────────────────
-// RENDER TABLE
+// APPLY COLUMN VISIBILITY
+// ─────────────────────────────────────────────
+function applyColumnVisibility() {
+    document.querySelectorAll('.col-toggle-input').forEach(cb => {
+        const visible  = cb.checked;
+        const colName  = cb.dataset.col;
+        document.querySelectorAll(`[data-col="${colName}"]`).forEach(el => {
+            el.style.display = visible ? '' : 'none';
+        });
+    });
+}
+
+// ─────────────────────────────────────────────
+// DOWNLOAD WATCHLIST AS CSV
+// ─────────────────────────────────────────────
+function downloadCSV() {
+    if (watchlistData.length === 0) {
+        alert('No watchlist data to export.');
+        return;
+    }
+
+    const headers = ['Symbol', 'LTP', 'Change %', 'Previous Close', 'Volume', 'Turnover', 'LTQ', 'Target Buy', 'Target Sell', 'Notes'];
+    const rows = watchlistData.map(w => {
+        const stock = marketData.find(s => s.symbol.toUpperCase() === w.symbol.toUpperCase());
+        return [
+            w.symbol,
+            stock ? stock.price : '',
+            stock ? `${stock.changePercent}%` : '',
+            stock ? stock.previousClose : '',
+            stock ? stock.volume : '',
+            stock ? stock.turnover : '',
+            stock ? (stock.ltq ?? '') : '',
+            w.target_buy  || '',
+            w.target_sell || '',
+            w.notes       || ''
+        ];
+    });
+
+    const escape = val => `"${String(val).replace(/"/g, '""')}"`;
+    const csv    = [headers, ...rows].map(r => r.map(escape).join(',')).join('\n');
+    const blob   = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url    = URL.createObjectURL(blob);
+    const link   = Object.assign(document.createElement('a'), {
+        href:     url,
+        download: `NEPSE_Watchlist_${new Date().toISOString().split('T')[0]}.csv`
+    });
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+// ─────────────────────────────────────────────
+// RENDER TABLE ROWS
 // ─────────────────────────────────────────────
 function render() {
-    const body     = document.getElementById('watchlistBody');
-    const emptyDiv = document.getElementById('wl-empty');
-    const countEl  = document.getElementById('wl-count');
+    const body       = document.getElementById('watchlistBody');
+    const emptyDiv   = document.getElementById('wl-empty');
+    const countEl    = document.getElementById('wl-count');
+    const countTopEl = document.getElementById('wl-count-top');
 
     if (!body) return;
 
-    if (countEl) countEl.innerText = `${watchlistData.length} stock${watchlistData.length !== 1 ? 's' : ''} watched`;
+    const countText = `${watchlistData.length} stock${watchlistData.length !== 1 ? 's' : ''} watched`;
+    if (countEl)    countEl.innerText    = countText;
+    if (countTopEl) countTopEl.innerText = countText;
 
     if (watchlistData.length === 0) {
         body.innerHTML = '';
@@ -115,70 +217,109 @@ function render() {
 
     const newHtml = watchlistData.map(w => {
         const stock  = marketData.find(s => s.symbol.toUpperCase() === w.symbol.toUpperCase());
-        const ltp    = stock ? parseFloat(stock.price) : null;
+        const ltp    = stock ? parseFloat(stock.price)         : null;
         const change = stock ? parseFloat(stock.changePercent) : null;
 
-        // Target alerts
+        // ── Target hit flags ──
         const buyHit  = ltp && w.target_buy  && ltp <= w.target_buy;
         const sellHit = ltp && w.target_sell && ltp >= w.target_sell;
 
+        // ── Row background: green tint ↑ / red tint ↓ / neutral ──
+        let rowStyle = 'border-left: 3px solid transparent;';
+        if (change !== null) {
+            if (change > 0)
+                rowStyle = 'background: rgba(16,185,129,0.04); border-left: 3px solid #10b981;';
+            else if (change < 0)
+                rowStyle = 'background: rgba(244,63,94,0.04); border-left: 3px solid #f43f5e;';
+        }
+
+        // ── Cell HTML helpers ──
+        const dash = `<span style="color:var(--text-secondary);">—</span>`;
+
         const ltpHtml = ltp !== null
-            ? `<span style="font-weight:700;">${ltp.toFixed(2)}</span>`
-            : `<span style="color:var(--text-secondary);">—</span>`;
+            ? `<span style="font-weight:700;">Rs.&nbsp;${ltp.toFixed(2)}</span>`
+            : dash;
 
         const changeHtml = change !== null
             ? `<span class="${change >= 0 ? 'price-up' : 'price-down'}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</span>`
-            : `<span style="color:var(--text-secondary);">—</span>`;
+            : dash;
+
+        const prevCloseHtml = stock?.previousClose !== undefined
+            ? `<span>Rs.&nbsp;${parseFloat(stock.previousClose).toFixed(2)}</span>`
+            : dash;
+
+        const volumeHtml = stock?.volume !== undefined
+            ? `<span>${Number(stock.volume).toLocaleString('en-IN')}</span>`
+            : dash;
+
+        const turnoverHtml = stock?.turnover !== undefined
+            ? `<span>Rs.&nbsp;${Number(stock.turnover).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>`
+            : dash;
+
+        const ltqHtml = stock?.ltq !== undefined
+            ? `<span>${Number(stock.ltq).toLocaleString('en-IN')}</span>`
+            : dash;
 
         const targetBuyHtml = w.target_buy
-            ? `<span class="target-badge target-buy-badge ${buyHit ? '' : ''}" 
-                style="${buyHit ? 'animation:pulse 1s infinite;box-shadow:0 0 8px #10b981;' : ''}">
-                Rs. ${w.target_buy} ${buyHit ? '🎯' : ''}
+            ? `<span class="target-badge target-buy-badge"
+                    style="${buyHit ? 'animation:pulse 1s infinite; box-shadow:0 0 8px #10b981;' : ''}">
+                    Rs.&nbsp;${w.target_buy}${buyHit ? ' 🎯' : ''}
                </span>`
             : `<span style="color:var(--text-secondary); font-size:0.8rem;">—</span>`;
 
         const targetSellHtml = w.target_sell
             ? `<span class="target-badge target-sell-badge"
-                style="${sellHit ? 'animation:pulse 1s infinite;box-shadow:0 0 8px #f43f5e;' : ''}">
-                Rs. ${w.target_sell} ${sellHit ? '🎯' : ''}
+                    style="${sellHit ? 'animation:pulse 1s infinite; box-shadow:0 0 8px #f43f5e;' : ''}">
+                    Rs.&nbsp;${w.target_sell}${sellHit ? ' 🎯' : ''}
                </span>`
             : `<span style="color:var(--text-secondary); font-size:0.8rem;">—</span>`;
 
         const notesHtml = w.notes
-            ? `<span class="notes-text" title="${w.notes}">${w.notes}</span>`
-            : `<span style="color:var(--text-secondary); font-size:0.8rem;">—</span>`;
+            ? `<span class="notes-text" title="${w.notes.replace(/"/g, '&quot;')}">${w.notes}</span>`
+            : dash;
+
+        // ── Symbol initials (first 2 chars) for avatar fallback ──
+        const initials = w.symbol.substring(0, 2).toUpperCase();
 
         return `
-        <tr style="border-left: 3px solid ${buyHit ? '#10b981' : sellHit ? '#f43f5e' : 'transparent'};">
-            <td style="cursor:pointer;" onclick="showSymbolDetails('${w.symbol}')">
-                <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
-                  <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="../images/stocks/${w.symbol}.png" 
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
-                         alt="${w.symbol}" 
-                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
-                    <div class="symbol-avatar" style="display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border-radius: 50%; letter-spacing: -0.2px;">
-                      ${w.symbol.substring(0, 2)}
+        <tr style="${rowStyle}">
+            <!-- Symbol — clickable → stock details -->
+            <td data-col="symbol" style="cursor:pointer;"
+                onclick="window.location.href='./market/stock-details.html?symbol=${encodeURIComponent(w.symbol)}'">
+                <div class="sym-link">
+                    <div class="sym-avatar-wrap">
+                        <img src="../images/stocks/${w.symbol}.png"
+                             alt="${w.symbol}"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="sym-avatar-fallback">${initials}</div>
                     </div>
-                  </div>
-                  <div style="display: flex; flex-direction: column;">
-                    <span style="font-weight: 700; color: var(--primary);">${w.symbol}</span>
-                  </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span class="sym-name">${w.symbol}</span>
+                    </div>
                 </div>
             </td>
-            <td>${ltpHtml}</td>
-            <td>${changeHtml}</td>
-            <td>${targetBuyHtml}</td>
-            <td>${targetSellHtml}</td>
-            <td>${notesHtml}</td>
+
+            <td data-col="ltp">${ltpHtml}</td>
+            <td data-col="change">${changeHtml}</td>
+            <td data-col="prevClose">${prevCloseHtml}</td>
+            <td data-col="volume">${volumeHtml}</td>
+            <td data-col="turnover">${turnoverHtml}</td>
+            <td data-col="ltq">${ltqHtml}</td>
+            <td data-col="targetBuy">${targetBuyHtml}</td>
+            <td data-col="targetSell">${targetSellHtml}</td>
+            <td data-col="notes">${notesHtml}</td>
+
+            <!-- Actions -->
             <td>
                 <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
                     <button onclick="window.editWatchlistItem(${w.id})"
-                        style="background:rgba(99,102,241,0.1);color:#6366f1;border:1px solid rgba(99,102,241,0.3);padding:4px 10px;border-radius:6px;font-size:0.78rem;cursor:pointer;">
+                        style="background:rgba(99,102,241,0.1); color:#6366f1; border:1px solid rgba(99,102,241,0.3); padding:4px 10px; border-radius:6px; font-size:0.78rem; cursor:pointer;"
+                        title="Edit">
                         <i class="fas fa-pen"></i>
                     </button>
                     <button onclick="window.removeFromWatchlist('${w.symbol}')"
-                        style="background:rgba(244,63,94,0.1);color:#f43f5e;border:1px solid rgba(244,63,94,0.3);padding:4px 10px;border-radius:6px;font-size:0.78rem;cursor:pointer;">
+                        style="background:rgba(244,63,94,0.1); color:#f43f5e; border:1px solid rgba(244,63,94,0.3); padding:4px 10px; border-radius:6px; font-size:0.78rem; cursor:pointer;"
+                        title="Remove">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -189,20 +330,21 @@ function render() {
     if (body.innerHTML !== newHtml) {
         body.innerHTML = newHtml;
     }
+
+    // Re-apply saved column visibility after every render
+    applyColumnVisibility();
 }
 
 // ─────────────────────────────────────────────
-// MODAL OPEN (Add or Edit)
+// MODAL — Open (Add or Edit)
 // ─────────────────────────────────────────────
 function openModal(item = null) {
-    document.getElementById('wl-edit-id').value     = item ? item.id : '';
+    document.getElementById('wl-edit-id').value = item ? item.id : '';
 
     if (item) {
-        // Edit mode: show symbol as plain text, disable search
         wlSymbolSearch.setValue(item.symbol);
         document.getElementById('wl-symbol').disabled = true;
     } else {
-        // Add mode: clear and enable search
         wlSymbolSearch.setData(marketData);
         wlSymbolSearch.clear();
         document.getElementById('wl-symbol').disabled = false;
@@ -210,24 +352,25 @@ function openModal(item = null) {
 
     document.getElementById('wl-target-buy').value  = item?.target_buy  ?? '';
     document.getElementById('wl-target-sell').value = item?.target_sell ?? '';
-    document.getElementById('wl-notes').value        = item?.notes ?? '';
+    document.getElementById('wl-notes').value        = item?.notes       ?? '';
     document.getElementById('wl-modal-title').innerText = item ? `Edit ${item.symbol}` : 'Add to Watchlist';
-    document.getElementById('wl-modal').style.display = 'flex';
+    document.getElementById('wl-modal').style.display   = 'flex';
 }
 
 // ─────────────────────────────────────────────
-// SAVE
+// SAVE — Add or Update
 // ─────────────────────────────────────────────
 async function handleSave() {
     const editId     = document.getElementById('wl-edit-id').value;
-    const symbol     = wlSymbolSearch ? wlSymbolSearch.getValue() : document.getElementById('wl-symbol')?.value.toUpperCase().trim();
+    const symbol     = wlSymbolSearch
+        ? wlSymbolSearch.getValue()
+        : document.getElementById('wl-symbol')?.value.toUpperCase().trim();
     const targetBuy  = parseFloat(document.getElementById('wl-target-buy').value)  || null;
     const targetSell = parseFloat(document.getElementById('wl-target-sell').value) || null;
     const notes      = document.getElementById('wl-notes').value.trim() || null;
 
     if (!editId && !symbol) { alert('Please select a symbol from the dropdown.'); return; }
 
-    // On edit, use the existing symbol from the hidden field
     const finalSymbol = editId
         ? watchlistData.find(w => w.id === parseInt(editId))?.symbol
         : symbol;
@@ -235,20 +378,19 @@ async function handleSave() {
     if (!finalSymbol) { alert('Symbol not found.'); return; }
 
     if (editId) {
-        await StorageService.updateWatchlistItem(parseInt(editId), {
-            target_buy: targetBuy, target_sell: targetSell, notes
-        });
+        await StorageService.updateWatchlistItem(parseInt(editId), { target_buy: targetBuy, target_sell: targetSell, notes });
     } else {
         await StorageService.addToWatchlist({ symbol: finalSymbol, target_buy: targetBuy, target_sell: targetSell, notes });
     }
 
     document.getElementById('wl-modal').style.display = 'none';
     wlSymbolSearch?.clear();
+    showShimmer();
     await refresh(true);
 }
 
 // ─────────────────────────────────────────────
-// EDIT & DELETE (Global)
+// GLOBAL HANDLERS (called from inline onclick)
 // ─────────────────────────────────────────────
 window.editWatchlistItem = (id) => {
     const item = watchlistData.find(w => w.id === id);
@@ -258,7 +400,11 @@ window.editWatchlistItem = (id) => {
 window.removeFromWatchlist = async (symbol) => {
     if (!confirm(`Remove ${symbol} from watchlist?`)) return;
     await StorageService.removeFromWatchlist(symbol);
+    showShimmer();
     await refresh(true);
 };
 
+// ─────────────────────────────────────────────
+// BOOTSTRAP
+// ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', init);

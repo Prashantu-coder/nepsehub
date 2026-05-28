@@ -124,3 +124,38 @@
 .wl-empty i { font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem; display: block; }
 .wl-empty h3 { margin-bottom: 0.5rem; }
 .wl-empty p  { color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem; }
+
+/* ── Custom Styled Checkbox inside Columns Dropdown ── */
+.col-toggle-input {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 18px !important;
+  height: 18px !important;
+  border: 2px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 4px !important;
+  outline: none !important;
+  background: transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+  padding: 0 !important;
+  margin: 0 !important;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: none !important;
+}
+
+.col-toggle-input:checked {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.col-toggle-input:checked::after {
+  content: "\f00c" !important;
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900 !important;
+  font-size: 10px !important;
+  color: white !important;
+  position: absolute;
+}

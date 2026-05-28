@@ -1,39 +1,30 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-// --- CONFIGURATION ---
-// Replace these with your actual Supabase project details
-const SUPABASE_URL = 'https://yzvarygeeycsbttxzusg.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_hKShryc4e4rFs5zbfvFubw_j2jv2gFW';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
 const STORAGE_KEYS = {
     SETTINGS: 'nepse_hub_settings',
     NOTIFICATIONS: 'nepse_notifications'
 };
 
 const StorageService = {
-    // --- Watchlist (Supabase) ---
+    // --- Watchlist (Express Backend) ---
     async getWatchlist() {
         try {
-            const { data, error } = await supabase
-                .from('watchlist')
-                .select('*')
-                .order('created_at', { ascending: false });
-            if (error) throw error;
-            return data || []; // full rows: { id, symbol, target_buy, target_sell, notes }
+            const response = await window.auth.apiCall('/api/watchlist');
+            if (!response.ok) throw new Error('Failed to fetch watchlist');
+            return await response.json();
         } catch (err) {
-            console.error('Watchlist Error:', err.message);
+            console.error('Watchlist Fetch Error:', err.message);
             return [];
         }
     },
 
     async addToWatchlist({ symbol, target_buy = null, target_sell = null, notes = null }) {
         try {
-            const { error } = await supabase
-                .from('watchlist')
-                .upsert({ symbol, target_buy, target_sell, notes }, { onConflict: 'symbol' });
-            return !error;
+            const response = await window.auth.apiCall('/api/watchlist', {
+                method: 'POST',
+                body: JSON.stringify({ symbol, target_buy, target_sell, notes })
+            });
+            if (!response.ok) throw new Error('Failed to add to watchlist');
+            const data = await response.json();
+            return data.success;
         } catch (err) {
             console.error('AddToWatchlist Error:', err.message);
             return false;
@@ -42,11 +33,13 @@ const StorageService = {
 
     async updateWatchlistItem(id, updates) {
         try {
-            const { error } = await supabase
-                .from('watchlist')
-                .update(updates)
-                .eq('id', id);
-            return !error;
+            const response = await window.auth.apiCall(`/api/watchlist/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(updates)
+            });
+            if (!response.ok) throw new Error('Failed to update watchlist item');
+            const data = await response.json();
+            return data.success;
         } catch (err) {
             console.error('UpdateWatchlistItem Error:', err.message);
             return false;
@@ -55,11 +48,12 @@ const StorageService = {
 
     async removeFromWatchlist(symbol) {
         try {
-            const { error } = await supabase
-                .from('watchlist')
-                .delete()
-                .eq('symbol', symbol);
-            return !error;
+            const response = await window.auth.apiCall(`/api/watchlist/${symbol}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) throw new Error('Failed to remove from watchlist');
+            const data = await response.json();
+            return data.success;
         } catch (err) {
             console.error('RemoveFromWatchlist Error:', err.message);
             return false;
@@ -68,27 +62,20 @@ const StorageService = {
 
     async isInWatchlist(symbol) {
         try {
-            const { data, error } = await supabase
-                .from('watchlist')
-                .select('symbol')
-                .eq('symbol', symbol);
-            if (error) throw error;
-            return data && data.length > 0;
+            const list = await this.getWatchlist();
+            return list.some(item => item.symbol.toUpperCase() === symbol.toUpperCase());
         } catch (err) {
             console.error('IsInWatchlist Error:', err.message);
             return false;
         }
     },
 
-    // --- Trade Plans (Supabase) ---
+    // --- Trade Plans (Express Backend) ---
     async getTradePlans() {
         try {
-            const { data, error } = await supabase
-                .from('trade_plans')
-                .select('*')
-                .order('created_at', { ascending: false });
-            if (error) throw error;
-            return data || [];
+            const response = await window.auth.apiCall('/api/trade-plans');
+            if (!response.ok) throw new Error('Failed to fetch trade plans');
+            return await response.json();
         } catch (err) {
             console.error('Trade Plans Fetch Error:', err.message);
             return [];
@@ -97,12 +84,13 @@ const StorageService = {
 
     async saveTradePlan(plan) {
         try {
-            const { data, error } = await supabase
-                .from('trade_plans')
-                .insert([plan])
-                .select();
-            if (error) throw error;
-            return { success: true, data: data[0] };
+            const response = await window.auth.apiCall('/api/trade-plans', {
+                method: 'POST',
+                body: JSON.stringify(plan)
+            });
+            if (!response.ok) throw new Error('Failed to save trade plan');
+            const data = await response.json();
+            return data;
         } catch (err) {
             console.error('Save Trade Plan Error:', err.message);
             return { success: false, error: err.message };
@@ -111,26 +99,22 @@ const StorageService = {
 
     async deleteTradePlan(id) {
         try {
-            const { error } = await supabase
-                .from('trade_plans')
-                .delete()
-                .eq('id', id);
-            return !error;
+            const response = await window.auth.apiCall(`/api/trade-plans/${id}`, {
+                method: 'DELETE'
+            });
+            return response.ok;
         } catch (err) {
             console.error('Delete Trade Plan Error:', err.message);
             return false;
         }
     },
 
-    // --- Transactions — Single Source of Truth (Supabase) ---
+    // --- Transactions — Single Source of Truth (Express Backend) ---
     async getTransactions() {
         try {
-            const { data, error } = await supabase
-                .from('transactions')
-                .select('*')
-                .order('transaction_date', { ascending: false });
-            if (error) throw error;
-            return { success: true, data: data || [] };
+            const response = await window.auth.apiCall('/api/transactions');
+            if (!response.ok) throw new Error('Failed to fetch transactions');
+            return await response.json();
         } catch (err) {
             console.error('Transactions Fetch Error:', err.message);
             return { success: false, error: err.message, data: [] };
@@ -139,12 +123,12 @@ const StorageService = {
 
     async addTransaction(tx) {
         try {
-            const { data, error } = await supabase
-                .from('transactions')
-                .insert([tx])
-                .select();
-            if (error) throw error;
-            return { success: true, data: data[0] };
+            const response = await window.auth.apiCall('/api/transactions', {
+                method: 'POST',
+                body: JSON.stringify(tx)
+            });
+            if (!response.ok) throw new Error('Failed to add transaction');
+            return await response.json();
         } catch (err) {
             console.error('Add Transaction Error:', err.message);
             return { success: false, error: err.message };
@@ -153,31 +137,24 @@ const StorageService = {
 
     async deleteTransaction(id) {
         try {
-            const { error } = await supabase
-                .from('transactions')
-                .delete()
-                .eq('id', id);
-            return !error;
+            const response = await window.auth.apiCall(`/api/transactions/${id}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) throw new Error('Failed to delete transaction');
+            const data = await response.json();
+            return data.success;
         } catch (err) {
             console.error('Delete Transaction Error:', err.message);
             return false;
         }
     },
 
-    // --- Notifications (Supabase) ---
+    // --- Notifications (Express Backend) ---
     async getNotifications() {
         try {
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-            
-            const { data, error } = await supabase
-                .from('notifications')
-                .select('*')
-                .gte('created_at', sevenDaysAgo.toISOString())
-                .order('created_at', { ascending: false });
-            
-            if (error) throw error;
-            return data || [];
+            const response = await window.auth.apiCall('/api/notifications');
+            if (!response.ok) throw new Error('Failed to fetch notifications');
+            return await response.json();
         } catch (err) {
             console.error('Notification Fetch Error:', err.message);
             return [];
@@ -186,16 +163,11 @@ const StorageService = {
 
     async addNotification(notif) {
         try {
-            const { error } = await supabase
-                .from('notifications')
-                .insert([{
-                    title: notif.title,
-                    message: notif.message,
-                    type: notif.type || 'info',
-                    symbol: notif.symbol || null,
-                    is_read: false
-                }]);
-            return !error;
+            const response = await window.auth.apiCall('/api/notifications', {
+                method: 'POST',
+                body: JSON.stringify(notif)
+            });
+            return response.ok;
         } catch (err) {
             console.error('AddNotification Error:', err.message);
             return false;
@@ -204,11 +176,12 @@ const StorageService = {
 
     async markNotificationsAsRead() {
         try {
-            const { error } = await supabase
-                .from('notifications')
-                .update({ is_read: true })
-                .eq('is_read', false);
-            return !error;
+            const response = await window.auth.apiCall('/api/notifications/mark-read', {
+                method: 'PUT'
+            });
+            if (!response.ok) throw new Error('Failed to mark notifications as read');
+            const data = await response.json();
+            return data.success;
         } catch (err) {
             console.error('MarkNotificationsAsRead Error:', err.message);
             return false;

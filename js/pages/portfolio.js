@@ -145,65 +145,51 @@ async function refresh(isInitial = false) {
 }
 
 function showSkeletons() {
-    // 1. Stats Grid
+    // 1. Stats Grid — shimmer the summary values
     const statIds = ['stat-total-inv', 'stat-current-val', 'stat-unrealized-pnl', 'stat-realized-pnl', 'stat-today-change'];
     statIds.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.innerHTML = '<div class="skeleton skeleton-text" style="width: 100px; margin: 0.5rem 0;"></div>';
+        if (el) el.innerHTML = '<div class="skeleton skeleton-text" style="width:100px; margin:0.5rem 0;"></div>';
     });
 
-    // 2. Table
-    const body = document.getElementById('portfolio-list-body');
-    if (body) {
-        body.innerHTML = Array(3).fill(0).map(() => `
-            <tr>
-                <td><div class="skeleton skeleton-text" style="width: 60px;"></div></td>
-                <td><div class="skeleton skeleton-text" style="width: 40px;"></div></td>
-                <td><div class="skeleton skeleton-text" style="width: 70px;"></div></td>
-                <td><div class="skeleton skeleton-text" style="width: 70px;"></div></td>
-                <td><div class="skeleton skeleton-text" style="width: 80px;"></div></td>
-                <td><div class="skeleton skeleton-text" style="width: 80px;"></div></td>
-                <td><div class="skeleton skeleton-text" style="width: 90px;"></div></td>
-                <td><div class="skeleton skeleton-text" style="width: 90px;"></div></td>
-                <td><div class="skeleton skeleton-text" style="width: 50px;"></div></td>
-            </tr>
-        `).join('');
-    }
+    // 2. Holdings table — re-show wrapper, show HTML shimmer tbody, hide real tbody
+    const tableWrap = document.getElementById('holdings-table-wrap');
+    const shimmer   = document.getElementById('holdings-shimmer-body');
+    const dataBody  = document.getElementById('portfolio-list-body');
+    if (tableWrap) tableWrap.style.display = '';   // ensure table is visible
+    if (shimmer)   shimmer.style.display   = '';   // show shimmer rows
+    if (dataBody)  dataBody.classList.add('pf-loading');
 
-    // 3. Charts (if visible)
-    const perfCard = document.querySelector('.chart-card:nth-child(1)');
-    const sectCard = document.querySelector('.chart-card:nth-child(2)');
-
-    if (perfCard && !perfCard.querySelector('.skeleton')) {
-        const canvas = perfCard.querySelector('canvas');
-        if (canvas) canvas.style.display = 'none';
-        const skel = document.createElement('div');
-        skel.className = 'skeleton skeleton-chart';
-        perfCard.appendChild(skel);
-    }
-    if (sectCard && !sectCard.querySelector('.skeleton')) {
-        const canvas = sectCard.querySelector('canvas');
-        if (canvas) canvas.style.display = 'none';
-        const skel = document.createElement('div');
-        skel.className = 'skeleton skeleton-chart';
-        sectCard.appendChild(skel);
-    }
+    // 3. Hide empty card while loading
+    const emptyCard = document.getElementById('portfolio-empty-msg');
+    if (emptyCard) emptyCard.style.display = 'none';
 }
 
 // ─────────────────────────────────────────────
 // RENDER HOLDINGS TABLE
 // ─────────────────────────────────────────────
 function renderHoldings() {
-    const body = document.getElementById('portfolio-list-body');
-    const emptyMsg = document.getElementById('portfolio-empty-msg');
+    const body        = document.getElementById('portfolio-list-body');
+    const shimmer     = document.getElementById('holdings-shimmer-body');
+    const tableWrap   = document.getElementById('holdings-table-wrap');
+    const emptyCard   = document.getElementById('portfolio-empty-msg');
     if (!body) return;
+
+    // Always hide shimmer tbody once data is ready
+    if (shimmer)   shimmer.style.display   = 'none';
+    body.classList.remove('pf-loading');
 
     if (computedHoldings.length === 0) {
         body.innerHTML = '';
-        if (emptyMsg) emptyMsg.style.display = 'block';
+        // Hide the whole table, show only the empty card
+        if (tableWrap) tableWrap.style.display = 'none';
+        if (emptyCard) emptyCard.style.display  = 'flex';
         return;
     }
-    if (emptyMsg) emptyMsg.style.display = 'none';
+
+    // Has data — show table, hide empty card
+    if (tableWrap) tableWrap.style.display = '';
+    if (emptyCard) emptyCard.style.display  = 'none';
 
     body.innerHTML = computedHoldings.map(h => {
         const stock = marketData.find(s => s.symbol.toUpperCase() === h.symbol.toUpperCase());
@@ -235,7 +221,7 @@ function renderHoldings() {
                 </div>
             </td>
             <td style="font-weight:600;">${h.quantity.toFixed(0)}</td>
-            <td style="color:var(--text-secondary);">Rs. ${h.wacc.toFixed(1)}</td>
+            <td style="color:var(--text-secondary);">Rs. ${h.wacc.toFixed(2)}</td>
             <td style="font-weight:700;">Rs. ${ltp.toFixed(1)}</td>
             <td style="color:var(--text-secondary);">Rs. ${fmt(h.totalInvested)}</td>
             <td style="font-weight:700;">Rs. ${fmt(curVal)}</td>
@@ -430,13 +416,21 @@ function initCharts() {
 // TRANSACTION HISTORY TABLE
 // ─────────────────────────────────────────────
 function renderTransactions() {
-    const body = document.getElementById('transaction-history-body');
+    const body      = document.getElementById('transaction-history-body');
+    const shimmer   = document.getElementById('tx-shimmer-body');
+    const emptyCard = document.getElementById('tx-empty-msg');
     if (!body) return;
 
+    // Hide shimmer tbody once called
+    if (shimmer) shimmer.style.display = 'none';
+    body.classList.remove('pf-loading');
+
     if (allTransactions.length === 0) {
-        body.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-secondary);">No transactions yet</td></tr>`;
+        body.innerHTML = '';
+        if (emptyCard) emptyCard.style.display = 'flex';
         return;
     }
+    if (emptyCard) emptyCard.style.display = 'none';
 
     const totalFees = allTransactions.reduce((s, t) => s + (t.broker_commission + t.sebon_fee + t.dp_charge), 0);
     const buyTotal = allTransactions.filter(t => t.type?.toUpperCase() === 'BUY').reduce((s, t) => s + t.total_amount, 0);

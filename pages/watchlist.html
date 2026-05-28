@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watchlist | NEPSE HUB</title>
+    <meta name="description" content="Monitor your favourite NEPSE stocks with live prices, target alerts, and custom columns.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/base.css">
     <link rel="stylesheet" href="../css/layout.css">
@@ -11,129 +12,359 @@
     <link rel="stylesheet" href="../css/themes.css">
     <link rel="stylesheet" href="../css/pages/watchlist.css">
     <link rel="stylesheet" href="../css/easy.css">
+
+    <style>
+        /* ── Pulse animation for LIVE dot ── */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        /* ── Shimmer rows in HTML ── */
+        .wl-shimmer-body tr td .sk {
+            display: inline-block;
+            border-radius: 5px;
+            height: 14px;
+        }
+        .sk-sym  { width: 70px; }
+        .sk-med  { width: 55px; }
+        .sk-sm   { width: 42px; }
+        .sk-lg   { width: 90px; }
+        .sk-act  { width: 56px; height: 24px; border-radius: 8px; }
+
+        /* ── Hidden utility ── */
+        .wl-shimmer-body.loaded { display: none; }
+        .wl-data-body.loading   { display: none; }
+
+        /* ── Market type row background ── */
+        .wl-type-broker   { background: rgba(99, 102, 241, 0.04); border-left: 3px solid #6366f1; }
+        .wl-type-flat     { border-left: 3px solid transparent; }
+
+        /* ── Symbol clickable hover ── */
+        .sym-link {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+        .sym-link:hover .sym-name { text-decoration: underline; text-underline-offset: 3px; }
+        .sym-avatar-wrap {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .sym-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .sym-avatar-fallback {
+            display: none;
+            position: absolute;
+            inset: 0;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            border-radius: 50%;
+        }
+        .sym-name {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        /* ── Notes cell truncation ── */
+        .notes-text {
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+        }
+    </style>
 </head>
 <body>
+    <!-- ════════════════════════════════════════ HEADER ════════════════════════════════════════ -->
     <header class="sticky">
-        <div style="display: flex; flex-direction: row; justify-content: space-between; width: 100%;">
-            <!-- logo -->
-            <div style="display: flex; align-items: center; gap: 1.5rem;">
-                <div id="burgerMenu" class="burger-menu">
-                    <i class="fas fa-bars"></i>
-                </div>
-
-                <div class="logo">
-                    <i class="fas fa-chart-line"></i>
-                    <span class="logo-text">NEPSE HUB</span>
-                </div>
-            </div>
-
-            <!-- nepse values -->
-            <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 6px;">
-                <div id="marketDot" class="blinking-dot"></div>
-                <div>
-                    <h6 class="nepse">NEPSE</h6>
-                </div>
-                <div id="index-value">
-                    <div class="flex-col">
-                        <span id="header-nepse-val" style="font-weight: 700; font-size: 1rem; color: var(--text-primary);">—</span>
-                        <span id="header-nepse-change" style="font-size: 0.78rem; font-weight: 600; margin-right: 0.5rem;">—</span>
-                    </div>
-                    <span class="pc-only" style="height: 12px; width: 1px; background: rgba(255, 255, 255, 0.15);"></span>
-                    <div class="flex-col">
-                            <span class="pc-only font-1rem text-secondary">Turnover: <strong id="header-nepse-turnover" class="text-primary">—</strong></span>
-                        <span class="pc-only font-1rem text-secondary">Volume: <strong id="header-nepse-volume" class="text-primary">—</strong></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- clock and notification -->
-            <div style="display: flex; gap: 5px; padding: 0.5rem 0rem; padding-right: 1rem;">
-                <!-- Combined Market Status & Clock Pill -->
-                <div class="market-status-pill pc-only">
-                    <div id="navbar-clock" class="navbar-clock-sub"></div>
-                    <div id="market-status" class="market-status-sub"></div>
-                </div>
-
-                <!-- Notification Bell -->
-                <div class="nav-notification-wrapper">
-                    <button id="notification-bell" class="btn-icon">
-                        <i class="far fa-bell"></i>
-                        <span id="notif-badge" class="notif-badge hidden">0</span>
-                    </button>
-                    <div id="notif-dropdown" class="notif-dropdown glass hidden">
-                        <div class="notif-header">
-                            <h5>Notifications</h5>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <button id="sound-toggle-btn" class="sound-toggle" title="Toggle alert sound">
-                                    <i class="fas fa-volume-up"></i>
-                                </button>
-                                <button id="mark-read-btn">Mark all as read</button>
-                            </div>
-                        </div>
-                        <div class="notif-filters">
-                            <button class="notif-filter-btn active" data-filter="all">All</button>
-                            <button class="notif-filter-btn" data-filter="buy">Buy Signals</button>
-                            <button class="notif-filter-btn" data-filter="sell">Sell Signals</button>
-                            <button class="notif-filter-btn" data-filter="stoploss">Stop Loss</button>
-                        </div>
-                        <div id="notif-list" class="notif-list">
-                            <div class="notif-empty">No notifications in the last 7 days</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <div style="display:flex; flex-direction:row; justify-content:space-between; width:100%;">
+        <!-- Logo -->
+        <div style="display:flex; align-items:center; gap:1.5rem;">
+          <div id="burgerMenu" class="burger-menu"><i class="fas fa-bars"></i></div>
+          <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            <span class="logo-text">NEPSE HUB</span>
+          </div>
         </div>
+
+        <!-- NEPSE Index -->
+        <div style="display:flex; flex-direction:row; justify-content:center; align-items:center; gap:6px;">
+          <div id="marketDot" class="blinking-dot"></div>
+          <div><h6 class="nepse">NEPSE</h6></div>
+          <div id="index-value">
+            <div class="flex-col">
+              <span id="header-nepse-val" style="font-weight:700; font-size:1rem; color:var(--text-primary);">—</span>
+              <span id="header-nepse-change" style="font-size:0.78rem; font-weight:600; margin-right:0.5rem;">—</span>
+            </div>
+            <span class="pc-only" style="height:12px; width:1px; background:rgba(255,255,255,0.15);"></span>
+            <div class="flex-col">
+              <span class="pc-only font-1rem text-secondary">Turnover: <strong id="header-nepse-turnover" class="text-primary">—</strong></span>
+              <span class="pc-only font-1rem text-secondary">Volume: <strong id="header-nepse-volume" class="text-primary">—</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clock / Notifications / Profile -->
+        <div style="display:flex; gap:5px; padding:0.5rem 0; padding-right:1rem;">
+          <div class="market-status-pill pc-only">
+            <div id="navbar-clock" class="navbar-clock-sub"></div>
+            <div id="market-status" class="market-status-sub"></div>
+          </div>
+
+          <!-- Notification Bell -->
+          <div class="nav-notification-wrapper">
+            <button id="notification-bell" class="btn-icon">
+              <i class="far fa-bell"></i>
+              <span id="notif-badge" class="notif-badge hidden">0</span>
+            </button>
+            <div id="notif-dropdown" class="notif-dropdown glass hidden">
+              <div class="notif-header">
+                <h5>Notifications</h5>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                  <button id="sound-toggle-btn" class="sound-toggle" title="Toggle alert sound">
+                    <i class="fas fa-volume-up"></i>
+                  </button>
+                  <button id="mark-read-btn">Mark all as read</button>
+                </div>
+              </div>
+              <div class="notif-filters">
+                <button class="notif-filter-btn active" data-filter="all">All</button>
+                <button class="notif-filter-btn" data-filter="buy">Buy Signals</button>
+                <button class="notif-filter-btn" data-filter="sell">Sell Signals</button>
+                <button class="notif-filter-btn" data-filter="stoploss">Stop Loss</button>
+              </div>
+              <div id="notif-list" class="notif-list">
+                <div class="notif-empty">No notifications in the last 7 days</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile -->
+          <div class="nav-profile-wrapper">
+            <button id="user-profile-btn" title="View Profile">
+              <span id="user-avatar-initial">U</span>
+            </button>
+            <div id="profile-dropdown" class="profile-dropdown glass hidden">
+              <div class="profile-header">
+                <div class="profile-avatar-large">U</div>
+                <div class="profile-meta">
+                  <h5>User</h5>
+                  <span>Code: </span>
+                </div>
+              </div>
+              <div class="profile-body">
+                <div class="profile-info-item">
+                  <i class="fas fa-envelope"></i>
+                  <span></span>
+                </div>
+              </div>
+              <div class="profile-footer">
+                <button id="logout-btn" class="btn-logout">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
+
     <div id="navbar-container"></div>
     <div class="app-container">
         <div id="sidebar-container"></div>
         <main class="main-content">
             <div id="app">
                 <div class="fade-in">
-                    <!-- Header -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+
+                    <!-- ══ Page Header ══ -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
                         <div>
                             <h2 style="margin-bottom:0.2rem;"><i class="fas fa-eye" style="margin-right:0.75rem;"></i>My Watchlist</h2>
-                            <p style="color:var(--text-secondary); font-size:0.85rem;">Track stocks with custom target prices</p>
+                            <p style="color:var(--text-secondary); font-size:0.85rem;">Track stocks with live prices &amp; custom target alerts</p>
                         </div>
-                        <div style="display:flex; gap:0.75rem; align-items:center;">
-                            <span id="wl-live-dot" style="display:flex; align-items:center; gap:0.4rem; font-size:0.78rem; color:var(--text-secondary);">
-                                <span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;animation:pulse 2s infinite;"></span> LIVE
+                        <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+                            <!-- LIVE indicator -->
+                            <span id="wl-live-dot" style="display:flex; align-items:center; gap:0.4rem; font-size:0.78rem; color:var(--text-secondary); margin-right:0.5rem;">
+                                <span style="width:8px; height:8px; border-radius:50%; background:#10b981; display:inline-block; animation:pulse 2s infinite;"></span> LIVE
                             </span>
-                            <button class="btn btn-secondary" id="enable-notifications" style="gap: 0.5rem; display: flex; align-items: center;">
+
+                            <!-- CSV Export -->
+                            <button class="btn btn-secondary" id="download-csv-btn" style="gap:0.5rem; display:flex; align-items:center;">
+                                <i class="fas fa-file-csv"></i> Export CSV
+                            </button>
+
+                            <!-- Columns toggle -->
+                            <div class="dropdown-wrapper" style="position:relative; display:inline-block;">
+                                <button class="btn btn-secondary" id="toggle-columns-btn" style="gap:0.5rem; display:flex; align-items:center;">
+                                    <i class="fas fa-columns"></i> Columns
+                                </button>
+                                <!-- dropdown starts HIDDEN — JS toggles it -->
+                                <div id="columns-dropdown" class="columns-dropdown glass hidden"
+                                     style="position:absolute; right:0; top:115%; background:#1e293b; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:1rem; min-width:185px; z-index:200; box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+                                    <div style="font-weight:700; font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; margin-bottom:0.6rem; letter-spacing:0.5px;">Visible Columns</div>
+
+                                    <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; padding:0.3rem 0; cursor:pointer; color:#fff;">
+                                        <input type="checkbox" class="col-toggle-input" data-col="ltp" checked> LTP (Last Price)
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; padding:0.3rem 0; cursor:pointer; color:#fff;">
+                                        <input type="checkbox" class="col-toggle-input" data-col="change" checked> Change %
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; padding:0.3rem 0; cursor:pointer; color:#fff;">
+                                        <input type="checkbox" class="col-toggle-input" data-col="prevClose" checked> Pre. Close
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; padding:0.3rem 0; cursor:pointer; color:#fff;">
+                                        <input type="checkbox" class="col-toggle-input" data-col="volume" checked> Volume
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; padding:0.3rem 0; cursor:pointer; color:#fff;">
+                                        <input type="checkbox" class="col-toggle-input" data-col="turnover" checked> Turnover
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; padding:0.3rem 0; cursor:pointer; color:#fff;">
+                                        <input type="checkbox" class="col-toggle-input" data-col="ltq" checked> LTQ (Last Qty)
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; padding:0.3rem 0; cursor:pointer; color:#fff;">
+                                        <input type="checkbox" class="col-toggle-input" data-col="targetBuy" checked> Target Buy
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; padding:0.3rem 0; cursor:pointer; color:#fff;">
+                                        <input type="checkbox" class="col-toggle-input" data-col="targetSell" checked> Target Sell
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; padding:0.3rem 0; cursor:pointer; color:#fff;">
+                                        <input type="checkbox" class="col-toggle-input" data-col="notes" checked> Notes
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Enable Alerts -->
+                            <button class="btn btn-secondary" id="enable-notifications" style="gap:0.5rem; display:flex; align-items:center;">
                                 <i class="fas fa-bell"></i> Enable Alerts
                             </button>
+
+                            <!-- Add Stock -->
                             <button class="btn btn-primary" id="open-wl-modal">
                                 <i class="fas fa-plus"></i> Add Stock
                             </button>
                         </div>
                     </div>
 
-                    <!-- Summary bar -->
+                    <!-- ══ Summary bar ══ -->
                     <div style="display:flex; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;">
-                        <span id="wl-count" style="color:var(--text-secondary); font-size:0.85rem;"></span>
+                        <span id="wl-count-top" style="color:var(--text-secondary); font-size:0.85rem;"></span>
                     </div>
 
-                    <!-- Table -->
+                    <!-- ══ Table Wrapper ══ -->
                     <div class="watchlist-table-wrap">
                         <div class="wl-count-bar">
                             <span id="wl-count"></span>
                             <span style="font-size:0.78rem;">Live prices updated every 30s</span>
                         </div>
+
                         <div style="overflow-x:auto;">
                             <table class="wl-table" id="watchlistTable">
                                 <thead>
                                     <tr style="color:var(--text-secondary); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.5px;">
-                                        <th>Symbol</th>
-                                        <th>LTP</th>
-                                        <th>Change</th>
-                                        <th>Target Buy</th>
-                                        <th>Target Sell</th>
-                                        <th>Notes</th>
+                                        <th data-col="symbol">Symbol</th>
+                                        <th data-col="ltp">LTP</th>
+                                        <th data-col="change">Change</th>
+                                        <th data-col="prevClose">Pre. Close</th>
+                                        <th data-col="volume">Volume</th>
+                                        <th data-col="turnover">Turnover</th>
+                                        <th data-col="ltq">LTQ</th>
+                                        <th data-col="targetBuy">Target Buy</th>
+                                        <th data-col="targetSell">Target Sell</th>
+                                        <th data-col="notes">Notes</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody id="watchlistBody"></tbody>
+
+                                <!-- ══ SHIMMER SKELETON ROWS (visible while loading) ══ -->
+                                <tbody id="shimmer-body" class="wl-shimmer-body">
+                                    <tr>
+                                        <td data-col="symbol"><div class="skeleton sk sk-sym"></div></td>
+                                        <td data-col="ltp"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="change"><div class="skeleton sk sk-sm"></div></td>
+                                        <td data-col="prevClose"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="volume"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="turnover"><div class="skeleton sk sk-lg"></div></td>
+                                        <td data-col="ltq"><div class="skeleton sk sk-sm"></div></td>
+                                        <td data-col="targetBuy"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="targetSell"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="notes"><div class="skeleton sk sk-lg"></div></td>
+                                        <td><div class="skeleton sk sk-act"></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td data-col="symbol"><div class="skeleton sk sk-sym"></div></td>
+                                        <td data-col="ltp"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="change"><div class="skeleton sk sk-sm"></div></td>
+                                        <td data-col="prevClose"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="volume"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="turnover"><div class="skeleton sk sk-lg"></div></td>
+                                        <td data-col="ltq"><div class="skeleton sk sk-sm"></div></td>
+                                        <td data-col="targetBuy"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="targetSell"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="notes"><div class="skeleton sk sk-lg"></div></td>
+                                        <td><div class="skeleton sk sk-act"></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td data-col="symbol"><div class="skeleton sk sk-sym"></div></td>
+                                        <td data-col="ltp"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="change"><div class="skeleton sk sk-sm"></div></td>
+                                        <td data-col="prevClose"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="volume"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="turnover"><div class="skeleton sk sk-lg"></div></td>
+                                        <td data-col="ltq"><div class="skeleton sk sk-sm"></div></td>
+                                        <td data-col="targetBuy"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="targetSell"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="notes"><div class="skeleton sk sk-lg"></div></td>
+                                        <td><div class="skeleton sk sk-act"></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td data-col="symbol"><div class="skeleton sk sk-sym"></div></td>
+                                        <td data-col="ltp"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="change"><div class="skeleton sk sk-sm"></div></td>
+                                        <td data-col="prevClose"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="volume"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="turnover"><div class="skeleton sk sk-lg"></div></td>
+                                        <td data-col="ltq"><div class="skeleton sk sk-sm"></div></td>
+                                        <td data-col="targetBuy"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="targetSell"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="notes"><div class="skeleton sk sk-lg"></div></td>
+                                        <td><div class="skeleton sk sk-act"></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td data-col="symbol"><div class="skeleton sk sk-sym"></div></td>
+                                        <td data-col="ltp"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="change"><div class="skeleton sk sk-sm"></div></td>
+                                        <td data-col="prevClose"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="volume"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="turnover"><div class="skeleton sk sk-lg"></div></td>
+                                        <td data-col="ltq"><div class="skeleton sk sk-sm"></div></td>
+                                        <td data-col="targetBuy"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="targetSell"><div class="skeleton sk sk-med"></div></td>
+                                        <td data-col="notes"><div class="skeleton sk sk-lg"></div></td>
+                                        <td><div class="skeleton sk sk-act"></div></td>
+                                    </tr>
+                                </tbody>
+
+                                <!-- ══ REAL DATA ROWS — filled by watchlist.js ══ -->
+                                <tbody id="watchlistBody" class="wl-data-body loading"></tbody>
                             </table>
                         </div>
 
@@ -145,12 +376,14 @@
                             <button class="btn btn-primary" id="empty-add-btn"><i class="fas fa-plus"></i> Add Stock</button>
                         </div>
                     </div>
+                    <!-- end .watchlist-table-wrap -->
+
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- ADD / EDIT MODAL -->
+    <!-- ════════════════════ ADD / EDIT MODAL ════════════════════ -->
     <div id="wl-modal" class="wl-modal-overlay">
         <div class="wl-modal-box">
             <div class="modal-header">
@@ -183,17 +416,10 @@
 
             <div style="display:flex; gap:1rem; margin-top:1.5rem;">
                 <button class="btn btn-secondary" id="cancel-wl-modal" style="flex:1;">Cancel</button>
-                <button class="btn btn-primary" id="save-wl-btn" style="flex:1;">Save</button>
+                <button class="btn btn-primary"   id="save-wl-btn"     style="flex:1;">Save</button>
             </div>
         </div>
     </div>
-
-    <style>
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0.3; }
-        }
-    </style>
 
     <script type="module" src="../js/pages/watchlist.js"></script>
 </body>
