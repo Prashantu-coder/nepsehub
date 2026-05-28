@@ -515,6 +515,11 @@ window.openSellModal = (symbol) => {
     const stock = marketData.find(s => s.symbol.toUpperCase() === symbol.toUpperCase());
     document.getElementById('sell-input-price').value = stock ? stock.price : '';
 
+    const sellDateInput = document.getElementById('sell-input-date');
+    if (sellDateInput) {
+        sellDateInput.valueAsDate = new Date();
+    }
+
     document.getElementById('sell-modal-overlay').style.display = 'flex';
     updateSellPreview();
 };
@@ -597,6 +602,7 @@ async function handleSell() {
 
     const qty = parseFloat(document.getElementById('sell-input-qty').value);
     const price = parseFloat(document.getElementById('sell-input-price').value);
+    const date = document.getElementById('sell-input-date').value;
 
     if (isNaN(qty) || qty <= 0 || qty > holding.quantity) {
         alert(`Cannot sell more than ${holding.quantity} units of ${currentSellSymbol}`);
@@ -616,7 +622,7 @@ async function handleSell() {
         capital_gain_tax: calc.cgt,
         profit_loss: calc.totalProfit,
         total_amount: calc.netReceivable,
-        transaction_date: new Date().toISOString()
+        transaction_date: date || new Date().toISOString()
     });
 
     if (res.success) {
