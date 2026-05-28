@@ -288,6 +288,221 @@ export const Layout = {
                 }
             };
         }
+
+        // Notification Settings button
+        const notifSettingsBtn = document.getElementById('notif-settings-btn');
+        if (notifSettingsBtn) {
+            notifSettingsBtn.onclick = (e) => {
+                e.stopPropagation();
+                dropdown.classList.add('hidden');
+                this.openNotifSettingsModal();
+            };
+        }
+    },
+
+    async openNotifSettingsModal() {
+        // Inject modal HTML if not already present
+        if (!document.getElementById('notif-settings-modal')) {
+            const overlay = document.createElement('div');
+            overlay.id = 'notif-settings-modal';
+            overlay.style.cssText = `
+                position:fixed;inset:0;z-index:9999;
+                background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+                display:flex;align-items:center;justify-content:center;
+                animation:fadeIn 0.2s ease;
+            `;
+            overlay.innerHTML = `
+                <div style="background:#1e293b;border-radius:20px;padding:0;width:min(480px,94vw);box-shadow:0 32px 64px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.08);overflow:hidden">
+                    <!-- Header -->
+                    <div style="background:linear-gradient(135deg,#6366f1,#3b82f6);padding:28px 32px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between">
+                            <div>
+                                <h2 style="margin:0;font-size:1.25rem;font-weight:800;color:#fff;letter-spacing:-0.3px">🔔 Notification Settings</h2>
+                                <p style="margin:4px 0 0;color:rgba(255,255,255,0.75);font-size:0.8rem">Daily NEPSE market summary delivery</p>
+                            </div>
+                            <button id="close-notif-modal" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div style="padding:28px 32px;">
+
+                        <!-- Summary Frequency -->
+                        <div style="margin-bottom:24px">
+                            <label style="display:block;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Summary Frequency</label>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                                <button class="freq-btn" data-freq="never" style="flex:1;padding:10px 0;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#94a3b8;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s">Never</button>
+                                <button class="freq-btn" data-freq="daily" style="flex:1;padding:10px 0;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#94a3b8;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s">Daily</button>
+                                <button class="freq-btn" data-freq="weekly" style="flex:1;padding:10px 0;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#94a3b8;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s">Weekly (Fri)</button>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Channels -->
+                        <div style="margin-bottom:24px">
+                            <label style="display:block;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Delivery Channels</label>
+                            
+                            <!-- Email toggle -->
+                            <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+                                <div style="display:flex;align-items:center;gap:12px">
+                                    <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center">
+                                        <i class="fas fa-envelope" style="color:#fff;font-size:0.9rem"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:600;color:#e2e8f0;font-size:0.88rem">Email Summary</div>
+                                        <div style="color:#64748b;font-size:0.75rem">Sent to your account email</div>
+                                    </div>
+                                </div>
+                                <label class="notif-toggle" style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">
+                                    <input type="checkbox" id="email-enabled-toggle" style="opacity:0;width:0;height:0">
+                                    <span style="position:absolute;inset:0;background:#334155;border-radius:999px;transition:0.3s" class="toggle-track"></span>
+                                    <span style="position:absolute;left:3px;top:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.3)" class="toggle-thumb"></span>
+                                </label>
+                            </div>
+
+                            <!-- Telegram toggle + connect -->
+                            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 16px">
+                                <div style="display:flex;align-items:center;justify-content:space-between">
+                                    <div style="display:flex;align-items:center;gap:12px">
+                                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0088cc,#00b4d8);display:flex;align-items:center;justify-content:center">
+                                            <i class="fab fa-telegram-plane" style="color:#fff;font-size:1rem"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight:600;color:#e2e8f0;font-size:0.88rem">Telegram Bot</div>
+                                            <div id="tg-status-text" style="color:#64748b;font-size:0.75rem">Checking…</div>
+                                        </div>
+                                    </div>
+                                    <label class="notif-toggle" style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">
+                                        <input type="checkbox" id="telegram-enabled-toggle" style="opacity:0;width:0;height:0">
+                                        <span style="position:absolute;inset:0;background:#334155;border-radius:999px;transition:0.3s" class="toggle-track"></span>
+                                        <span style="position:absolute;left:3px;top:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.3)" class="toggle-thumb"></span>
+                                    </label>
+                                </div>
+                                <div id="tg-connect-section" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);display:none">
+                                    <p style="margin:0 0 10px;color:#94a3b8;font-size:0.78rem;line-height:1.5">
+                                        Open Telegram and message <strong style="color:#0088cc">@NepseHubBot</strong> with:
+                                    </p>
+                                    <div style="background:#0f172a;border-radius:8px;padding:10px 14px;font-family:monospace;font-size:0.82rem;color:#7dd3fc;display:flex;align-items:center;justify-content:space-between">
+                                        <span id="tg-link-command">/start YOUR_CODE</span>
+                                        <button id="copy-tg-link" style="background:none;border:none;color:#6366f1;cursor:pointer;font-size:0.75rem;font-weight:600;padding:0 0 0 8px"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save button -->
+                        <button id="save-notif-settings" style="width:100%;padding:14px;background:linear-gradient(135deg,#6366f1,#3b82f6);border:none;border-radius:12px;color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px">
+                            Save Settings
+                        </button>
+                        <div id="notif-save-status" style="text-align:center;margin-top:10px;font-size:0.8rem;color:#10b981;min-height:18px"></div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            // Close handlers
+            document.getElementById('close-notif-modal').onclick = () => overlay.remove();
+            overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+        }
+
+        // ----- Populate data -----
+        const settings = await StorageService.getNotificationSettings();
+        const user = window.auth?.getUser();
+        const code = user?.code || 'YOUR_CODE';
+
+        // Frequency buttons
+        const freqBtns = document.querySelectorAll('.freq-btn');
+        freqBtns.forEach(btn => {
+            const active = btn.dataset.freq === (settings.marketSummaryFrequency || 'never');
+            btn.style.background = active ? 'linear-gradient(135deg,#6366f1,#3b82f6)' : 'rgba(255,255,255,0.04)';
+            btn.style.color = active ? '#fff' : '#94a3b8';
+            btn.style.borderColor = active ? 'transparent' : 'rgba(255,255,255,0.1)';
+            btn.onclick = () => {
+                freqBtns.forEach(b => {
+                    b.style.background = 'rgba(255,255,255,0.04)';
+                    b.style.color = '#94a3b8';
+                    b.style.borderColor = 'rgba(255,255,255,0.1)';
+                });
+                btn.style.background = 'linear-gradient(135deg,#6366f1,#3b82f6)';
+                btn.style.color = '#fff';
+                btn.style.borderColor = 'transparent';
+            };
+        });
+
+        // Toggle helper
+        const applyToggle = (input, enabled) => {
+            input.checked = enabled;
+            const track = input.nextElementSibling;
+            const thumb = track?.nextElementSibling;
+            track.style.background = enabled ? '#6366f1' : '#334155';
+            thumb.style.transform = enabled ? 'translateX(20px)' : 'translateX(0)';
+        };
+        const bindToggle = (input) => {
+            input.addEventListener('change', () => {
+                const track = input.nextElementSibling;
+                const thumb = track?.nextElementSibling;
+                track.style.background = input.checked ? '#6366f1' : '#334155';
+                thumb.style.transform = input.checked ? 'translateX(20px)' : 'translateX(0)';
+            });
+        };
+
+        const emailToggle = document.getElementById('email-enabled-toggle');
+        const tgToggle = document.getElementById('telegram-enabled-toggle');
+
+        applyToggle(emailToggle, settings.emailEnabled || false);
+        applyToggle(tgToggle, settings.telegramEnabled || false);
+        bindToggle(emailToggle);
+        bindToggle(tgToggle);
+
+        // Telegram connect section
+        const tgConnectSection = document.getElementById('tg-connect-section');
+        const tgStatusText = document.getElementById('tg-status-text');
+        const tgCmd = document.getElementById('tg-link-command');
+        if (tgCmd) tgCmd.textContent = `/start ${code}`;
+
+        if (settings.telegramConnected) {
+            tgStatusText.innerHTML = '<span style="color:#10b981">✓ Account linked</span>';
+        } else {
+            tgStatusText.textContent = 'Not linked — follow steps below to connect';
+            tgConnectSection.style.display = 'block';
+        }
+
+        tgToggle.addEventListener('change', () => {
+            if (tgToggle.checked && !settings.telegramConnected) {
+                tgConnectSection.style.display = 'block';
+            } else if (!tgToggle.checked) {
+                tgConnectSection.style.display = 'none';
+            }
+        });
+
+        // Copy command
+        document.getElementById('copy-tg-link')?.addEventListener('click', () => {
+            navigator.clipboard.writeText(`/start ${code}`);
+            const btn = document.getElementById('copy-tg-link');
+            if (btn) { btn.innerHTML = '<i class="fas fa-check"></i>'; setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i>'; }, 1500); }
+        });
+
+        // Save
+        document.getElementById('save-notif-settings').onclick = async () => {
+            const activeFreq = document.querySelector('.freq-btn[style*="linear-gradient"]')?.dataset.freq || 'never';
+            const saveBtn = document.getElementById('save-notif-settings');
+            const statusEl = document.getElementById('notif-save-status');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving…';
+
+            const ok = await StorageService.updateNotificationSettings({
+                marketSummaryFrequency: activeFreq,
+                emailEnabled: document.getElementById('email-enabled-toggle').checked,
+                telegramEnabled: document.getElementById('telegram-enabled-toggle').checked,
+            });
+
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Settings';
+            statusEl.textContent = ok ? '✓ Settings saved successfully!' : '✗ Failed to save. Please try again.';
+            statusEl.style.color = ok ? '#10b981' : '#ef4444';
+            setTimeout(() => { statusEl.textContent = ''; }, 3000);
+        };
     },
 
     setupGlobalSearch() {

@@ -96,97 +96,206 @@
 <body>
     <!-- ════════════════════════════════════════ HEADER ════════════════════════════════════════ -->
     <header class="sticky">
-      <div style="display:flex; flex-direction:row; justify-content:space-between; width:100%;">
-        <!-- Logo -->
-        <div style="display:flex; align-items:center; gap:1.5rem;">
-          <div id="burgerMenu" class="burger-menu"><i class="fas fa-bars"></i></div>
-          <div class="logo">
-            <i class="fas fa-chart-line"></i>
-            <span class="logo-text">NEPSE HUB</span>
-          </div>
+    <div style="
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          width: 100%;
+        ">
+      <!-- logo -->
+      <div style="display: flex; align-items: center; gap: 1.5rem">
+        <div
+          id="burgerMenu"
+          class="burger-menu"
+        >
+          <i class="fas fa-bars"></i>
         </div>
 
-        <!-- NEPSE Index -->
-        <div style="display:flex; flex-direction:row; justify-content:center; align-items:center; gap:6px;">
-          <div id="marketDot" class="blinking-dot"></div>
-          <div><h6 class="nepse">NEPSE</h6></div>
-          <div id="index-value">
-            <div class="flex-col">
-              <span id="header-nepse-val" style="font-weight:700; font-size:1rem; color:var(--text-primary);">—</span>
-              <span id="header-nepse-change" style="font-size:0.78rem; font-weight:600; margin-right:0.5rem;">—</span>
-            </div>
-            <span class="pc-only" style="height:12px; width:1px; background:rgba(255,255,255,0.15);"></span>
-            <div class="flex-col">
-              <span class="pc-only font-1rem text-secondary">Turnover: <strong id="header-nepse-turnover" class="text-primary">—</strong></span>
-              <span class="pc-only font-1rem text-secondary">Volume: <strong id="header-nepse-volume" class="text-primary">—</strong></span>
-            </div>
+        <div class="logo">
+          <i class="fas fa-chart-line"></i>
+          <span class="logo-text">NEPSE HUB</span>
+        </div>
+      </div>
+
+      <!-- nepse values -->
+      <div style="
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+          ">
+        <div
+          id="marketDot"
+          class="blinking-dot"
+        ></div>
+        <div>
+          <h6 class="nepse">NEPSE</h6>
+        </div>
+        <div id="index-value">
+          <div class="flex-col">
+            <span
+              id="header-nepse-val"
+              style="
+                  font-weight: 700;
+                  font-size: 1rem;
+                  color: var(--text-primary);
+                "
+            >—</span>
+            <span
+              id="header-nepse-change"
+              style="
+                  font-size: 0.78rem;
+                  font-weight: 600;
+                  margin-right: 0.5rem;
+                "
+            >—</span>
+          </div>
+          <span
+            class="pc-only"
+            style="
+                height: 12px;
+                width: 1px;
+                background: rgba(255, 255, 255, 0.15);
+              "
+          ></span>
+          <div class="flex-col">
+            <span class="pc-only font-1rem text-secondary">Turnover:
+              <strong
+                id="header-nepse-turnover"
+                class="text-primary"
+              >—</strong></span>
+            <span class="pc-only font-1rem text-secondary">Volume:
+              <strong
+                id="header-nepse-volume"
+                class="text-primary"
+              >—</strong></span>
           </div>
         </div>
+      </div>
 
-        <!-- Clock / Notifications / Profile -->
-        <div style="display:flex; gap:5px; padding:0.5rem 0; padding-right:1rem;">
-          <div class="market-status-pill pc-only">
-            <div id="navbar-clock" class="navbar-clock-sub"></div>
-            <div id="market-status" class="market-status-sub"></div>
-          </div>
+      <!-- clock and notification -->
+      <div style="
+            display: flex;
+            gap: 5px;
+            padding: 0.5rem 0rem;
+            padding-right: 1rem;
+          ">
+        <!-- Combined Market Status & Clock Pill -->
+        <div class="market-status-pill pc-only">
+          <div
+            id="navbar-clock"
+            class="navbar-clock-sub"
+          ></div>
+          <div
+            id="market-status"
+            class="market-status-sub"
+          ></div>
+        </div>
 
-          <!-- Notification Bell -->
-          <div class="nav-notification-wrapper">
-            <button id="notification-bell" class="btn-icon">
-              <i class="far fa-bell"></i>
-              <span id="notif-badge" class="notif-badge hidden">0</span>
-            </button>
-            <div id="notif-dropdown" class="notif-dropdown glass hidden">
-              <div class="notif-header">
-                <h5>Notifications</h5>
-                <div style="display:flex; align-items:center; gap:0.5rem;">
-                  <button id="sound-toggle-btn" class="sound-toggle" title="Toggle alert sound">
-                    <i class="fas fa-volume-up"></i>
-                  </button>
-                  <button id="mark-read-btn">Mark all as read</button>
-                </div>
-              </div>
-              <div class="notif-filters">
-                <button class="notif-filter-btn active" data-filter="all">All</button>
-                <button class="notif-filter-btn" data-filter="buy">Buy Signals</button>
-                <button class="notif-filter-btn" data-filter="sell">Sell Signals</button>
-                <button class="notif-filter-btn" data-filter="stoploss">Stop Loss</button>
-              </div>
-              <div id="notif-list" class="notif-list">
-                <div class="notif-empty">No notifications in the last 7 days</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Profile -->
-          <div class="nav-profile-wrapper">
-            <button id="user-profile-btn" title="View Profile">
-              <span id="user-avatar-initial">U</span>
-            </button>
-            <div id="profile-dropdown" class="profile-dropdown glass hidden">
-              <div class="profile-header">
-                <div class="profile-avatar-large">U</div>
-                <div class="profile-meta">
-                  <h5>User</h5>
-                  <span>Code: </span>
-                </div>
-              </div>
-              <div class="profile-body">
-                <div class="profile-info-item">
-                  <i class="fas fa-envelope"></i>
-                  <span></span>
-                </div>
-              </div>
-              <div class="profile-footer">
-                <button id="logout-btn" class="btn-logout">
-                  <i class="fas fa-sign-out-alt"></i> Logout
+        <!-- Notification Bell -->
+        <div class="nav-notification-wrapper">
+          <button
+            id="notification-bell"
+            class="btn-icon"
+          >
+            <i class="far fa-bell"></i>
+            <span
+              id="notif-badge"
+              class="notif-badge hidden"
+            >0</span>
+          </button>
+          <div
+            id="notif-dropdown"
+            class="notif-dropdown glass hidden"
+          >
+            <div class="notif-header">
+              <h5>Notifications</h5>
+              <div style="display: flex; align-items: center; gap: 0.5rem">
+                <button
+                  id="sound-toggle-btn"
+                  class="sound-toggle"
+                  title="Toggle alert sound"
+                >
+                  <i class="fas fa-volume-up"></i>
                 </button>
+                <button id="mark-read-btn">Mark all as read</button>
               </div>
+            </div>
+            <div class="notif-filters">
+              <button
+                class="notif-filter-btn active"
+                data-filter="all"
+              >
+                All
+              </button>
+              <button
+                class="notif-filter-btn"
+                data-filter="buy"
+              >
+                Buy Signals
+              </button>
+              <button
+                class="notif-filter-btn"
+                data-filter="sell"
+              >
+                Sell Signals
+              </button>
+              <button
+                class="notif-filter-btn"
+                data-filter="stoploss"
+              >
+                Stop Loss
+              </button>
+            </div>
+            <div
+              id="notif-list"
+              class="notif-list"
+            >
+              <div class="notif-empty">
+                No notifications in the last 7 days
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-profile-wrapper">
+          <button
+            id="user-profile-btn"
+            title="View Profile"
+          >
+            <span id="user-avatar-initial">U</span>
+          </button>
+          <div
+            id="profile-dropdown"
+            class="profile-dropdown glass hidden"
+          >
+            <div class="profile-header">
+              <div class="profile-avatar-large">U</div>
+              <div class="profile-meta">
+                <h5>User</h5>
+                <span>Code: </span>
+              </div>
+            </div>
+            <div class="profile-body">
+              <div class="profile-info-item">
+                <i class="fas fa-envelope"></i>
+                <span></span>
+              </div>
+            </div>
+            <div class="profile-footer">
+              <button id="notif-settings-btn" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;color:#a5b4fc;font-size:0.82rem;font-weight:600;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
+                <i class="fas fa-bell" style="font-size:0.8rem"></i> Notification Settings
+              </button>
+              <button id="logout-btn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </header>
+    </div>
+  </header>
 
     <div id="navbar-container"></div>
     <div class="app-container">
