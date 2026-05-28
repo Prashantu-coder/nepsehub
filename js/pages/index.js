@@ -662,11 +662,25 @@ async function renderMainChart() {
 
         if (activePeriod === '1D') {
             if (!Array.isArray(rawData) || rawData.length === 0) return;
-            labels = rawData.map(item => {
+            
+            // Filter out any trailing flat points after market close (3:01 PM NPT = 901 minutes)
+            const filteredData = rawData.filter(item => {
+                const timestamp = item[0];
+                const d = new Date(timestamp * 1000);
+                
+                // Mathematical timezone conversion to Nepal Standard Time (UTC + 5:45)
+                const utcMinutes = d.getUTCHours() * 60 + d.getUTCMinutes();
+                const nptMinutes = (utcMinutes + 345) % 1440;
+                
+                // Only keep points between 11:00 AM NPT (660 minutes) and 3:01 PM NPT (901 minutes)
+                return nptMinutes >= 660 && nptMinutes <= 901;
+            });
+
+            labels = filteredData.map(item => {
                 const d = new Date(item[0] * 1000);
                 return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
             });
-            prices = rawData.map(item => item[1]);
+            prices = filteredData.map(item => item[1]);
         } else {
             const dataList = rawData.success && Array.isArray(rawData.data) ? rawData.data : [];
             if (dataList.length === 0) return;

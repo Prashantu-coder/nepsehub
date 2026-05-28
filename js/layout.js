@@ -632,35 +632,39 @@ export const Layout = {
                 <span class="status-dot ${isOpen ? 'status-open' : 'status-closed'}"></span>
                 <span class="status-text">${isOpen ? 'MARKET OPEN' : 'MARKET CLOSED'}</span>
             `;
+            return isOpen;
         };
 
         // 1. Initial Fetch (REST)
         fetch('https://marketstatus.onrender.com/market-status')
             .then(res => res.json())
-            .then(data => updateUI(data.status))
-            .catch(err => console.error('Market status fetch failed:', err));
+            .then(data => {
+                const isOpen = updateUI(data.status);
 
-        // 2. Live Updates (WebSocket)
-        const connectWS = () => {
-            const ws = new WebSocket('wss://marketstatus.onrender.com/ws/market-status');
+                // 2. Only connect WebSocket for live updates if market is open
+                if (isOpen) {
+                    const connectWS = () => {
+                        const ws = new WebSocket('wss://marketstatus.onrender.com/ws/market-status');
 
-            ws.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data.status) updateUI(data.status);
-                } catch (e) {
-                    // Handle non-json if needed
-                    updateUI(event.data);
+                        ws.onmessage = (event) => {
+                            try {
+                                const wsData = JSON.parse(event.data);
+                                if (wsData.status) updateUI(wsData.status);
+                            } catch (e) {
+                                updateUI(event.data);
+                            }
+                        };
+
+                        ws.onclose = () => {
+                            // Reconnect after 5 seconds if connection lost
+                            setTimeout(connectWS, 5000);
+                        };
+                    };
+
+                    connectWS();
                 }
-            };
-
-            ws.onclose = () => {
-                // Reconnect after 5 seconds if connection lost
-                setTimeout(connectWS, 5000);
-            };
-        };
-
-        connectWS();
+            })
+            .catch(err => console.error('Market status fetch failed:', err));
     },
 
     initClock() {
@@ -777,11 +781,23 @@ export const Layout = {
 
                 if (Array.isArray(rawData[0])) {
                     // Coordinates array schema: [[timestamp, price], ...]
-                    labels = rawData.map(item => {
+                    const filteredData = rawData.filter(item => {
+                        const timestamp = item[0];
+                        const d = new Date(timestamp * 1000);
+                        const nptTime = d.toLocaleTimeString('en-US', {
+                            timeZone: 'Asia/Kathmandu',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        });
+                        return nptTime >= '10:55' && nptTime <= '15:05';
+                    });
+
+                    labels = filteredData.map(item => {
                         const d = new Date(item[0] * 1000);
                         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
                     });
-                    prices = rawData.map(item => parseFloat(item[1] || 0));
+                    prices = filteredData.map(item => parseFloat(item[1] || 0));
                 } else {
                     // Object based schema: [{time: 1779104165, contractRate: 438}, ...] or [{time: "...", price: ...}]
                     labels = rawData.map(d => {

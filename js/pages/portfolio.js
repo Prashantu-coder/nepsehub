@@ -108,8 +108,9 @@ async function init() {
         };
     }
 
-    await refresh(true); // Pass true for initial load skeletons
-    setInterval(refresh, 60000);
+    await refresh(true); // Pass true for initial load skeletons — fetches transactions + market data once
+    // Only refresh market data periodically (transactions are loaded once on page load)
+    setInterval(refreshMarketOnly, 60000);
 }
 
 // ─────────────────────────────────────────────
@@ -141,6 +142,26 @@ async function refresh(isInitial = false) {
         initCharts();
     } catch (error) {
         console.error("Refresh failed:", error);
+    }
+}
+
+// Refresh only market prices (no transactions re-fetch)
+async function refreshMarketOnly() {
+    try {
+        const mktRes = await DataService.getLiveMarket();
+        if (mktRes) marketData = mktRes;
+
+        computedHoldings = PortfolioService.computeHoldings(allTransactions).map(h => ({
+            ...h,
+            totalInvested: h.totalInvestment,
+            quantity: h.qty
+        }));
+
+        renderHoldings();
+        updateSummaryCards();
+        initCharts();
+    } catch (error) {
+        console.error("Market refresh failed:", error);
     }
 }
 

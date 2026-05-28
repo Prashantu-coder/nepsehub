@@ -191,6 +191,7 @@ class State {
     }
 
     // Helper: update UI based on status string (must be 'market open' or 'market close')
+    // Returns true if market is open, false otherwise
     function updateMarketDisplay(statusStr, fetchTime) {
         // normalise string: trim & lower case comparison but keep original for display
         const normalized = statusStr.trim().toLowerCase();
@@ -219,6 +220,8 @@ class State {
             dotElement.classList.add('dot-closed');
             statusMessageSpan.innerHTML = '🔴';
         }
+
+        return isOpen;
     }
 
     // main function to fetch market status
@@ -244,7 +247,7 @@ class State {
             if (data && typeof data === 'object' && 'status' in data) {
                 const marketStatusText = String(data.status);
                 const fetchCompleteTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                updateMarketDisplay(marketStatusText, fetchCompleteTime);
+                return updateMarketDisplay(marketStatusText, fetchCompleteTime);
             } else {
                 throw new Error('Invalid API format: missing "status" key');
             }
@@ -260,16 +263,19 @@ class State {
             }
             const errorTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             handleFetchError(userFriendlyMsg, errorTime);
+            return false;
         }
     }
 
     // initial fetch when page loads
-    fetchMarketStatus();
-
-    // set interval to auto-refresh every 60 seconds (good balance)
-    let intervalId = setInterval(() => {
-        fetchMarketStatus();
-    }, 60000);
+    fetchMarketStatus().then(isOpen => {
+        // Only poll periodically if market is open
+        if (isOpen) {
+            setInterval(() => {
+                fetchMarketStatus();
+            }, 60000);
+        }
+    });
 
     // small console info
     console.log('Market Status Monitor started · blinking dot will adapt to "market open" (green blink) or "market close" (red blink)');

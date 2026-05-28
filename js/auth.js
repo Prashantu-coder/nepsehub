@@ -65,7 +65,9 @@ class AuthManager {
     };
 
     // Add auth token if available and not a public endpoint
-    if (this.accessToken && !url.includes('/api/auth/')) {
+    const publicAuthEndpoints = ['/api/auth/login', '/api/auth/register', '/api/auth/refresh'];
+    const isPublicAuth = publicAuthEndpoints.some(ep => url.includes(ep));
+    if (this.accessToken && !isPublicAuth) {
       headers.Authorization = `Bearer ${this.accessToken}`;
     }
 

@@ -403,16 +403,43 @@ async function updateChart() {
         let prices = [];
 
         if (Array.isArray(rawData[0])) {
-            labels = rawData.map(item => {
+            let processedData = rawData;
+            if (activeTimeframe === '1D') {
+                processedData = rawData.filter(item => {
+                    const timestamp = item[0];
+                    const d = new Date(timestamp * 1000);
+                    
+                    // Mathematical timezone conversion to Nepal Standard Time (UTC + 5:45)
+                    const utcMinutes = d.getUTCHours() * 60 + d.getUTCMinutes();
+                    const nptMinutes = (utcMinutes + 345) % 1440;
+                    
+                    // Only keep points between 11:00 AM NPT (660 minutes) and 3:01 PM NPT (901 minutes)
+                    return nptMinutes >= 660 && nptMinutes <= 901;
+                });
+            }
+
+            labels = processedData.map(item => {
                 const d = new Date(item[0] * 1000);
                 if (activeTimeframe === '1D') {
                     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
                 }
                 return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
             });
-            prices = rawData.map(item => parseFloat(item[1] || 0));
+            prices = processedData.map(item => parseFloat(item[1] || 0));
         } else {
-            labels = rawData.map(d => {
+            // Filter object-schema data for 1D: discard post-market flat points
+            let objectData = rawData;
+            if (activeTimeframe === '1D') {
+                objectData = rawData.filter(d => {
+                    const timeVal = d.time || d.date;
+                    if (!timeVal || typeof timeVal !== 'number') return true;
+                    const utcMinutes = Math.floor(timeVal / 60) % 1440;
+                    const nptMinutes = (utcMinutes + 345) % 1440;
+                    return nptMinutes >= 660 && nptMinutes <= 901;
+                });
+            }
+
+            labels = objectData.map(d => {
                 const timeVal = d.time || d.date;
                 if (!timeVal) return '';
                 if (typeof timeVal === 'number') {
@@ -433,7 +460,7 @@ async function updateChart() {
                 }
                 return timeStr;
             });
-            prices = rawData.map(d => parseFloat(d.contractRate || d.price || d.y || d.value || 0));
+            prices = objectData.map(d => parseFloat(d.contractRate || d.price || d.y || d.value || 0));
         }
 
         const isPositive = prices[prices.length - 1] >= prices[0];

@@ -10,6 +10,7 @@ let watchlistSymbols = [];
 let currentCategory = "all";
 let currentSector = "all";
 let sortConfig = { key: null, direction: 'asc' };
+let isMarketOpen = null; // null = unknown (first load), true/false after first fetch
 
 // Formatting helpers (en-IN for Nepali lakhs/crores formatting)
 const formatPrice = (val) => parseFloat(val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -53,11 +54,12 @@ function formatTimestamp(lastUpdatedStr) {
 async function updateMarketStatus() {
   const dot = document.getElementById("marketStatusDot");
   const title = document.querySelector(".live-market-title");
-  if (!dot) return;
+  if (!dot) return false;
 
-  const setStatus = (isOpen, isFallback = false) => {
+  const setStatus = (open, isFallback = false) => {
+    isMarketOpen = open;
     const titleText = isFallback ? " (Fallback Check)" : "";
-    if (isOpen) {
+    if (open) {
       dot.className = "status-dot-indicator status-dot-open";
       dot.setAttribute("title", `Market is Open${titleText}`);
       if (title) {
@@ -72,6 +74,7 @@ async function updateMarketStatus() {
         title.classList.add("text-status-closed");
       }
     }
+    return open;
   };
 
   try {
@@ -80,9 +83,8 @@ async function updateMarketStatus() {
       const statusData = await response.json();
       if (statusData && statusData.status) {
         const statusStr = statusData.status.toLowerCase();
-        const isOpen = statusStr.includes("open") || statusStr === "open";
-        setStatus(isOpen, false);
-        return;
+        const open = statusStr.includes("open") || statusStr === "open";
+        return setStatus(open, false);
       }
     }
   } catch (e) {
@@ -99,9 +101,9 @@ async function updateMarketStatus() {
   // Trading days: Sunday (0) to Thursday (4). Trading hours: 11:00 AM (660) to 3:00 PM (900)
   const isTradingDay = (day >= 0 && day <= 4);
   const isTradingHours = (timeVal >= 660 && timeVal <= 900);
-  const isOpen = isTradingDay && isTradingHours;
+  const open = isTradingDay && isTradingHours;
 
-  setStatus(isOpen, true);
+  return setStatus(open, true);
 }
 
 async function fetchMarket() {
@@ -151,7 +153,10 @@ async function fetchMarket() {
     if (timestampEl) {
       timestampEl.textContent = formatTimestamp(data[0].lastUpdated);
     }
-    updateMarketStatus();
+    // Only re-check market status if market is open (avoid repeated API calls when closed)
+    if (isMarketOpen !== false) {
+      updateMarketStatus();
+    }
   }
 }
 
@@ -515,7 +520,9 @@ async function init() {
   setupBadgeFilter("filterNeutral", "neutral");
 
   applyColumnVisibility();
-  updateMarketStatus();
+
+  // Fetch market status once on page load
+  const marketIsOpen = await updateMarketStatus();
 
   // Initial fetch
   const marketBody = document.getElementById("marketBody");
@@ -527,16 +534,18 @@ async function init() {
   // Refresh market data every 5 seconds (5000ms)
   setInterval(fetchMarket, 5000);
 
-  // Sync Market Status check to exactly the top of the minute (00.00s)
-  const syncMarketStatusTimer = () => {
-    const now = new Date();
-    const msUntilNextMinute = 60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
-    setTimeout(() => {
-      updateMarketStatus();
-      setInterval(updateMarketStatus, 60000);
-    }, msUntilNextMinute);
-  };
-  syncMarketStatusTimer();
+  // Only set up periodic market status polling if market is currently open
+  if (marketIsOpen) {
+    const syncMarketStatusTimer = () => {
+      const now = new Date();
+      const msUntilNextMinute = 60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
+      setTimeout(() => {
+        updateMarketStatus();
+        setInterval(updateMarketStatus, 60000);
+      }, msUntilNextMinute);
+    };
+    syncMarketStatusTimer();
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);
