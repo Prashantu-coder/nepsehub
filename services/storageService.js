@@ -188,6 +188,46 @@ const StorageService = {
         }
     },
 
+    // --- Notification Settings (Express Backend) ---
+    async getNotificationSettings() {
+        try {
+            const response = await window.auth.apiCall('/api/auth/notification-settings');
+            if (!response.ok) throw new Error('Failed to fetch notification settings');
+            const data = await response.json();
+            return data.settings || {};
+        } catch (err) {
+            console.error('GetNotificationSettings Error:', err.message);
+            return { marketSummaryFrequency: 'never', emailEnabled: false, telegramEnabled: false, telegramConnected: false };
+        }
+    },
+
+    async updateNotificationSettings(settings) {
+        try {
+            const response = await window.auth.apiCall('/api/auth/notification-settings', {
+                method: 'PUT',
+                body: JSON.stringify(settings)
+            });
+            if (!response.ok) throw new Error('Failed to update notification settings');
+            const data = await response.json();
+            return data.success;
+        } catch (err) {
+            console.error('UpdateNotificationSettings Error:', err.message);
+            return false;
+        }
+    },
+
+    async getTelegramStatus() {
+        try {
+            const response = await window.auth.apiCall('/api/auth/telegram-status');
+            if (!response.ok) throw new Error('Failed to fetch telegram status');
+            const data = await response.json();
+            return data.connected || false;
+        } catch (err) {
+            console.error('GetTelegramStatus Error:', err.message);
+            return false;
+        }
+    },
+
     // --- Local Settings (LocalStorage) ---
     getSettings() {
         const settings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
