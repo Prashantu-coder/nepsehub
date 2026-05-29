@@ -12,6 +12,26 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = '/index.html';
   }
 
+  // Check for session expiry redirect toast message
+  const toastMessage = sessionStorage.getItem('login_toast_message');
+  if (toastMessage) {
+    sessionStorage.removeItem('login_toast_message');
+    // Dynamically import NotificationService to show the toast
+    import('../../services/notificationService.js')
+      .then(m => {
+        const NotificationService = m.default;
+        NotificationService.showToast('Session Expired', toastMessage, 'stoploss');
+      })
+      .catch(err => {
+        console.error('Failed to load NotificationService for toast:', err);
+        // Fallback to general error element if toast service loading fails
+        if (generalError) {
+          generalError.textContent = toastMessage;
+          generalError.style.display = 'block';
+        }
+      });
+  }
+
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
