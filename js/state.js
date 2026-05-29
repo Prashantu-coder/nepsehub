@@ -187,7 +187,9 @@ class State {
 
     // Helper: remove existing animation classes from dot
     function resetDotAnimations() {
-        dotElement.classList.remove('dot-open', 'dot-closed');
+        if (dotElement) {
+            dotElement.classList.remove('dot-open', 'dot-closed');
+        }
     }
 
     // Helper: update UI based on status string (must be 'market open' or 'market close')
@@ -213,15 +215,29 @@ class State {
 
         // apply proper blinking class & colors
         resetDotAnimations();
+        const statusMessageSpan = document.getElementById('statusMessage');
         if (isOpen) {
-            dotElement.classList.add('dot-open');
-            statusMessageSpan.innerHTML = '🟢';
+            if (dotElement) dotElement.classList.add('dot-open');
+            if (statusMessageSpan) statusMessageSpan.innerHTML = '🟢';
         } else {
-            dotElement.classList.add('dot-closed');
-            statusMessageSpan.innerHTML = '🔴';
+            if (dotElement) dotElement.classList.add('dot-closed');
+            if (statusMessageSpan) statusMessageSpan.innerHTML = '🔴';
         }
 
         return isOpen;
+    }
+
+    // Helper: handle fetch errors gracefully
+    function handleFetchError(msg, time) {
+        console.error(`[Market Status Error] ${time}: ${msg}`);
+        resetDotAnimations();
+        if (dotElement) {
+            dotElement.classList.add('dot-closed'); // default to closed/offline state
+        }
+        const statusMessageSpan = document.getElementById('statusMessage');
+        if (statusMessageSpan) {
+            statusMessageSpan.innerHTML = '⚪';
+        }
     }
 
     // main function to fetch market status

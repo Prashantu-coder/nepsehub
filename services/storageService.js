@@ -7,9 +7,7 @@ const StorageService = {
     // --- Watchlist (Express Backend) ---
     async getWatchlist() {
         try {
-            const response = await window.auth.apiCall('/api/watchlist');
-            if (!response.ok) throw new Error('Failed to fetch watchlist');
-            return await response.json();
+            return await window.auth.getCachedWatchlist();
         } catch (err) {
             console.error('Watchlist Fetch Error:', err.message);
             return [];
@@ -24,6 +22,7 @@ const StorageService = {
             });
             if (!response.ok) throw new Error('Failed to add to watchlist');
             const data = await response.json();
+            await window.auth.refreshWatchlist();
             return data.success;
         } catch (err) {
             console.error('AddToWatchlist Error:', err.message);
@@ -39,6 +38,7 @@ const StorageService = {
             });
             if (!response.ok) throw new Error('Failed to update watchlist item');
             const data = await response.json();
+            await window.auth.refreshWatchlist();
             return data.success;
         } catch (err) {
             console.error('UpdateWatchlistItem Error:', err.message);
@@ -53,6 +53,7 @@ const StorageService = {
             });
             if (!response.ok) throw new Error('Failed to remove from watchlist');
             const data = await response.json();
+            await window.auth.refreshWatchlist();
             return data.success;
         } catch (err) {
             console.error('RemoveFromWatchlist Error:', err.message);
@@ -112,9 +113,7 @@ const StorageService = {
     // --- Transactions — Single Source of Truth (Express Backend) ---
     async getTransactions() {
         try {
-            const response = await window.auth.apiCall('/api/transactions');
-            if (!response.ok) throw new Error('Failed to fetch transactions');
-            return await response.json();
+            return await window.auth.getCachedTransactions();
         } catch (err) {
             console.error('Transactions Fetch Error:', err.message);
             return { success: false, error: err.message, data: [] };
@@ -128,7 +127,9 @@ const StorageService = {
                 body: JSON.stringify(tx)
             });
             if (!response.ok) throw new Error('Failed to add transaction');
-            return await response.json();
+            const data = await response.json();
+            await window.auth.refreshTransactions();
+            return data;
         } catch (err) {
             console.error('Add Transaction Error:', err.message);
             return { success: false, error: err.message };
@@ -142,6 +143,7 @@ const StorageService = {
             });
             if (!response.ok) throw new Error('Failed to delete transaction');
             const data = await response.json();
+            await window.auth.refreshTransactions();
             return data.success;
         } catch (err) {
             console.error('Delete Transaction Error:', err.message);

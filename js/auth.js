@@ -6,6 +6,91 @@ class AuthManager {
     this.user = this.loadUser();
     this.isAuthenticated = !!this.accessToken;
     this.API_BASE = 'https://nepse-hub-backend-7uwu.onrender.com';
+
+    // Cached data — fetched once on page load
+    this._cachedTransactions = null;
+    this._cachedWatchlist = null;
+    this._transactionsLoaded = false;
+    this._watchlistLoaded = false;
+
+    // Fetch once on page load if authenticated
+    if (this.isAuthenticated) {
+      this._initDataPromise = this._fetchInitialData();
+    }
+  }
+
+  // Fetch transactions & watchlist once on page load
+  async _fetchInitialData() {
+    try {
+      const [transRes, watchRes] = await Promise.allSettled([
+        this.apiCall('/api/transactions'),
+        this.apiCall('/api/watchlist')
+      ]);
+
+      if (transRes.status === 'fulfilled' && transRes.value.ok) {
+        this._cachedTransactions = await transRes.value.json();
+        this._transactionsLoaded = true;
+      }
+
+      if (watchRes.status === 'fulfilled' && watchRes.value.ok) {
+        this._cachedWatchlist = await watchRes.value.json();
+        this._watchlistLoaded = true;
+      }
+    } catch (err) {
+      console.error('Initial data fetch error:', err);
+    }
+  }
+
+  // Get cached transactions (no new API call)
+  async getCachedTransactions() {
+    if (this._initDataPromise) await this._initDataPromise;
+    return this._cachedTransactions || { success: false, data: [] };
+  }
+
+  // Get cached watchlist (no new API call)
+  async getCachedWatchlist() {
+    if (this._initDataPromise) await this._initDataPromise;
+    return this._cachedWatchlist || [];
+  }
+
+  // Invalidate transaction cache (call after add/delete)
+  invalidateTransactions() {
+    this._transactionsLoaded = false;
+    this._cachedTransactions = null;
+  }
+
+  // Invalidate watchlist cache (call after add/remove/update)
+  invalidateWatchlist() {
+    this._watchlistLoaded = false;
+    this._cachedWatchlist = null;
+  }
+
+  // Refresh transaction cache from API
+  async refreshTransactions() {
+    try {
+      const response = await this.apiCall('/api/transactions');
+      if (response.ok) {
+        this._cachedTransactions = await response.json();
+        this._transactionsLoaded = true;
+      }
+    } catch (err) {
+      console.error('Refresh transactions error:', err);
+    }
+    return this._cachedTransactions || { success: false, data: [] };
+  }
+
+  // Refresh watchlist cache from API
+  async refreshWatchlist() {
+    try {
+      const response = await this.apiCall('/api/watchlist');
+      if (response.ok) {
+        this._cachedWatchlist = await response.json();
+        this._watchlistLoaded = true;
+      }
+    } catch (err) {
+      console.error('Refresh watchlist error:', err);
+    }
+    return this._cachedWatchlist || [];
   }
 
   // Load user from localStorage
