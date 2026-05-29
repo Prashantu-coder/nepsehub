@@ -22,10 +22,18 @@ export const Navbar = () => {
             children: [
                 { id: 'live-market', text: 'Live Market', icon: 'fa-broadcast-tower', path: 'pages/market/live.html' },
                 { id: 'stocks-today', text: 'Stocks Today', icon: 'fa-chart-line', path: 'pages/market/stocks-today.html' },
+                { id: 'news', text: 'Announcements', icon: 'fa-bullhorn', path: 'pages/news.html' }
+            ]
+        },
+        {
+            id: 'analysis',
+            icon: 'fa-chart-pie',
+            text: 'Analysis',
+            children: [
+                { id: 'screener', text: 'Technical Screener', icon: 'fa-robot', path: 'pages/market/screener.html' },
                 { id: 'heatmap', text: 'Market Heatmap', icon: 'fa-th', path: 'pages/market/heatmap.html' },
                 { id: 'todays-top', text: "Today's Top", icon: 'fa-crown', path: 'pages/market/todays-top.html' },
-                { id: 'circuit-level', text: 'Daily Circuit Level', icon: 'fa-bolt', path: 'pages/market/circuit-level.html' },
-                { id: 'news', text: 'Announcements', icon: 'fa-bullhorn', path: 'pages/news.html' }
+                { id: 'circuit-level', text: 'Daily Circuit Level', icon: 'fa-bolt', path: 'pages/market/circuit-level.html' }
             ]
         },
         {
@@ -33,8 +41,7 @@ export const Navbar = () => {
             icon: 'fa-cubes',
             text: 'Investment',
             children: [
-                { id: 'ipo-tracker', text: 'Upcoming/Existing Issues', icon: 'fa-rocket', path: 'pages/market/ipo-tracker.html' },
-                // { id: 'screener', text: 'Technical Screener', icon: 'fa-robot', path: 'pages/market/screener.html' }
+                { id: 'ipo-tracker', text: 'Upcoming/Existing Issues', icon: 'fa-rocket', path: 'pages/market/ipo-tracker.html' }
             ]
         },
         {
