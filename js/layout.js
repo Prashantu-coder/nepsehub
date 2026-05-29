@@ -406,9 +406,18 @@ export const Layout = {
                             Save Settings
                         </button>
                         <div id="notif-save-status" style="text-align:center;margin-top:10px;font-size:0.8rem;color:#10b981;min-height:18px"></div>
+
+                        <!-- Test Notification -->
+                        <div style="margin-top:16px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top:16px">
+                            <button id="send-test-notif-btn" style="width:100%;padding:11px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);border-radius:12px;color:#818cf8;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px">
+                                <i class="fas fa-flask"></i> 🧪 Send Test Notification (Bypass Close)
+                            </button>
+                            <div id="test-notif-status" style="text-align:center;margin-top:8px;font-size:0.75rem;color:#94a3b8;min-height:14px"></div>
+                        </div>
                     </div>
                 </div>
             `;
+
             document.body.appendChild(overlay);
 
             // Close handlers
@@ -513,7 +522,60 @@ export const Layout = {
             statusEl.style.color = ok ? '#10b981' : '#ef4444';
             setTimeout(() => { statusEl.textContent = ''; }, 3000);
         };
+
+        // Test Dispatch Button Click Handler
+        const testBtn = document.getElementById('send-test-notif-btn');
+        if (testBtn) {
+            testBtn.onclick = async () => {
+                const statusEl = document.getElementById('test-notif-status');
+                testBtn.disabled = true;
+                const originalText = testBtn.innerHTML;
+                testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Triggering test dispatch...';
+                statusEl.textContent = 'Contacting server...';
+                statusEl.style.color = '#94a3b8';
+
+                try {
+                    const response = await window.auth.apiCall('/api/notifications/test-dispatch', {
+                        method: 'POST'
+                    });
+                    
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.error || `HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    if (data.success) {
+                        const tg = data.results.telegram;
+                        const em = data.results.email;
+                        
+                        let statusMsg = '';
+                        if (tg.attempted && tg.success) statusMsg += '📢 Telegram Sent! ';
+                        else if (tg.attempted) statusMsg += `⚠️ Telegram failed: ${tg.error}. `;
+                        else statusMsg += 'Telegram skipped. ';
+
+                        if (em.attempted && em.success) statusMsg += '✉️ Email Sent!';
+                        else if (em.attempted) statusMsg += `⚠️ Email failed: ${em.error}.`;
+                        else statusMsg += 'Email skipped.';
+
+                        statusEl.textContent = statusMsg;
+                        statusEl.style.color = '#10b981';
+                    } else {
+                        statusEl.textContent = `Error: ${data.error || 'Failed to dispatch test'}`;
+                        statusEl.style.color = '#ef4444';
+                    }
+                } catch (err) {
+                    console.error('Test notification fail:', err);
+                    statusEl.textContent = `❌ Test failed: ${err.message}`;
+                    statusEl.style.color = '#ef4444';
+                } finally {
+                    testBtn.disabled = false;
+                    testBtn.innerHTML = originalText;
+                }
+            };
+        }
     },
+
 
     setupGlobalSearch() {
         const navInput = document.getElementById('nav-global-search');
