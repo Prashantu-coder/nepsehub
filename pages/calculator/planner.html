@@ -239,13 +239,19 @@
 
                 <div class="form-group">
                   <label>Stock Symbol / Name</label>
-                  <input
-                    type="text"
-                    id="stockName"
-                    list="stockList"
-                    placeholder="Search e.g. NICA..."
-                    value=""
-                  />
+                  <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input
+                      type="text"
+                      id="stockName"
+                      list="stockList"
+                      placeholder="Search e.g. NICA..."
+                      value=""
+                      style="flex: 1; border-radius: 20px; padding: 0.6rem 1.2rem;"
+                    />
+                    <button id="generateSetupBtn" class="btn" style="padding: 0.6rem 1.2rem; border-radius: 20px; font-size: 0.82rem; background: rgba(99, 102, 241, 0.15); color: var(--secondary); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; height: 42px; transition: var(--transition-fast);">
+                      <i class="fas fa-magic"></i> Auto-Setup
+                    </button>
+                  </div>
                   <datalist id="stockList"></datalist>
                 </div>
 
@@ -295,7 +301,7 @@
                   "
                 >
                   <label>Total Trading Capital (NPR)</label>
-                  <inputW
+                  <input
                     type="number"
                     id="capital"
                     placeholder="100000"
@@ -303,13 +309,7 @@
                   />
                 </div>
 
-                <div
-                  style="
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 1rem;
-                  "
-                >
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                   <div class="form-group">
                     <label>Risk Mode</label>
                     <select id="riskMode">
@@ -369,32 +369,11 @@
                   <!-- Results here -->
                 </div>
 
-                <div
-                  id="decisionBadge"
-                  style="
-                    margin-top: 2rem;
-                    padding: 1.5rem;
-                    border-radius: 16px;
-                    text-align: center;
-                    font-weight: 800;
-                    font-size: 1.25rem;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                  "
-                >
+                <div id="decisionBadge" style="margin-top: 2rem;padding: 1.5rem;border-radius: 16px;text-align: center;font-weight: 800;font-size: 1.25rem;text-transform: uppercase;letter-spacing: 1px;">
                   <!-- Decision here -->
                 </div>
 
-                <div
-                  id="warningArea"
-                  style="
-                    margin-top: 1rem;
-                    color: var(--danger);
-                    font-size: 0.85rem;
-                    text-align: center;
-                  "
-                ></div>
-
+                <div id="warningArea" style="margin-top: 1rem; color: var(--danger); font-size: 0.85rem; text-align: center;"></div>
                 <div style="margin-top: 2rem;">
                   <button id="savePlanBtn" class="btn btn-primary" style="width: 100%; padding: 1rem;" disabled>
                     <i class="fas fa-save"></i> Save Trade Plan
@@ -402,8 +381,30 @@
                 </div>
               </div>
             </div>
+
+            <!-- Saved Plans Section -->
+            <div class="glass" style="margin-top: 2rem; padding: 2rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                  <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-clipboard-list"></i>
+                  </div>
+                  <div>
+                    <h3 style="font-weight: 700; margin: 0;">My Saved Plans</h3>
+                    <span id="savedPlansCount" style="font-size: 0.78rem; color: var(--text-secondary);">Loading...</span>
+                  </div>
+                </div>
+              </div>
+
+              <div id="savedPlansContainer">
+                <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+                  <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                  <p>Loading saved plans...</p>
+                </div>
+              </div>
+            </div>
+
           </div>
-        </div>
       </main>
     </div>
 
