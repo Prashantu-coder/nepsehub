@@ -543,23 +543,23 @@ export const Layout = {
                         const errData = await response.json().catch(() => ({}));
                         throw new Error(errData.error || `HTTP ${response.status}`);
                     }
-
                     const data = await response.json();
                     if (data.success) {
                         const tg = data.results.telegram;
-                        const em = data.results.email;
                         
                         let statusMsg = '';
-                        if (tg.attempted && tg.success) statusMsg += '📢 Telegram Sent! ';
-                        else if (tg.attempted) statusMsg += `⚠️ Telegram failed: ${tg.error}. `;
-                        else statusMsg += 'Telegram skipped. ';
-
-                        if (em.attempted && em.success) statusMsg += '✉️ Email Sent!';
-                        else if (em.attempted) statusMsg += `⚠️ Email failed: ${em.error}.`;
-                        else statusMsg += 'Email skipped.';
+                        if (tg.attempted && tg.success) {
+                            statusMsg = '📢 Telegram Test Notification Sent!';
+                            statusEl.style.color = '#10b981';
+                        } else if (tg.attempted) {
+                            statusMsg = `⚠️ Telegram failed: ${tg.error}`;
+                            statusEl.style.color = '#ef4444';
+                        } else {
+                            statusMsg = 'Telegram skipped (not linked).';
+                            statusEl.style.color = '#eab308';
+                        }
 
                         statusEl.textContent = statusMsg;
-                        statusEl.style.color = '#10b981';
                     } else {
                         statusEl.textContent = `Error: ${data.error || 'Failed to dispatch test'}`;
                         statusEl.style.color = '#ef4444';
