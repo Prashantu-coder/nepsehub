@@ -1,3 +1,31 @@
+// Global fetch interceptor to catch 401 and redirect to login with a toast
+(function() {
+  const originalFetch = window.fetch;
+  window.fetch = async function(input, init) {
+    try {
+      const response = await originalFetch(input, init);
+      
+      if (response.status === 401) {
+        const url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+        const isAuthRoute = url.includes('/api/auth/login') || url.includes('/api/auth/register');
+        const isRefreshRoute = url.includes('/api/auth/refresh');
+        
+        if (!isAuthRoute && window.auth && window.auth.isLoggedIn()) {
+          // If this is a refresh attempt that failed, or if we don't have a refresh token to try
+          if (isRefreshRoute || !window.auth.refreshToken) {
+            window.auth.clearTokens();
+            sessionStorage.setItem('login_toast_message', 'Session expired. Please log in again.');
+            window.location.href = '/pages/login.html';
+          }
+        }
+      }
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  };
+})();
+
 // Frontend Authentication State Manager
 class AuthManager {
   constructor() {
@@ -175,6 +203,7 @@ class AuthManager {
         } else {
           // Refresh failed, logout
           this.clearTokens();
+          sessionStorage.setItem('login_toast_message', 'Session expired. Please log in again.');
           window.location.href = '/pages/login.html';
           return response;
         }
