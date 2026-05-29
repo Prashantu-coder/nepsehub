@@ -10,10 +10,24 @@
         const isAuthRoute = url.includes('/api/auth/login') || url.includes('/api/auth/register');
         const isRefreshRoute = url.includes('/api/auth/refresh');
         
-        if (!isAuthRoute && window.auth && window.auth.isLoggedIn()) {
+        const hasAccessToken = !!localStorage.getItem('accessToken');
+        const hasRefreshToken = !!localStorage.getItem('refreshToken');
+        
+        if (!isAuthRoute && hasAccessToken) {
           // If this is a refresh attempt that failed, or if we don't have a refresh token to try
-          if (isRefreshRoute || !window.auth.refreshToken) {
-            window.auth.clearTokens();
+          if (isRefreshRoute || !hasRefreshToken) {
+            // Clear local storage and object state
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            
+            if (window.auth) {
+              window.auth.accessToken = null;
+              window.auth.refreshToken = null;
+              window.auth.user = null;
+              window.auth.isAuthenticated = false;
+            }
+            
             sessionStorage.setItem('login_toast_message', 'Session expired. Please log in again.');
             window.location.href = '/pages/login.html';
           }
