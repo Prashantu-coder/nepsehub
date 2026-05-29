@@ -90,11 +90,16 @@ const DataService = {
 
     // ... (rest of the file remains same, but I'll update getAnnouncements below)
     async getAnnouncements() {
+        const marketOpen = await this.checkMarketStatus();
+        if (!marketOpen && this._announcementsCache) {
+            return this._announcementsCache;
+        }
+
         try {
             const endpoint = `${this.API_BASE}/market-info/announcements`;
             // console.log(`📡 Fetching announcements from: ${endpoint}`);
             const response = await fetch(endpoint);
-            if (!response.ok) return [];
+            if (!response.ok) return this._announcementsCache || [];
             const result = await response.json();
 
             // Handle multiple professional schemas
@@ -105,10 +110,12 @@ const DataService = {
                 data = result.content;
             }
 
-            return Array.isArray(data) ? data : [];
+            const parsed = Array.isArray(data) ? data : [];
+            this._announcementsCache = parsed;
+            return parsed;
         } catch (error) {
             console.error('❌ Announcements Fetch Error:', error);
-            return [];
+            return this._announcementsCache || [];
         }
     },
 
@@ -132,6 +139,36 @@ const DataService = {
     _homepageIndicesCache: null,
     _homepageSubindicesCache: null,
 
+    _announcementsCache: null,
+    _chartCache: {},
+    _isMarketOpen: null,
+    _marketStatusCheckedAt: 0,
+
+    async checkMarketStatus() {
+        const now = Date.now();
+        if (this._isMarketOpen !== null && (now - this._marketStatusCheckedAt < 60000)) {
+            return this._isMarketOpen;
+        }
+
+        try {
+            const response = await fetch('https://marketstatus.onrender.com/market-status');
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.status) {
+                    this._isMarketOpen = data.status.toLowerCase().includes('open');
+                }
+            }
+        } catch (e) {
+            console.warn('[DataService] Failed to fetch market status:', e);
+            if (this._isMarketOpen === null) {
+                this._isMarketOpen = true; // Fallback to true so we don't block requests if status service fails
+            }
+        }
+        
+        this._marketStatusCheckedAt = Date.now();
+        return this._isMarketOpen;
+    },
+
     // Professional Backend URL (Update this to your Render URL after deployment)
     API_BASE: 'https://nepse-hub-backend.onrender.com',
 
@@ -140,6 +177,12 @@ const DataService = {
         if (this._liveMarketPromise) {
             return this._liveMarketPromise;
         }
+
+        const marketOpen = await this.checkMarketStatus();
+        if (!marketOpen && this._liveMarketCache) {
+            return this._liveMarketCache;
+        }
+
         if (this._liveMarketCache && (now - this._liveMarketLastFetched < 5000)) {
             return this._liveMarketCache;
         }
@@ -231,6 +274,12 @@ const DataService = {
     async getMarketSummary() {
         const now = Date.now();
         if (this._marketSummaryPromise) return this._marketSummaryPromise;
+
+        const marketOpen = await this.checkMarketStatus();
+        if (!marketOpen && this._marketSummaryCache) {
+            return this._marketSummaryCache;
+        }
+
         if (this._marketSummaryCache && (now - this._marketSummaryLastFetched < 1000)) {
             return this._marketSummaryCache;
         }
@@ -266,6 +315,12 @@ const DataService = {
     async getIndices() {
         const now = Date.now();
         if (this._indicesPromise) return this._indicesPromise;
+
+        const marketOpen = await this.checkMarketStatus();
+        if (!marketOpen && this._indicesCache) {
+            return this._indicesCache;
+        }
+
         if (this._indicesCache && (now - this._indicesLastFetched < 5000)) {
             return this._indicesCache;
         }
@@ -292,6 +347,12 @@ const DataService = {
     async getSectorIndices() {
         const now = Date.now();
         if (this._subindicesPromise) return this._subindicesPromise;
+
+        const marketOpen = await this.checkMarketStatus();
+        if (!marketOpen && this._subindicesCache) {
+            return this._subindicesCache;
+        }
+
         if (this._subindicesCache && (now - this._subindicesLastFetched < 5000)) {
             return this._subindicesCache;
         }
@@ -415,6 +476,12 @@ const DataService = {
     },
 
     async getIndexChart(symbol, period = '1D') {
+        const cacheKey = `${symbol}_${period}`;
+        const marketOpen = await this.checkMarketStatus();
+        if (!marketOpen && this._chartCache && this._chartCache[cacheKey]) {
+            return this._chartCache[cacheKey];
+        }
+
         try {
             const upperSymbol = symbol.toUpperCase();
             const isIndex = ['NEPSE', 'SENSITIVE', 'FLOAT', 'SENFLOAT', 'SENSITIVE FLOAT', 'BANKING', 'DEVELOPMENT BANK', 'FINANCE', 'HOTELS AND TOURISM', 'HYDROPOWER', 'INVESTMENT', 'LIFE INSURANCE', 'MANU.& PRO.', 'MICROFINANCE', 'MUTUAL FUND', 'NON LIFE INSURANCE', 'OTHERS', 'TRADING'].includes(upperSymbol) || upperSymbol.includes('INDEX');
@@ -428,9 +495,58 @@ const DataService = {
             }
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error('Network response was not ok');
-            return await response.json();
+            const data = await response.json();
+            
+            this._chartCache = this._chartCache || {};
+            this._chartCache[cacheKey] = data;
+            return data;
         } catch (error) {
             console.error(`Failed to fetch chart for ${symbol} with period ${period}:`, error);
+            return this._chartCache ? this._chartCache[cacheKey] || null : null;
+        }
+    },
+
+    _screenerCache: null,
+    _screenerCacheTime: 0,
+
+    async getTechnicalIndicators(symbol) {
+        const now = Date.now();
+        // Return from cache if fresh (5 minutes)
+        if (this._screenerCache && (now - this._screenerCacheTime < 300000)) {
+            return this._screenerCache.find(item => item.symbol.toUpperCase() === symbol.toUpperCase()) || null;
+        }
+
+        try {
+            let allResults = [];
+            let page = 1;
+            let hasMore = true;
+
+            while (hasMore) {
+                const response = await fetch(`https://technical-nepse.vercel.app/api/screener/all?page=${page}&limit=50`);
+                if (!response.ok) break;
+                const data = await response.json();
+
+                if (data.results && data.results.length > 0) {
+                    allResults = allResults.concat(data.results);
+                }
+
+                const totalPages = data.pagination?.total_pages || 1;
+                if (page >= totalPages) {
+                    hasMore = false;
+                } else {
+                    page++;
+                }
+            }
+
+            this._screenerCache = allResults;
+            this._screenerCacheTime = Date.now();
+            return allResults.find(item => item.symbol.toUpperCase() === symbol.toUpperCase()) || null;
+        } catch (e) {
+            console.error('❌ Screener API Fetch Error:', e);
+            // Return from stale cache if available
+            if (this._screenerCache) {
+                return this._screenerCache.find(item => item.symbol.toUpperCase() === symbol.toUpperCase()) || null;
+            }
             return null;
         }
     },
