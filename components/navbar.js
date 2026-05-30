@@ -33,7 +33,8 @@ export const Navbar = () => {
                 { id: 'screener', text: 'Technical Screener', icon: 'fa-robot', path: 'pages/analysis/screener.html' },
                 { id: 'heatmap', text: 'Market Heatmap', icon: 'fa-th', path: 'pages/analysis/heatmap.html' },
                 { id: 'todays-top', text: "Today's Top", icon: 'fa-crown', path: 'pages/analysis/todays-top.html' },
-                { id: 'circuit-level', text: 'Daily Circuit Level', icon: 'fa-bolt', path: 'pages/analysis/circuit-level.html' }
+                { id: 'circuit-level', text: 'Daily Circuit Level', icon: 'fa-bolt', path: 'pages/analysis/circuit-level.html' },
+                { id: 'volumepulse', text: 'Volume Pulse', icon: 'fa-chart-line', path: 'pages/analysis/volumepulse.html' }
             ]
         },
         {

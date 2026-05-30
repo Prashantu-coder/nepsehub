@@ -11,7 +11,7 @@ body,
   transition:
     background-color var(--transition-slow),
     color var(--transition-slow),
-    border-color var(--transition-slow),
+    border-color rgba(56, 189, 248, 0.2),
     box-shadow var(--transition-slow),
     transform var(--transition-fast);
 }
