@@ -1,21 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Market Heatmap | NEPSE HUB</title>
-    <meta name="description" content="Visual market heatmap showing NEPSE stock performance by sector.">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../../css/base.css">
-    <link rel="stylesheet" href="../../css/layout.css">
-    <link rel="stylesheet" href="../../css/components.css">
-    <link rel="stylesheet" href="../../css/themes.css">
-    <link rel="stylesheet" href="../../css/pages/heatmap.css">
-    <link rel="stylesheet" href="../../css/easy.css">
-</head>
-<body>
-  <header class="sticky">
+    <meta name="description" content="Visual market heatmap showing NEPSE stock performance by sector."/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/analysis/all.css" />
+    <link rel="stylesheet" href="../../css/easy.css" />
+  </head>
+  <body>
+    <header class="sticky">
       <div
         style="
           display: flex;
@@ -154,80 +152,104 @@
           </div>
 
           <div class="nav-profile-wrapper">
-                <button id="user-profile-btn" title="View Profile">
-                    <span id="user-avatar-initial">U</span>
-                </button>
-                <div id="profile-dropdown" class="profile-dropdown glass hidden">
-                    <div class="profile-header">
-                        <div class="profile-avatar-large">U</div>
-                        <div class="profile-meta">
-                            <h5>User</h5>
-                            <span>Code: </span>
-                        </div>
-                    </div>
-                    <div class="profile-body">
-                        <div class="profile-info-item">
-                            <i class="fas fa-envelope"></i>
-                            <span></span>
-                        </div>
-                    </div>
-                    <div class="profile-footer">
-                        <button id="notif-settings-btn" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;color:#a5b4fc;font-size:0.82rem;font-weight:600;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
-                            <i class="fas fa-bell" style="font-size:0.8rem"></i> Notification Settings
-                        </button>
-                        <button id="logout-btn" class="btn-logout">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </div>
+            <button id="user-profile-btn" title="View Profile">
+              <span id="user-avatar-initial">U</span>
+            </button>
+            <div id="profile-dropdown" class="profile-dropdown glass hidden">
+              <div class="profile-header">
+                <div class="profile-avatar-large">U</div>
+                <div class="profile-meta">
+                  <h5>User</h5>
+                  <span>Code: </span>
                 </div>
+              </div>
+              <div class="profile-body">
+                <div class="profile-info-item">
+                  <i class="fas fa-envelope"></i>
+                  <span></span>
+                </div>
+              </div>
+              <div class="profile-footer">
+                <button
+                  id="notif-settings-btn"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    width: 100%;
+                    padding: 9px 12px;
+                    background: rgba(99, 102, 241, 0.08);
+                    border: 1px solid rgba(99, 102, 241, 0.2);
+                    border-radius: 10px;
+                    color: #a5b4fc;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-bottom: 8px;
+                    transition: all 0.2s;
+                  "
+                >
+                  <i class="fas fa-bell" style="font-size: 0.8rem"></i>
+                  Notification Settings
+                </button>
+                <button id="logout-btn" class="btn-logout">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+              </div>
             </div>
+          </div>
         </div>
       </div>
-  </header>
+    </header>
 
-  <div id="navbar-container"></div>
-  <div class="app-container">
-    <div id="sidebar-container"></div>
-    <main class="main-content" style="padding: 1rem 1.5rem;">
-            <div id="app">
-                <!-- Toolbar -->
-                <div class="heatmap-toolbar">
-                    <div class="toolbar-left">
-                        <select id="sector-filter" class="sector-dropdown glass">
-                            <option value="all">All Sectors</option>
-                        </select>
-                    </div>
-                    <div class="toolbar-right">
-                        <span class="hm-info-text">Block size is indicative of turnover</span>
-                    </div>
-                </div>
-
-                <!-- Treemap -->
-                <div id="treemap-wrapper" class="treemap-wrapper">
-                    <div class="heatmap-loading" id="heatmap-loading">
-                        <div class="nepse-spinner-container" style="width: 60px; height: 60px;">
-                            <div class="ring ring-blue"></div>
-                            <div class="ring ring-green"></div>
-                        </div>
-                        <p>Loading market data...</p>
-                    </div>
-                </div>
-
-                <!-- Legend (bottom) -->
-                <div class="heatmap-legend-bar">
-                    <div class="lg-stop" style="background: #7f1d1d;">-5%</div>
-                    <div class="lg-stop" style="background: #991b1b;">-3%</div>
-                    <div class="lg-stop" style="background: #b91c1c;">-1%</div>
-                    <div class="lg-stop" style="background: #374151;">0%</div>
-                    <div class="lg-stop" style="background: #166534;">+1%</div>
-                    <div class="lg-stop" style="background: #15803d;">+3%</div>
-                    <div class="lg-stop" style="background: #16a34a;">+5%</div>
-                </div>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+      <div id="sidebar-container"></div>
+      <main class="main-content" style="padding: 1rem 1.5rem">
+        <div id="app">
+          <!-- Toolbar -->
+          <div class="heatmap-toolbar">
+            <div class="toolbar-left">
+              <select id="sector-filter" class="sector-dropdown glass">
+                <option value="all">All Sectors</option>
+              </select>
             </div>
-        </main>
+            <div class="toolbar-right">
+              <span class="hm-info-text"
+                >Block size is indicative of turnover</span
+              >
+            </div>
+          </div>
+
+          <!-- Treemap -->
+          <div id="treemap-wrapper" class="treemap-wrapper">
+            <div class="heatmap-loading" id="heatmap-loading">
+              <div
+                class="nepse-spinner-container"
+                style="width: 60px; height: 60px"
+              >
+                <div class="ring ring-blue"></div>
+                <div class="ring ring-green"></div>
+              </div>
+              <p>Loading market data...</p>
+            </div>
+          </div>
+
+          <!-- Legend (bottom) -->
+          <div class="heatmap-legend-bar">
+            <div class="lg-stop" style="background: #7f1d1d">-5%</div>
+            <div class="lg-stop" style="background: #991b1b">-3%</div>
+            <div class="lg-stop" style="background: #b91c1c">-1%</div>
+            <div class="lg-stop" style="background: #374151">0%</div>
+            <div class="lg-stop" style="background: #166534">+1%</div>
+            <div class="lg-stop" style="background: #15803d">+3%</div>
+            <div class="lg-stop" style="background: #16a34a">+5%</div>
+          </div>
+        </div>
+      </main>
     </div>
 
-    <script type="module" src="../../js/pages/market/heatmap.js"></script>
+    <script type="module" src="../../js/pages/analysis/heatmap.js"></script>
     <script src="../../js/security.js"></script>
-</body>
+  </body>
 </html>
