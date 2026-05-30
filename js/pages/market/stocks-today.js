@@ -17,7 +17,7 @@ async function fetchMarket() {
     DataService.getLiveMarket(),
     StorageService.getWatchlist()
   ]);
-  
+
   if (data && data.length > 0) {
     // Keep track of current prices for flash detection before saving new data
     const newPrices = {};
@@ -40,7 +40,7 @@ async function fetchMarket() {
     marketData = data;
     prevMarketPrices = newPrices;
     watchlistSymbols = watchlist || [];
-    
+
     applyFilter();
     updateMarketWidgets();
     populateSectorCarousel();
@@ -127,7 +127,7 @@ function populateSectorCarousel() {
 
   // Extract unique sectors
   const sectors = [...new Set(marketData.map(s => s.sector))].filter(Boolean);
-  
+
   // Calculate average %Change for each sector
   const sectorData = sectors.map(sec => {
     const secStocks = marketData.filter(s => s.sector === sec);
@@ -164,10 +164,10 @@ function populateSectorCarousel() {
   // Update DOM only if contents changed to prevent focus scroll jumps
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
-  
+
   if (container.children.length <= 1 || container.innerText !== tempDiv.innerText) {
     container.innerHTML = html;
-    
+
     // Re-attach card pill event handlers
     document.querySelectorAll('.sector-pill-card').forEach(card => {
       card.addEventListener('click', () => {
@@ -202,7 +202,7 @@ function applyFilter() {
   if (sortConfig.key) {
     sortData(sortConfig.key, sortConfig.direction);
   }
-  
+
   renderTable();
 }
 
@@ -225,7 +225,7 @@ function sortData(key, direction) {
   });
 }
 
-window.renderTable = function() {
+window.renderTable = function () {
   const body = document.getElementById("marketBody");
   const totalCount = document.getElementById("totalCount");
   const filteredCount = document.getElementById("filteredCount");
@@ -243,67 +243,67 @@ window.renderTable = function() {
   const isSameOrder = currentSymbols.length === newSymbols.length && currentSymbols.every((s, i) => s === newSymbols[i]);
 
   if (isSameOrder) {
-      filteredData.forEach(stock => {
-          const row = document.getElementById(`row-${stock.symbol}`);
-          if (!row) return;
+    filteredData.forEach(stock => {
+      const row = document.getElementById(`row-${stock.symbol}`);
+      if (!row) return;
 
-          const change = parseFloat(stock.change) || 0;
-          const changePercent = parseFloat(stock.changePercent) || 0;
-          const changeClass = changePercent >= 0 ? "price-up" : "price-down";
-          const sign = changePercent >= 0 ? "+" : "";
-
-          // Apply dynamic row class based on percent change
-          const rowClass = changePercent > 0 ? "tr-up" : (changePercent < 0 ? "tr-down" : "tr-neutral");
-          if (!row.classList.contains(rowClass)) {
-              row.classList.remove("tr-up", "tr-down", "tr-neutral");
-              row.classList.add(rowClass);
-          }
-
-          // Update each visible field individually without recreating the DOM
-          visibleCols.forEach(col => {
-              if (col === 'symbol') return;
-              
-              const cell = row.querySelector(`td[data-field="${col}"]`);
-              if (!cell) return;
-
-              let newContent = "";
-              if (col === 'price') {
-                  newContent = `Rs. ${(parseFloat(stock.price) || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
-              } else if (col === 'ltq') {
-                  newContent = parseFloat(stock.ltq || 0).toLocaleString();
-              } else if (col === 'changePercent') {
-                  newContent = `${sign}${change.toFixed(2)} (${sign}${changePercent.toFixed(2)}%)`;
-                  if (cell.className !== changeClass) cell.className = changeClass;
-              } else if (col === 'open') {
-                  newContent = `Rs. ${parseFloat(stock.open || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
-              } else if (col === 'high') {
-                  newContent = `Rs. ${parseFloat(stock.high || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
-              } else if (col === 'low') {
-                  newContent = `Rs. ${parseFloat(stock.low || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
-              } else if (col === 'volume') {
-                  newContent = parseInt(stock.volume || 0).toLocaleString();
-              } else if (col === 'previousClose') {
-                  newContent = `Rs. ${parseFloat(stock.previousClose || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
-              }
-
-              if (cell.innerHTML !== newContent) {
-                  cell.innerHTML = newContent;
-              }
-          });
-      });
-      return;
-  }
-
-  // Full table render only if filtering or sorting changes the rows
-  body.innerHTML = filteredData.map((stock) => {
       const change = parseFloat(stock.change) || 0;
       const changePercent = parseFloat(stock.changePercent) || 0;
       const changeClass = changePercent >= 0 ? "price-up" : "price-down";
       const sign = changePercent >= 0 ? "+" : "";
-      const rowClass = changePercent > 0 ? "tr-up" : (changePercent < 0 ? "tr-down" : "tr-neutral");
 
-      const cols = {
-          symbol: `
+      // Apply dynamic row class based on percent change
+      const rowClass = changePercent > 0 ? "tr-up" : (changePercent < 0 ? "tr-down" : "tr-neutral");
+      if (!row.classList.contains(rowClass)) {
+        row.classList.remove("tr-up", "tr-down", "tr-neutral");
+        row.classList.add(rowClass);
+      }
+
+      // Update each visible field individually without recreating the DOM
+      visibleCols.forEach(col => {
+        if (col === 'symbol') return;
+
+        const cell = row.querySelector(`td[data-field="${col}"]`);
+        if (!cell) return;
+
+        let newContent = "";
+        if (col === 'price') {
+          newContent = `Rs. ${(parseFloat(stock.price) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        } else if (col === 'ltq') {
+          newContent = parseFloat(stock.ltq || 0).toLocaleString();
+        } else if (col === 'changePercent') {
+          newContent = `${sign}${change.toFixed(2)} (${sign}${changePercent.toFixed(2)}%)`;
+          if (cell.className !== changeClass) cell.className = changeClass;
+        } else if (col === 'open') {
+          newContent = `Rs. ${parseFloat(stock.open || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        } else if (col === 'high') {
+          newContent = `Rs. ${parseFloat(stock.high || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        } else if (col === 'low') {
+          newContent = `Rs. ${parseFloat(stock.low || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        } else if (col === 'volume') {
+          newContent = parseInt(stock.volume || 0).toLocaleString();
+        } else if (col === 'previousClose') {
+          newContent = `Rs. ${parseFloat(stock.previousClose || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+
+        if (cell.innerHTML !== newContent) {
+          cell.innerHTML = newContent;
+        }
+      });
+    });
+    return;
+  }
+
+  // Full table render only if filtering or sorting changes the rows
+  body.innerHTML = filteredData.map((stock) => {
+    const change = parseFloat(stock.change) || 0;
+    const changePercent = parseFloat(stock.changePercent) || 0;
+    const changeClass = changePercent >= 0 ? "price-up" : "price-down";
+    const sign = changePercent >= 0 ? "+" : "";
+    const rowClass = changePercent > 0 ? "tr-up" : (changePercent < 0 ? "tr-down" : "tr-neutral");
+
+    const cols = {
+      symbol: `
               <td class="symbol-cell" title="${stock.name}">
                 <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
                   <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -320,23 +320,23 @@ window.renderTable = function() {
                   </div>
                 </div>
               </td>`,
-          price: `<td id="price-cell-${stock.symbol}" data-field="price" style="font-weight: 700;">Rs. ${(parseFloat(stock.price) || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>`,
-          ltq: `<td data-field="ltq">${parseFloat(stock.ltq || 0).toLocaleString()}</td>`,
-          changePercent: `<td class="${changeClass}" data-field="changePercent" style="font-weight: 600;">${sign}${change.toFixed(2)} (${sign}${changePercent.toFixed(2)}%)</td>`,
-          open: `<td data-field="open">Rs. ${parseFloat(stock.open || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>`,
-          high: `<td data-field="high">Rs. ${parseFloat(stock.high || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>`,
-          low: `<td data-field="low">Rs. ${parseFloat(stock.low || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>`,
-          volume: `<td data-field="volume">${parseInt(stock.volume || 0).toLocaleString()}</td>`,
-          previousClose: `<td data-field="previousClose">Rs. ${parseFloat(stock.previousClose || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>`
-      };
+      price: `<td id="price-cell-${stock.symbol}" data-field="price" style="font-weight: 700;">Rs. ${(parseFloat(stock.price) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>`,
+      ltq: `<td data-field="ltq">${parseFloat(stock.ltq || 0).toLocaleString()}</td>`,
+      changePercent: `<td class="${changeClass}" data-field="changePercent" style="font-weight: 600;">${sign}${change.toFixed(2)} (${sign}${changePercent.toFixed(2)}%)</td>`,
+      open: `<td data-field="open">Rs. ${parseFloat(stock.open || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>`,
+      high: `<td data-field="high">Rs. ${parseFloat(stock.high || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>`,
+      low: `<td data-field="low">Rs. ${parseFloat(stock.low || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>`,
+      volume: `<td data-field="volume">${parseInt(stock.volume || 0).toLocaleString()}</td>`,
+      previousClose: `<td data-field="previousClose">Rs. ${parseFloat(stock.previousClose || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>`
+    };
 
-      return `<tr id="row-${stock.symbol}" data-symbol="${stock.symbol}" class="fade-in ${rowClass}" onclick="window.openQuickPanel('${stock.symbol}')" style="cursor: pointer;">
+    return `<tr id="row-${stock.symbol}" data-symbol="${stock.symbol}" class=" ${rowClass}" onclick="window.openQuickPanel('${stock.symbol}')" style="cursor: pointer;">
           ${Object.keys(cols).filter(k => visibleCols.includes(k)).map(k => cols[k]).join('')}
       </tr>`;
   }).join("");
 };
 
-window.openQuickPanel = async function(symbol) {
+window.openQuickPanel = async function (symbol) {
   const stock = marketData.find(s => s.symbol === symbol);
   if (!stock) return;
 
@@ -515,22 +515,22 @@ function closeQuickPanel() {
 let visibleCols = ['symbol', 'price', 'ltq', 'changePercent', 'open', 'high', 'low', 'volume', 'previousClose'];
 
 async function initColumnVisibility() {
-    const saved = await StorageService.load('market_visible_cols');
-    if (saved) visibleCols = saved;
-    applyColumnVisibility();
+  const saved = await StorageService.load('market_visible_cols');
+  if (saved) visibleCols = saved;
+  applyColumnVisibility();
 }
 
 function applyColumnVisibility() {
-    // Header visibility
-    document.querySelectorAll('th[data-sort]').forEach(th => {
-        const col = th.dataset.sort;
-        th.style.display = visibleCols.includes(col) ? 'table-cell' : 'none';
-    });
-    // Symbol is always visible
-    const symbolTh = document.querySelector('th[data-sort="symbol"]');
-    if (symbolTh) symbolTh.style.display = 'table-cell';
-    
-    renderTable();
+  // Header visibility
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    const col = th.dataset.sort;
+    th.style.display = visibleCols.includes(col) ? 'table-cell' : 'none';
+  });
+  // Symbol is always visible
+  const symbolTh = document.querySelector('th[data-sort="symbol"]');
+  if (symbolTh) symbolTh.style.display = 'table-cell';
+
+  renderTable();
 }
 
 async function init() {
@@ -555,7 +555,7 @@ async function init() {
       // Update UI classes
       document.querySelectorAll('th.sortable').forEach(h => h.classList.remove('asc', 'desc'));
       th.classList.add(sortConfig.direction);
-      
+
       applyFilter();
     });
   });
@@ -564,7 +564,7 @@ async function init() {
   const carousel = document.getElementById("sectorCarousel");
   const prevBtn = document.getElementById("carouselPrevBtn");
   const nextBtn = document.getElementById("carouselNextBtn");
-  
+
   if (carousel && prevBtn && nextBtn) {
     prevBtn.addEventListener('click', () => {
       carousel.scrollBy({ left: -200, behavior: 'smooth' });
@@ -583,31 +583,31 @@ async function init() {
   // Column Customization UI population
   const settingsBtn = document.getElementById('columnSettingsBtn');
   const settingsPopup = document.getElementById('columnSettingsPopup');
-  
+
   if (settingsBtn) {
     settingsBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        settingsPopup.classList.toggle('active');
+      e.stopPropagation();
+      settingsPopup.classList.toggle('active');
     });
   }
 
   document.addEventListener('click', (e) => {
-      if (settingsPopup && !settingsPopup.contains(e.target)) settingsPopup.classList.remove('active');
+    if (settingsPopup && !settingsPopup.contains(e.target)) settingsPopup.classList.remove('active');
   });
 
   document.querySelectorAll('.column-option input').forEach(cb => {
-      const col = cb.dataset.col;
-      cb.checked = visibleCols.includes(col);
-      
-      cb.addEventListener('change', () => {
-          if (cb.checked) {
-              if (!visibleCols.includes(col)) visibleCols.push(col);
-          } else {
-              visibleCols = visibleCols.filter(c => c !== col);
-          }
-          StorageService.save('market_visible_cols', visibleCols);
-          applyColumnVisibility();
-      });
+    const col = cb.dataset.col;
+    cb.checked = visibleCols.includes(col);
+
+    cb.addEventListener('change', () => {
+      if (cb.checked) {
+        if (!visibleCols.includes(col)) visibleCols.push(col);
+      } else {
+        visibleCols = visibleCols.filter(c => c !== col);
+      }
+      StorageService.save('market_visible_cols', visibleCols);
+      applyColumnVisibility();
+    });
   });
 
   applyColumnVisibility();

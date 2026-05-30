@@ -44,7 +44,7 @@ const DCALogic = {
 
     const resultsArea = document.getElementById("dcaResults");
     if (resultsArea) {
-        resultsArea.innerHTML = `
+      resultsArea.innerHTML = `
           <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
             <span style="color: var(--text-secondary);">Total Units:</span>
             <span style="font-weight: 600;">${totalShares.toLocaleString()} Shares</span>
@@ -109,7 +109,7 @@ const DCALogic = {
     if (!container) return;
 
     const div = document.createElement("div");
-    div.className = "entry-row fade-in";
+    div.className = "entry-row";
     div.innerHTML = `
       <div class="form-group" style="margin-bottom: 0;">
           <input type="number" class="buy-price" placeholder="Price">

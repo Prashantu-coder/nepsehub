@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="../../css/base.css" />
     <link rel="stylesheet" href="../../css/layout.css" />
     <link rel="stylesheet" href="../../css/components.css" />
-    <link rel="stylesheet" href="../../css/themes.css" />
     <link rel="stylesheet" href="../../css/easy.css" />
     <style>
       .ladder-step {
@@ -201,33 +200,52 @@
           </div>
 
           <div class="nav-profile-wrapper">
-                <button id="user-profile-btn" title="View Profile">
-                    <span id="user-avatar-initial">U</span>
-                </button>
-                <div id="profile-dropdown" class="profile-dropdown glass hidden">
-                    <div class="profile-header">
-                        <div class="profile-avatar-large">U</div>
-                        <div class="profile-meta">
-                            <h5>User</h5>
-                            <span>Code: </span>
-                        </div>
-                    </div>
-                    <div class="profile-body">
-                        <div class="profile-info-item">
-                            <i class="fas fa-envelope"></i>
-                            <span></span>
-                        </div>
-                    </div>
-                    <div class="profile-footer">
-                        <button id="notif-settings-btn" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;color:#a5b4fc;font-size:0.82rem;font-weight:600;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
-                            <i class="fas fa-bell" style="font-size:0.8rem"></i> Notification Settings
-                        </button>
-                        <button id="logout-btn" class="btn-logout">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </div>
+            <button id="user-profile-btn" title="View Profile">
+              <span id="user-avatar-initial">U</span>
+            </button>
+            <div id="profile-dropdown" class="profile-dropdown glass hidden">
+              <div class="profile-header">
+                <div class="profile-avatar-large">U</div>
+                <div class="profile-meta">
+                  <h5>User</h5>
+                  <span>Code: </span>
                 </div>
+              </div>
+              <div class="profile-body">
+                <div class="profile-info-item">
+                  <i class="fas fa-envelope"></i>
+                  <span></span>
+                </div>
+              </div>
+              <div class="profile-footer">
+                <button
+                  id="notif-settings-btn"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    width: 100%;
+                    padding: 9px 12px;
+                    background: rgba(99, 102, 241, 0.08);
+                    border: 1px solid rgba(99, 102, 241, 0.2);
+                    border-radius: 10px;
+                    color: #a5b4fc;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-bottom: 8px;
+                    transition: all 0.2s;
+                  "
+                >
+                  <i class="fas fa-bell" style="font-size: 0.8rem"></i>
+                  Notification Settings
+                </button>
+                <button id="logout-btn" class="btn-logout">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+              </div>
             </div>
+          </div>
         </div>
       </div>
     </header>
@@ -236,208 +254,187 @@
       <div id="sidebar-container"></div>
       <main class="main-content">
         <div id="app">
-          <div class="fade-in">
-            <div class="section-header">
-              <h2>Exit Strategy Planner</h2>
-              <p style="color: var(--text-secondary)">
-                Plan your profit ladder for disciplined execution
-              </p>
-            </div>
+          <div class="section-header">
+            <h2>Exit Strategy Planner</h2>
+            <p style="color: var(--text-secondary)">
+              Plan your profit ladder for disciplined execution
+            </p>
+          </div>
 
-            <div
-              class="tools-grid"
-              style="
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 1.5rem;
-              "
-            >
-              <!-- Input Section -->
-              <div class="glass" style="padding: 2rem; border-radius: 20px">
+          <div
+            class="tools-grid"
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 1.5rem;
+            "
+          >
+            <!-- Input Section -->
+            <div class="glass" style="padding: 2rem; border-radius: 20px">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 1rem;
+                  margin-bottom: 2rem;
+                "
+              >
                 <div
                   style="
+                    background: var(--primary);
+                    color: white;
+                    width: 45px;
+                    height: 45px;
+                    border-radius: 12px;
                     display: flex;
                     align-items: center;
-                    gap: 1rem;
-                    margin-bottom: 2rem;
+                    justify-content: center;
                   "
                 >
-                  <div
-                    style="
-                      background: var(--primary);
-                      color: white;
-                      width: 45px;
-                      height: 45px;
-                      border-radius: 12px;
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                    "
-                  >
-                    <i class="fas fa-sign-out-alt"></i>
-                  </div>
-                  <h3 style="font-weight: 700">Setup & Allocation</h3>
+                  <i class="fas fa-sign-out-alt"></i>
                 </div>
+                <h3 style="font-weight: 700">Setup & Allocation</h3>
+              </div>
 
-                <div
-                  style="
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 1rem;
-                  "
-                >
-                  <div class="form-group">
-                    <label>Entry Price</label>
-                    <input
-                      type="number"
-                      id="entryPrice"
-                      placeholder="500"
-                      value=""
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Total Quantity</label>
-                    <input
-                      type="number"
-                      id="totalQty"
-                      placeholder="100"
-                      value=""
-                    />
-                  </div>
+              <div
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem"
+              >
+                <div class="form-group">
+                  <label>Entry Price</label>
+                  <input
+                    type="number"
+                    id="entryPrice"
+                    placeholder="500"
+                    value=""
+                  />
                 </div>
-
-                <div class="form-group" style="margin-top: 1rem">
-                  <label>Targets (T1 < T2 < T3)</label>
-                  <div
-                    style="
-                      display: grid;
-                      grid-template-columns: 1fr 1fr 1fr;
-                      gap: 0.8rem;
-                    "
-                  >
-                    <input
-                      type="number"
-                      id="target1"
-                      placeholder="T1"
-                      value=""
-                    />
-                    <input
-                      type="number"
-                      id="target2"
-                      placeholder="T2"
-                      value=""
-                    />
-                    <input
-                      type="number"
-                      id="target3"
-                      placeholder="T3"
-                      value=""
-                    />
-                  </div>
-                </div>
-
-                <div
-                  style="
-                    margin-top: 2rem;
-                    padding-top: 1.5rem;
-                    border-top: 1px solid var(--surface-border);
-                  "
-                >
-                  <div class="slider-group">
-                    <div style="display: flex; justify-content: space-between">
-                      <label>Portion 1 (at T1)</label>
-                      <span id="p1Val">40%</span>
-                    </div>
-                    <input
-                      type="range"
-                      id="p1Slider"
-                      min="0"
-                      max="100"
-                      value="40"
-                    />
-                  </div>
-                  <div class="slider-group">
-                    <div style="display: flex; justify-content: space-between">
-                      <label>Portion 2 (at T2)</label>
-                      <span id="p2Val">30%</span>
-                    </div>
-                    <input
-                      type="range"
-                      id="p2Slider"
-                      min="0"
-                      max="100"
-                      value="30"
-                    />
-                  </div>
-                  <div class="slider-group">
-                    <div style="display: flex; justify-content: space-between">
-                      <label>Portion 3 (at T3)</label>
-                      <span id="p3Val">30%</span>
-                    </div>
-                    <input
-                      type="range"
-                      id="p3Slider"
-                      min="0"
-                      max="100"
-                      value="30"
-                      disabled
-                    />
-                  </div>
-                  <div
-                    id="allocWarning"
-                    style="
-                      color: var(--danger);
-                      font-size: 0.8rem;
-                      text-align: center;
-                    "
-                  ></div>
+                <div class="form-group">
+                  <label>Total Quantity</label>
+                  <input
+                    type="number"
+                    id="totalQty"
+                    placeholder="100"
+                    value=""
+                  />
                 </div>
               </div>
 
-              <!-- Result Section -->
-              <div class="glass" style="padding: 2rem; border-radius: 20px">
+              <div class="form-group" style="margin-top: 1rem">
+                <label>Targets (T1 < T2 < T3)</label>
                 <div
                   style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    gap: 0.8rem;
+                  "
+                >
+                  <input type="number" id="target1" placeholder="T1" value="" />
+                  <input type="number" id="target2" placeholder="T2" value="" />
+                  <input type="number" id="target3" placeholder="T3" value="" />
+                </div>
+              </div>
+
+              <div
+                style="
+                  margin-top: 2rem;
+                  padding-top: 1.5rem;
+                  border-top: 1px solid var(--surface-border);
+                "
+              >
+                <div class="slider-group">
+                  <div style="display: flex; justify-content: space-between">
+                    <label>Portion 1 (at T1)</label>
+                    <span id="p1Val">40%</span>
+                  </div>
+                  <input
+                    type="range"
+                    id="p1Slider"
+                    min="0"
+                    max="100"
+                    value="40"
+                  />
+                </div>
+                <div class="slider-group">
+                  <div style="display: flex; justify-content: space-between">
+                    <label>Portion 2 (at T2)</label>
+                    <span id="p2Val">30%</span>
+                  </div>
+                  <input
+                    type="range"
+                    id="p2Slider"
+                    min="0"
+                    max="100"
+                    value="30"
+                  />
+                </div>
+                <div class="slider-group">
+                  <div style="display: flex; justify-content: space-between">
+                    <label>Portion 3 (at T3)</label>
+                    <span id="p3Val">30%</span>
+                  </div>
+                  <input
+                    type="range"
+                    id="p3Slider"
+                    min="0"
+                    max="100"
+                    value="30"
+                    disabled
+                  />
+                </div>
+                <div
+                  id="allocWarning"
+                  style="
+                    color: var(--danger);
+                    font-size: 0.8rem;
+                    text-align: center;
+                  "
+                ></div>
+              </div>
+            </div>
+
+            <!-- Result Section -->
+            <div class="glass" style="padding: 2rem; border-radius: 20px">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 1rem;
+                  margin-bottom: 2rem;
+                "
+              >
+                <div
+                  style="
+                    background: var(--secondary);
+                    color: white;
+                    width: 45px;
+                    height: 45px;
+                    border-radius: 12px;
                     display: flex;
                     align-items: center;
-                    gap: 1rem;
-                    margin-bottom: 2rem;
+                    justify-content: center;
                   "
                 >
-                  <div
-                    style="
-                      background: var(--secondary);
-                      color: white;
-                      width: 45px;
-                      height: 45px;
-                      border-radius: 12px;
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                    "
-                  >
-                    <i class="fas fa-layer-group"></i>
-                  </div>
-                  <h3 style="font-weight: 700">Profit Ladder</h3>
+                  <i class="fas fa-layer-group"></i>
                 </div>
+                <h3 style="font-weight: 700">Profit Ladder</h3>
+              </div>
 
-                <div id="ladderContainer">
-                  <!-- Ladder steps injected here -->
-                </div>
+              <div id="ladderContainer">
+                <!-- Ladder steps injected here -->
+              </div>
 
-                <div
-                  id="summaryCard"
-                  class="summary-card"
-                  style="
-                    background: rgba(255, 255, 255, 0.05);
-                    padding: 1.5rem;
-                    border-radius: 16px;
-                    margin-top: 2rem;
-                    border: 1px solid var(--surface-border);
-                  "
-                >
-                  <!-- Summary here -->
-                </div>
+              <div
+                id="summaryCard"
+                class="summary-card"
+                style="
+                  background: rgba(255, 255, 255, 0.05);
+                  padding: 1.5rem;
+                  border-radius: 16px;
+                  margin-top: 2rem;
+                  border: 1px solid var(--surface-border);
+                "
+              >
+                <!-- Summary here -->
               </div>
             </div>
           </div>

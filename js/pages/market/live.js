@@ -316,7 +316,7 @@ window.renderTable = function () {
       turnover: `<td data-field="turnover">${formatPrice(stock.turnover)}</td>`
     };
 
-    return `<tr id="row-${stock.symbol}" data-symbol="${stock.symbol}" class="fade-in ${rowClass}" onclick="window.openQuickPanel('${stock.symbol}')" style="cursor: pointer;" title="${stock.name}">
+    return `<tr id="row-${stock.symbol}" data-symbol="${stock.symbol}" class="${rowClass}" onclick="window.openQuickPanel('${stock.symbol}')" style="cursor: pointer;" title="${stock.name}">
           ${Object.keys(cols).filter(k => visibleCols.includes(k)).map(k => cols[k]).join('')}
       </tr>`;
   }).join("");

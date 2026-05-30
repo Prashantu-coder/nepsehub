@@ -411,70 +411,6 @@ const DataService = {
         }
     },
 
-
-    // --- Technical Analysis Service ---
-    async getTechnicalMACD() {
-        try {
-            const endpoint = `${this.API_BASE}/technical/macd/all`;
-            const response = await fetch(endpoint);
-            if (!response.ok) return [];
-            const result = await response.json();
-            const data = result.success ? result.data : result;
-
-            return data.map(item => ({
-                ...item,
-                price: item.close,
-                signalLine: item.signal_line,
-                histogram: item.hist,
-                trend: item.signal
-            }));
-        } catch (error) {
-            console.error('❌ MACD Fetch Error:', error);
-            return [];
-        }
-    },
-
-    async getTechnicalRSI() {
-        try {
-            const endpoint = `${this.API_BASE}/technical/rsi/all`;
-            const response = await fetch(endpoint);
-            if (!response.ok) return [];
-            const result = await response.json();
-            const data = result.success ? result.data : result;
-
-            return data.map(item => ({
-                ...item,
-                price: item.close,
-                condition: item.rsi <= 30 ? 'Oversold' : item.rsi >= 70 ? 'Overbought' : 'Neutral',
-                trend: item.rsi <= 30 ? 'Bullish' : item.rsi >= 70 ? 'Bearish' : 'Neutral'
-            }));
-        } catch (error) {
-            console.error('❌ RSI Fetch Error:', error);
-            return [];
-        }
-    },
-
-    async getTechnicalBollinger() {
-        try {
-            const endpoint = `${this.API_BASE}/technical/bollinger/all`;
-            const response = await fetch(endpoint);
-            if (!response.ok) return [];
-            const result = await response.json();
-            const data = result.success ? result.data : result;
-
-            return data.map(item => ({
-                ...item,
-                price: item.close,
-                upperBand: item.upper,
-                lowerBand: item.lower,
-                trend: item.status === 'Oversold' ? 'Bullish' : item.status === 'Overbought' ? 'Bearish' : 'Neutral'
-            }));
-        } catch (error) {
-            console.error('❌ Bollinger Fetch Error:', error);
-            return [];
-        }
-    },
-
     async getIndexChart(symbol, period = '1D') {
         const cacheKey = `${symbol}_${period}`;
         const marketOpen = await this.checkMarketStatus();
@@ -559,6 +495,69 @@ const DataService = {
                 resolve(data);
             }, 500); // 500ms simulated delay
         });
+    },
+
+    /**
+     * Daily close prices for SIP / backtest use.
+     * @returns {Promise<Array<{date: string, close: number}>>}
+     */
+    async getHistoricalCloses(symbol, period = '1Y') {
+        try {
+            let rawData = await this.getIndexChart(symbol, period);
+            if (!rawData) return [];
+
+            if (!Array.isArray(rawData) && Array.isArray(rawData.data)) {
+                rawData = rawData.data;
+            }
+            if (!Array.isArray(rawData) || rawData.length === 0) return [];
+
+            const byDate = new Map();
+
+            if (Array.isArray(rawData[0])) {
+                rawData.forEach((item) => {
+                    const ts = item[0];
+                    const close = parseFloat(item[1] || 0);
+                    if (!ts || !close) return;
+                    const d = new Date(ts * 1000);
+                    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    byDate.set(key, close);
+                });
+            } else {
+                rawData.forEach((d) => {
+                    const timeVal = d.time || d.date || d.tradeDate;
+                    const close = parseFloat(d.contractRate || d.price || d.close || d.y || d.value || 0);
+                    if (!timeVal || !close) return;
+                    let key;
+                    if (typeof timeVal === 'number') {
+                        const dt = new Date(timeVal * 1000);
+                        key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+                    } else {
+                        const timeStr = String(timeVal);
+                        key = timeStr.includes('T') ? timeStr.split('T')[0] : timeStr.substring(0, 10);
+                    }
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(key)) {
+                        byDate.set(key, close);
+                    }
+                });
+            }
+
+            return Array.from(byDate.entries())
+                .map(([date, close]) => ({ date, close }))
+                .sort((a, b) => a.date.localeCompare(b.date));
+        } catch (error) {
+            console.error(`Failed to fetch historical closes for ${symbol}:`, error);
+            return [];
+        }
+    },
+
+    getStockLtp(symbol, stocks = []) {
+        if (!symbol || !stocks.length) return 0;
+        const upper = symbol.toUpperCase();
+        const stock = stocks.find(
+            (s) => (s.symbol || s.scrip || '').toUpperCase() === upper
+        );
+        if (!stock) return 0;
+        return parseFloat(stock.ltp || stock.price || stock.lastTradedPrice || stock.close || 0) || 0;
     },
 
     getHomepageIndices() {

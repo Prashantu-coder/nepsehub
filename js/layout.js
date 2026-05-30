@@ -319,7 +319,6 @@ export const Layout = {
                 position:fixed;inset:0;z-index:9999;
                 background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
                 display:flex;align-items:center;justify-content:center;
-                animation:fadeIn 0.2s ease;
             `;
             overlay.innerHTML = `
                 <div style="background:#1e293b;border-radius:20px;padding:0;width:min(480px,94vw);box-shadow:0 32px 64px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.08);overflow:hidden">

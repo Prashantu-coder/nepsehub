@@ -1,22 +1,23 @@
 <!doctype html>
 <html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Market | NEPSE HUB</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/pages/market.css" />
+    <link rel="stylesheet" href="../../css/pages/live.css" />
+    <link rel="stylesheet" href="../../css/easy.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Market | NEPSE HUB</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="../../css/base.css" />
-  <link rel="stylesheet" href="../../css/layout.css" />
-  <link rel="stylesheet" href="../../css/components.css" />
-  <link rel="stylesheet" href="../../css/themes.css" />
-  <link rel="stylesheet" href="../../css/pages/market.css" />
-  <link rel="stylesheet" href="../../css/pages/live.css" />
-  <link rel="stylesheet" href="../../css/easy.css">
-</head>
-
-<body>
-  <header class="sticky">
+  <body>
+    <header class="sticky">
       <div
         style="
           display: flex;
@@ -155,42 +156,60 @@
           </div>
 
           <div class="nav-profile-wrapper">
-                <button id="user-profile-btn" title="View Profile">
-                    <span id="user-avatar-initial">U</span>
-                </button>
-                <div id="profile-dropdown" class="profile-dropdown glass hidden">
-                    <div class="profile-header">
-                        <div class="profile-avatar-large">U</div>
-                        <div class="profile-meta">
-                            <h5>User</h5>
-                            <span>Code: </span>
-                        </div>
-                    </div>
-                    <div class="profile-body">
-                        <div class="profile-info-item">
-                            <i class="fas fa-envelope"></i>
-                            <span></span>
-                        </div>
-                    </div>
-                    <div class="profile-footer">
-                        <button id="notif-settings-btn" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;color:#a5b4fc;font-size:0.82rem;font-weight:600;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
-                            <i class="fas fa-bell" style="font-size:0.8rem"></i> Notification Settings
-                        </button>
-                        <button id="logout-btn" class="btn-logout">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </div>
+            <button id="user-profile-btn" title="View Profile">
+              <span id="user-avatar-initial">U</span>
+            </button>
+            <div id="profile-dropdown" class="profile-dropdown glass hidden">
+              <div class="profile-header">
+                <div class="profile-avatar-large">U</div>
+                <div class="profile-meta">
+                  <h5>User</h5>
+                  <span>Code: </span>
                 </div>
+              </div>
+              <div class="profile-body">
+                <div class="profile-info-item">
+                  <i class="fas fa-envelope"></i>
+                  <span></span>
+                </div>
+              </div>
+              <div class="profile-footer">
+                <button
+                  id="notif-settings-btn"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    width: 100%;
+                    padding: 9px 12px;
+                    background: rgba(99, 102, 241, 0.08);
+                    border: 1px solid rgba(99, 102, 241, 0.2);
+                    border-radius: 10px;
+                    color: #a5b4fc;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-bottom: 8px;
+                    transition: all 0.2s;
+                  "
+                >
+                  <i class="fas fa-bell" style="font-size: 0.8rem"></i>
+                  Notification Settings
+                </button>
+                <button id="logout-btn" class="btn-logout">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+              </div>
             </div>
+          </div>
         </div>
       </div>
-  </header>
-  <div id="navbar-container"></div>
-  <div class="app-container">
-    <div id="sidebar-container"></div>
-    <main class="main-content">
-      <div id="app">
-        <div class="fade-in">
+    </header>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+      <div id="sidebar-container"></div>
+      <main class="main-content">
+        <div id="app">
           <!-- New Live Market Header -->
           <div class="live-market-header">
             <div class="summary-badges">
@@ -205,8 +224,13 @@
               </button>
             </div>
 
-            <h1 class="live-market-title status-dot-indicator-head"><span id="marketStatusDot"
-                class="status-dot-indicator status-dot-closed"></span>Live Market</h1>
+            <h1 class="live-market-title status-dot-indicator-head">
+              <span
+                id="marketStatusDot"
+                class="status-dot-indicator status-dot-closed"
+              ></span
+              >Live Market
+            </h1>
 
             <div class="live-market-timestamp" id="liveTimestamp">
               As of: --/--/---- --:-- --
@@ -226,51 +250,120 @@
                 <option value="Life Insurance">Life Insurance</option>
                 <option value="Non-Life Insurance">Non-Life Insurance</option>
                 <option value="Microfinance">Microfinance</option>
-                <option value="Manufacturing & Processing">Manufacturing & Processing</option>
+                <option value="Manufacturing & Processing">
+                  Manufacturing & Processing
+                </option>
                 <option value="Trading">Trading</option>
                 <option value="Investment">Investment</option>
                 <option value="Others">Others</option>
               </select>
-              <input type="text" id="marketSearch" class="filter-search" placeholder="Enter symbol to search..." />
-              <button id="searchBtn" class="btn-search"><i class="fas fa-search"></i> Search</button>
-              <button id="clearBtn" class="btn-clear"><i class="fas fa-undo"></i> Clear</button>
+              <input
+                type="text"
+                id="marketSearch"
+                class="filter-search"
+                placeholder="Enter symbol to search..."
+              />
+              <button id="searchBtn" class="btn-search">
+                <i class="fas fa-search"></i> Search
+              </button>
+              <button id="clearBtn" class="btn-clear">
+                <i class="fas fa-undo"></i> Clear
+              </button>
             </div>
           </div>
 
-          <div class="glass" style="padding: 0.8rem 0; border-radius: 12px; margin-top: 0.75rem">
-            <div style="
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                  margin-bottom: 0.3rem;
-                  padding: 0 1.5rem;
-                  gap: 1rem;
-                ">
+          <div
+            class="glass"
+            style="padding: 0.8rem 0; border-radius: 12px; margin-top: 0.75rem"
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.3rem;
+                padding: 0 1.5rem;
+                gap: 1rem;
+              "
+            >
               <div></div>
-              <div style="display: flex; gap: 1rem; align-items: center;">
-                <div id="marketSummary" style="font-size: 0.9rem; color: var(--text-secondary)">
-                  Showing <span id="filteredCount">0</span> of <span id="totalCount">0</span> stocks
+              <div style="display: flex; gap: 1rem; align-items: center">
+                <div
+                  id="marketSummary"
+                  style="font-size: 0.9rem; color: var(--text-secondary)"
+                >
+                  Showing <span id="filteredCount">0</span> of
+                  <span id="totalCount">0</span> stocks
                 </div>
-                <div style="position: relative;">
-                  <button id="columnSettingsBtn" class="btn btn-secondary btn-sm" title="Customize Columns">
+                <div style="position: relative">
+                  <button
+                    id="columnSettingsBtn"
+                    class="btn btn-secondary btn-sm"
+                    title="Customize Columns"
+                  >
                     <i class="fas fa-columns"></i>
                   </button>
                   <div id="columnSettingsPopup" class="column-settings">
-                    <h4 style="margin-bottom: 0.8rem; font-size: 0.9rem;">Show Columns</h4>
-                    <label class="column-option"><input type="checkbox" data-col="symbol" checked disabled>
-                      SYMBOL</label>
-                    <label class="column-option"><input type="checkbox" data-col="price" checked> LTP</label>
-                    <label class="column-option"><input type="checkbox" data-col="ltq" checked> LTV</label>
-                    <label class="column-option"><input type="checkbox" data-col="change" checked> POINT CHANGE</label>
-                    <label class="column-option"><input type="checkbox" data-col="changePercent" checked>
-                      %CHANGE</label>
-                    <label class="column-option"><input type="checkbox" data-col="open" checked> OPEN</label>
-                    <label class="column-option"><input type="checkbox" data-col="high" checked> HIGH</label>
-                    <label class="column-option"><input type="checkbox" data-col="low" checked> LOW</label>
-                    <label class="column-option"><input type="checkbox" data-col="previousClose" checked> PREV
-                      CLOSE</label>
-                    <label class="column-option"><input type="checkbox" data-col="volume" checked> VOLUME</label>
-                    <label class="column-option"><input type="checkbox" data-col="turnover" checked> TURNOVER</label>
+                    <h4 style="margin-bottom: 0.8rem; font-size: 0.9rem">
+                      Show Columns
+                    </h4>
+                    <label class="column-option"
+                      ><input
+                        type="checkbox"
+                        data-col="symbol"
+                        checked
+                        disabled
+                      />
+                      SYMBOL</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="price" checked />
+                      LTP</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="ltq" checked />
+                      LTV</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="change" checked /> POINT
+                      CHANGE</label
+                    >
+                    <label class="column-option"
+                      ><input
+                        type="checkbox"
+                        data-col="changePercent"
+                        checked
+                      />
+                      %CHANGE</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="open" checked />
+                      OPEN</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="high" checked />
+                      HIGH</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="low" checked />
+                      LOW</label
+                    >
+                    <label class="column-option"
+                      ><input
+                        type="checkbox"
+                        data-col="previousClose"
+                        checked
+                      />
+                      PREV CLOSE</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="volume" checked />
+                      VOLUME</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="turnover" checked />
+                      TURNOVER</label
+                    >
                   </div>
                 </div>
               </div>
@@ -288,7 +381,9 @@
                     <th class="sortable" data-sort="open">OPEN</th>
                     <th class="sortable" data-sort="high">HIGH</th>
                     <th class="sortable" data-sort="low">LOW</th>
-                    <th class="sortable" data-sort="previousClose">PREV CLOSE</th>
+                    <th class="sortable" data-sort="previousClose">
+                      PREV CLOSE
+                    </th>
                     <th class="sortable" data-sort="volume">VOLUME</th>
                     <th class="sortable" data-sort="turnover">TURNOVER</th>
                   </tr>
@@ -300,21 +395,21 @@
             </div>
           </div>
         </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Quick Action Side Panel -->
-  <div class="side-panel-overlay" id="panelOverlay"></div>
-  <div class="side-panel" id="quickPanel">
-    <div class="close-panel" id="closePanel"><i class="fas fa-times"></i></div>
-    <div id="panelContent">
-      <!-- Content injected dynamically -->
+      </main>
     </div>
-  </div>
 
-  <script type="module" src="../../js/pages/market/live.js"></script>
-  <script src="../../js/security.js"></script>
-</body>
+    <!-- Quick Action Side Panel -->
+    <div class="side-panel-overlay" id="panelOverlay"></div>
+    <div class="side-panel" id="quickPanel">
+      <div class="close-panel" id="closePanel">
+        <i class="fas fa-times"></i>
+      </div>
+      <div id="panelContent">
+        <!-- Content injected dynamically -->
+      </div>
+    </div>
 
+    <script type="module" src="../../js/pages/market/live.js"></script>
+    <script src="../../js/security.js"></script>
+  </body>
 </html>

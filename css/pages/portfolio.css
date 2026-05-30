@@ -10,16 +10,19 @@
   gap: 1rem;
   margin-bottom: 2rem;
 }
+
 @media (max-width: 1200px) {
   .portfolio-stats-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
 @media (max-width: 768px) {
   .portfolio-stats-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
+
 @media (max-width: 480px) {
   .portfolio-stats-grid {
     grid-template-columns: 1fr;
@@ -55,7 +58,7 @@
 
 .summary-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .summary-card-inner {
@@ -107,6 +110,7 @@
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
+
 @media (max-width: 900px) {
   .portfolio-charts-grid {
     grid-template-columns: 1fr;
@@ -121,6 +125,7 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
 .holdings-table-wrap h4 {
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--surface-border);
@@ -158,6 +163,7 @@
   margin-top: 1rem;
   font-size: 0.85rem;
 }
+
 .fee-preview-buy .fee-header {
   color: var(--primary);
   font-weight: 600;
@@ -166,11 +172,13 @@
   gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
+
 .fee-preview-buy .fee-total {
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--danger);
 }
+
 .fee-preview-buy .fee-wacc {
   font-size: 0.75rem;
   color: var(--text-secondary);
@@ -191,12 +199,14 @@
   padding: 5rem 2rem;
   text-align: center;
 }
+
 .portfolio-empty i {
   font-size: 3rem;
   color: var(--text-secondary);
   margin-bottom: 1rem;
   display: block;
 }
+
 .portfolio-empty p {
   color: var(--text-secondary);
   margin-bottom: 1.5rem;
@@ -210,299 +220,308 @@
 
 /* Risk Dashboard Styles */
 .risk-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
 }
 
 .risk-card {
-    padding: 1.5rem;
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  padding: 1.5rem;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .risk-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .risk-label {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
 .risk-icon {
-    color: var(--primary);
-    opacity: 0.6;
+  color: var(--primary);
+  opacity: 0.6;
 }
 
 .risk-value {
-    font-size: 1.75rem;
-    font-weight: 800;
+  font-size: 1.75rem;
+  font-weight: 800;
 }
 
 .risk-sub-label {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
 .concentration-item {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .concentration-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.85rem;
-    margin-bottom: 0.4rem;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
 }
 
 .concentration-bar-bg {
-    height: 8px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 4px;
-    overflow: hidden;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .concentration-bar-fill {
-    height: 100%;
-    background: var(--primary);
-    border-radius: 4px;
-    transition: width 1s ease-out;
+  height: 100%;
+  background: var(--primary);
+  border-radius: 4px;
+  transition: width 1s ease-out;
 }
 
 .warning-item {
-    display: flex;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    background: rgba(244, 63, 94, 0.05);
-    border: 1px solid rgba(244, 63, 94, 0.1);
-    border-radius: 12px;
-    font-size: 0.85rem;
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(244, 63, 94, 0.05);
+  border: 1px solid rgba(244, 63, 94, 0.1);
+  border-radius: 12px;
+  font-size: 0.85rem;
 }
 
 .warning-item.warning-low {
-    background: rgba(245, 158, 11, 0.05);
-    border-color: rgba(245, 158, 11, 0.1);
+  background: rgba(245, 158, 11, 0.05);
+  border-color: rgba(245, 158, 11, 0.1);
 }
 
 .warning-item i {
-    margin-top: 0.2rem;
+  margin-top: 0.2rem;
 }
 
 .symbol-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 1.1rem;
-    flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+  flex-shrink: 0;
 }
 
 .pnl-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .pnl-positive {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--secondary);
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--secondary);
 }
 
 .pnl-negative {
-    background: rgba(244, 63, 94, 0.1);
-    color: var(--danger);
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--danger);
 }
 
 .btn-sell-action {
-    background: rgba(244, 63, 94, 0.08);
-    color: var(--danger);
-    border: 1px solid rgba(244, 63, 94, 0.2);
-    padding: 0.5rem 1rem;
-    border-radius: 10px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  background: rgba(244, 63, 94, 0.08);
+  color: var(--danger);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .btn-sell-action:hover {
-    background: var(--danger);
-    color: white;
-    transform: scale(1.05);
+  background: var(--danger);
+  color: white;
+  transform: scale(1.05);
 }
 
 /* ── Skeleton Loading ── */
 .skeleton {
-    position: relative;
-    overflow: hidden;
-    background-color: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
+  position: relative;
+  overflow: hidden;
 }
 
 .skeleton::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    transform: translateX(-100%);
-    background-image: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0) 0,
-        rgba(255, 255, 255, 0.02) 20%,
-        rgba(255, 255, 255, 0.05) 60%,
-        rgba(255, 255, 255, 0)
-    );
-    animation: shimmer 2s infinite linear;
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.02) 20%,
+      rgba(255, 255, 255, 0.05) 60%,
+      rgba(255, 255, 255, 0));
+  animation: shimmer 2s infinite linear;
 }
 
 @keyframes shimmer {
-    100% {
-        transform: translateX(100%);
-    }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .skeleton-text {
-    height: 1.2rem;
-    width: 100%;
+  height: 1.2rem;
+  width: 100%;
 }
 
 .skeleton-card {
-    height: 80px;
+  height: 80px;
 }
 
 .skeleton-chart {
-    height: 300px;
-    width: 100%;
+  height: 300px;
+  width: 100%;
 }
 
 /* ── Shimmer / Data tbody visibility helpers ── */
-.portfolio-shimmer-body { display: table-row-group; }
-.portfolio-data-body.pf-loading { display: none; }
+.portfolio-shimmer-body {
+  display: table-row-group;
+}
+
+.portfolio-data-body.pf-loading {
+  display: none;
+}
 
 /* ══════════════════════════════════════════════
    PORTFOLIO EMPTY STATE CARD
 ══════════════════════════════════════════════ */
 .pf-empty-card {
-    display: none; /* shown via JS as flex */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 4rem 2rem;
-    margin-top: 1.5rem;
-    border-radius: 24px;
-    border: 1px dashed rgba(99, 102, 241, 0.25);
-    background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.06) 0%, transparent 65%);
-    position: relative;
-    overflow: hidden;
-    gap: 0;
+  display: none;
+  /* shown via JS as flex */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  margin-top: 1.5rem;
+  border-radius: 24px;
+  border: 1px dashed rgba(99, 102, 241, 0.25);
+  background: radial-gradient(ellipse at 50% 0%, rgba(99, 102, 241, 0.06) 0%, transparent 65%);
+  position: relative;
+  overflow: hidden;
+  gap: 0;
 }
 
 /* Glowing ambient background blob */
 .pf-empty-glow {
-    position: absolute;
-    top: -60px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 280px;
-    height: 180px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
-    pointer-events: none;
-    filter: blur(20px);
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+  filter: blur(20px);
 }
 
 /* Icon circle */
 .pf-empty-icon {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(59,130,246,0.15) 100%);
-    border: 1px solid rgba(99,102,241,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.75rem;
-    color: #6366f1;
-    margin-bottom: 1.25rem;
-    box-shadow: 0 0 24px rgba(99,102,241,0.2);
-    animation: pf-empty-float 4s ease-in-out infinite;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(59, 130, 246, 0.15) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  color: #6366f1;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 0 24px rgba(99, 102, 241, 0.2);
+  animation: pf-empty-float 4s ease-in-out infinite;
 }
 
 @keyframes pf-empty-float {
-    0%, 100% { transform: translateY(0);   }
-    50%       { transform: translateY(-6px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 .pf-empty-title {
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0 0 0.6rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 0.6rem;
 }
 
 .pf-empty-sub {
-    font-size: 0.88rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    max-width: 420px;
-    margin: 0 0 1.5rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 420px;
+  margin: 0 0 1.5rem;
 }
 
 /* Inspirational quote block */
 .pf-empty-quote {
-    font-style: italic;
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-    max-width: 420px;
-    padding: 0.9rem 1.25rem;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    margin-bottom: 2rem;
-    line-height: 1.6;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  max-width: 420px;
+  padding: 0.9rem 1.25rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 2rem;
+  line-height: 1.6;
 }
 
 .pf-empty-btn {
-    padding: 0.75rem 2rem;
-    font-size: 0.9rem;
-    font-weight: 700;
-    border-radius: 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    box-shadow: 0 0 24px rgba(99,102,241,0.35);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 0.75rem 2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: 0 0 24px rgba(99, 102, 241, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .pf-empty-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 36px rgba(99,102,241,0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 0 36px rgba(99, 102, 241, 0.5);
 }
 
 /* Smaller variant used for the Transactions empty state */
 .pf-empty-sm {
-    padding: 3rem 2rem;
-    border-style: solid;
-    border-color: rgba(255,255,255,0.06);
-    background: rgba(255,255,255,0.015);
+  padding: 3rem 2rem;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.015);
 }

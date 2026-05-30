@@ -59,6 +59,7 @@
   justify-content: space-between;
   padding: 0.1rem 2rem;
   z-index: 1000;
+  flex-direction: row;
 }
 
 .navbar .logo {

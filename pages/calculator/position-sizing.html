@@ -11,8 +11,7 @@
     <link rel="stylesheet" href="../../css/base.css" />
     <link rel="stylesheet" href="../../css/layout.css" />
     <link rel="stylesheet" href="../../css/components.css" />
-    <link rel="stylesheet" href="../../css/themes.css" />
-    <link rel="stylesheet" href="../../css/easy.css">
+    <link rel="stylesheet" href="../../css/easy.css" />
   </head>
   <body>
     <header class="sticky">
@@ -154,33 +153,52 @@
           </div>
 
           <div class="nav-profile-wrapper">
-                <button id="user-profile-btn" title="View Profile">
-                    <span id="user-avatar-initial">U</span>
-                </button>
-                <div id="profile-dropdown" class="profile-dropdown glass hidden">
-                    <div class="profile-header">
-                        <div class="profile-avatar-large">U</div>
-                        <div class="profile-meta">
-                            <h5>User</h5>
-                            <span>Code: </span>
-                        </div>
-                    </div>
-                    <div class="profile-body">
-                        <div class="profile-info-item">
-                            <i class="fas fa-envelope"></i>
-                            <span></span>
-                        </div>
-                    </div>
-                    <div class="profile-footer">
-                        <button id="notif-settings-btn" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;color:#a5b4fc;font-size:0.82rem;font-weight:600;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
-                            <i class="fas fa-bell" style="font-size:0.8rem"></i> Notification Settings
-                        </button>
-                        <button id="logout-btn" class="btn-logout">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </div>
+            <button id="user-profile-btn" title="View Profile">
+              <span id="user-avatar-initial">U</span>
+            </button>
+            <div id="profile-dropdown" class="profile-dropdown glass hidden">
+              <div class="profile-header">
+                <div class="profile-avatar-large">U</div>
+                <div class="profile-meta">
+                  <h5>User</h5>
+                  <span>Code: </span>
                 </div>
+              </div>
+              <div class="profile-body">
+                <div class="profile-info-item">
+                  <i class="fas fa-envelope"></i>
+                  <span></span>
+                </div>
+              </div>
+              <div class="profile-footer">
+                <button
+                  id="notif-settings-btn"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    width: 100%;
+                    padding: 9px 12px;
+                    background: rgba(99, 102, 241, 0.08);
+                    border: 1px solid rgba(99, 102, 241, 0.2);
+                    border-radius: 10px;
+                    color: #a5b4fc;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-bottom: 8px;
+                    transition: all 0.2s;
+                  "
+                >
+                  <i class="fas fa-bell" style="font-size: 0.8rem"></i>
+                  Notification Settings
+                </button>
+                <button id="logout-btn" class="btn-logout">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+              </div>
             </div>
+          </div>
         </div>
       </div>
     </header>
@@ -189,28 +207,107 @@
       <div id="sidebar-container"></div>
       <main class="main-content">
         <div id="app">
-          <div class="fade-in">
-            <div class="section-header">
-              <h2>Position Sizing Calculator</h2>
-            </div>
+          <div class="section-header">
+            <h2>Position Sizing Calculator</h2>
+          </div>
 
+          <div
+            class="tools-grid"
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 1.5rem;
+            "
+          >
+            <!-- Input Section -->
             <div
-              class="tools-grid"
+              class="glass"
               style="
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 1.5rem;
+                padding: 1.5rem;
+                border-radius: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
               "
             >
-              <!-- Input Section -->
               <div
-                class="glass"
                 style="
-                  padding: 1.5rem;
-                  border-radius: 20px;
-                  border: 1px solid rgba(255, 255, 255, 0.2);
+                  display: flex;
+                  align-items: center;
+                  gap: 1rem;
+                  margin-bottom: 1.5rem;
                 "
               >
+                <div
+                  style="
+                    background: var(--primary);
+                    color: white;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <i class="fas fa-chart-pie"></i>
+                </div>
+                <h3 style="font-weight: 700">Trade Parameters</h3>
+              </div>
+
+              <div class="form-group">
+                <label>Total Account Balance (Rs.)</label>
+                <input
+                  type="number"
+                  id="balance"
+                  placeholder="e.g. 100000"
+                  value=""
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Risk Percentage (%)</label>
+                <input
+                  type="number"
+                  id="riskPercent"
+                  placeholder="e.g. 1"
+                  value=""
+                  step="0.1"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Entry Price (Rs.)</label>
+                <input
+                  type="number"
+                  id="entryPrice"
+                  placeholder="e.g. 500"
+                  value=""
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Stop Loss (Rs.)</label>
+                <input
+                  type="number"
+                  id="stopLoss"
+                  placeholder="e.g. 480"
+                  value=""
+                />
+              </div>
+            </div>
+
+            <!-- Results Section -->
+            <div
+              class="glass"
+              style="
+                padding: 1.5rem;
+                border-radius: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+              "
+            >
+              <div>
                 <div
                   style="
                     display: flex;
@@ -221,7 +318,7 @@
                 >
                   <div
                     style="
-                      background: var(--primary);
+                      background: var(--secondary);
                       color: white;
                       width: 40px;
                       height: 40px;
@@ -231,108 +328,27 @@
                       justify-content: center;
                     "
                   >
-                    <i class="fas fa-chart-pie"></i>
+                    <i class="fas fa-calculator"></i>
                   </div>
-                  <h3 style="font-weight: 700">Trade Parameters</h3>
+                  <h3 style="font-weight: 700">Recommended Size</h3>
                 </div>
 
-                <div class="form-group">
-                  <label>Total Account Balance (Rs.)</label>
-                  <input
-                    type="number"
-                    id="balance"
-                    placeholder="e.g. 100000"
-                    value=""
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label>Risk Percentage (%)</label>
-                  <input
-                    type="number"
-                    id="riskPercent"
-                    placeholder="e.g. 1"
-                    value=""
-                    step="0.1"
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label>Entry Price (Rs.)</label>
-                  <input
-                    type="number"
-                    id="entryPrice"
-                    placeholder="e.g. 500"
-                    value=""
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label>Stop Loss (Rs.)</label>
-                  <input
-                    type="number"
-                    id="stopLoss"
-                    placeholder="e.g. 480"
-                    value=""
-                  />
+                <div id="sizingResults" class="calculator-results">
+                  <!-- Results injected here -->
                 </div>
               </div>
 
-              <!-- Results Section -->
               <div
-                class="glass"
+                id="riskWarning"
                 style="
-                  padding: 1.5rem;
-                  border-radius: 20px;
-                  border: 1px solid rgba(255, 255, 255, 0.2);
-                  display: flex;
-                  flex-direction: column;
-                  justify-content: space-between;
+                  margin-top: 1.5rem;
+                  padding: 1rem;
+                  border-radius: 12px;
+                  font-size: 0.85rem;
+                  display: none;
                 "
               >
-                <div>
-                  <div
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 1rem;
-                      margin-bottom: 1.5rem;
-                    "
-                  >
-                    <div
-                      style="
-                        background: var(--secondary);
-                        color: white;
-                        width: 40px;
-                        height: 40px;
-                        border-radius: 12px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                      "
-                    >
-                      <i class="fas fa-calculator"></i>
-                    </div>
-                    <h3 style="font-weight: 700">Recommended Size</h3>
-                  </div>
-
-                  <div id="sizingResults" class="calculator-results">
-                    <!-- Results injected here -->
-                  </div>
-                </div>
-
-                <div
-                  id="riskWarning"
-                  style="
-                    margin-top: 1.5rem;
-                    padding: 1rem;
-                    border-radius: 12px;
-                    font-size: 0.85rem;
-                    display: none;
-                  "
-                >
-                  <!-- Warning injected here -->
-                </div>
+                <!-- Warning injected here -->
               </div>
             </div>
           </div>

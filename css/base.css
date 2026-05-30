@@ -113,6 +113,28 @@ header {
   background: var(--background)
 }
 
+/* Loading Skeleton */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 25%,
+    var(--surface-border) 50%,
+    var(--surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 .blinking-dot {
   width: 20px;
   height: 15px;
@@ -164,6 +186,8 @@ header {
   border: 1px solid var(--surface-border);
   box-shadow: var(--card-shadow);
   color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
 }
 
 .text-gradient {

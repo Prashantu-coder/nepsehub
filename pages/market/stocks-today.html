@@ -11,10 +11,9 @@
     <link rel="stylesheet" href="../../css/base.css" />
     <link rel="stylesheet" href="../../css/layout.css" />
     <link rel="stylesheet" href="../../css/components.css" />
-    <link rel="stylesheet" href="../../css/themes.css" />
     <link rel="stylesheet" href="../../css/pages/market.css" />
-    <link rel="stylesheet" href="../../css/easy.css">
-    
+    <link rel="stylesheet" href="../../css/easy.css" />
+
     <!-- Chart.js for premium side panel intraday charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -33,14 +32,14 @@
 
       /* Sticky Header fix */
       .market-table thead {
-          position: sticky;
-          top: 0;
-          z-index: 10;
-          background: var(--surface-bg) !important;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--surface-bg) !important;
       }
 
       .market-table thead th {
-          background: var(--surface-bg) !important;
+        background: var(--surface-bg) !important;
       }
 
       /* Row Background Color Overrides based on Market Status */
@@ -49,30 +48,57 @@
       }
 
       .tr-up {
-        background: linear-gradient(90deg, rgba(16, 185, 129, 0.04) 0%, rgba(16, 185, 129, 0.005) 100%) !important;
+        background: linear-gradient(
+          90deg,
+          rgba(16, 185, 129, 0.04) 0%,
+          rgba(16, 185, 129, 0.005) 100%
+        ) !important;
       }
 
       .tr-down {
-        background: linear-gradient(90deg, rgba(239, 68, 68, 0.04) 0%, rgba(239, 68, 68, 0.005) 100%) !important;
+        background: linear-gradient(
+          90deg,
+          rgba(239, 68, 68, 0.04) 0%,
+          rgba(239, 68, 68, 0.005) 100%
+        ) !important;
       }
 
       .tr-neutral {
-        background: linear-gradient(90deg, rgba(59, 130, 246, 0.04) 0%, rgba(59, 130, 246, 0.005) 100%) !important;
+        background: linear-gradient(
+          90deg,
+          rgba(59, 130, 246, 0.04) 0%,
+          rgba(59, 130, 246, 0.005) 100%
+        ) !important;
       }
 
       /* Hover effects */
       .tr-up:hover {
-        background: linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%) !important;
+        background: linear-gradient(
+          90deg,
+          rgba(16, 185, 129, 0.08) 0%,
+          rgba(16, 185, 129, 0.02) 100%
+        ) !important;
       }
+
       .tr-down:hover {
-        background: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.02) 100%) !important;
+        background: linear-gradient(
+          90deg,
+          rgba(239, 68, 68, 0.08) 0%,
+          rgba(239, 68, 68, 0.02) 100%
+        ) !important;
       }
+
       .tr-neutral:hover {
-        background: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.02) 100%) !important;
+        background: linear-gradient(
+          90deg,
+          rgba(59, 130, 246, 0.08) 0%,
+          rgba(59, 130, 246, 0.02) 100%
+        ) !important;
       }
 
       /* Style Symbol (Company Name) Cell */
-      .symbol-cell, .symbol-cell div {
+      .symbol-cell,
+      .symbol-cell div {
         color: #ffffff !important;
         font-weight: 700 !important;
         padding-left: 3px !important;
@@ -80,50 +106,55 @@
 
       /* Column Settings Popup */
       .column-settings {
-          position: absolute;
-          top: 100%;
-          right: 0;
-          width: 200px;
-          background: var(--surface-bg);
-          border: 1px solid var(--surface-border);
-          border-radius: 12px;
-          padding: 1rem;
-          z-index: 100;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-          display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        width: 200px;
+        background: var(--surface-bg);
+        border: 1px solid var(--surface-border);
+        border-radius: 12px;
+        padding: 1rem;
+        z-index: 100;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        display: none;
       }
 
       .column-settings.active {
-          display: block;
+        display: block;
       }
 
       .column-option {
-          display: flex;
-          align-items: center;
-          gap: 0.8rem;
-          margin-bottom: 0.5rem;
-          cursor: pointer;
-          font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        font-size: 0.85rem;
       }
 
       .column-option input {
-          cursor: pointer;
+        cursor: pointer;
       }
 
-      .market-table th, .market-table td {
+      .market-table th,
+      .market-table td {
         padding: 1.25rem 1rem;
         border-bottom: 1px solid var(--surface-border);
         white-space: nowrap;
-        text-align: right; /* Default right alignment for numbers */
+        text-align: right;
+        /* Default right alignment for numbers */
         transition: background-color 0.5s ease;
       }
 
-      .market-table th:first-child, .market-table td:first-child {
-        text-align: left; /* Symbol left aligned */
+      .market-table th:first-child,
+      .market-table td:first-child {
+        text-align: left;
+        /* Symbol left aligned */
         padding-left: 0.5rem;
       }
 
-      .market-table th:last-child, .market-table td:last-child {
+      .market-table th:last-child,
+      .market-table td:last-child {
         padding-right: 0.5rem;
       }
 
@@ -189,9 +220,17 @@
       }
 
       @keyframes pulse {
-        0% { opacity: 0.5; }
-        50% { opacity: 1; }
-        100% { opacity: 0.5; }
+        0% {
+          opacity: 0.5;
+        }
+
+        50% {
+          opacity: 1;
+        }
+
+        100% {
+          opacity: 0.5;
+        }
       }
 
       /* Overview Widgets Styling */
@@ -204,7 +243,7 @@
 
       @media (max-width: 992px) {
         .market-overview-grid {
-            grid-template-columns: 1fr;
+          grid-template-columns: 1fr;
         }
       }
 
@@ -246,9 +285,17 @@
         font-weight: 700;
       }
 
-      .breadth-label.advances { color: #10b981; }
-      .breadth-label.neutral { color: var(--text-secondary); }
-      .breadth-label.declines { color: #ef4444; }
+      .breadth-label.advances {
+        color: #10b981;
+      }
+
+      .breadth-label.neutral {
+        color: var(--text-secondary);
+      }
+
+      .breadth-label.declines {
+        color: #ef4444;
+      }
 
       .breadth-bar-wrapper {
         display: flex;
@@ -289,14 +336,21 @@
       .gauge-display {
         position: relative;
         width: 140px;
-        height: 70px; /* Semi-circle */
+        height: 70px;
+        /* Semi-circle */
         border-radius: 140px 140px 0 0;
-        background: conic-gradient(from 180deg at 50% 100%, #ef4444 0deg, #facc15 90deg, #10b981 180deg, transparent 180deg);
+        background: conic-gradient(
+          from 180deg at 50% 100%,
+          #ef4444 0deg,
+          #facc15 90deg,
+          #10b981 180deg,
+          transparent 180deg
+        );
         overflow: hidden;
       }
 
       .gauge-display::after {
-        content: '';
+        content: "";
         position: absolute;
         bottom: 0;
         left: 50%;
@@ -304,7 +358,8 @@
         width: 110px;
         height: 55px;
         border-radius: 110px 110px 0 0;
-        background: var(--surface-bg); /* Mask inside */
+        background: var(--surface-bg);
+        /* Mask inside */
         z-index: 2;
       }
 
@@ -364,11 +419,13 @@
         scroll-behavior: smooth;
         padding: 0.4rem 0.2rem;
         width: 100%;
-        scrollbar-width: none; /* Firefox */
+        scrollbar-width: none;
+        /* Firefox */
       }
 
       .sector-carousel::-webkit-scrollbar {
-        display: none; /* Chrome/Safari */
+        display: none;
+        /* Chrome/Safari */
       }
 
       .sector-pill-card {
@@ -392,7 +449,11 @@
       }
 
       .sector-pill-card.active {
-        background: linear-gradient(135deg, rgba(250, 204, 21, 0.1), rgba(250, 204, 21, 0.05)) !important;
+        background: linear-gradient(
+          135deg,
+          rgba(250, 204, 21, 0.1),
+          rgba(250, 204, 21, 0.05)
+        ) !important;
         border-color: var(--primary);
         box-shadow: 0 4px 15px rgba(250, 204, 21, 0.15);
       }
@@ -411,9 +472,17 @@
         font-weight: 800;
       }
 
-      .sector-pill-chg.up { color: #10b981; }
-      .sector-pill-chg.down { color: #ef4444; }
-      .sector-pill-chg.neutral { color: var(--text-secondary); }
+      .sector-pill-chg.up {
+        color: #10b981;
+      }
+
+      .sector-pill-chg.down {
+        color: #ef4444;
+      }
+
+      .sector-pill-chg.neutral {
+        color: var(--text-secondary);
+      }
 
       .carousel-btn {
         width: 32px;
@@ -439,13 +508,23 @@
 
       /* Ticker Row Glowing Updates */
       @keyframes green-flash {
-        0% { background-color: rgba(16, 185, 129, 0.25); }
-        100% { background-color: transparent; }
+        0% {
+          background-color: rgba(16, 185, 129, 0.25);
+        }
+
+        100% {
+          background-color: transparent;
+        }
       }
 
       @keyframes red-flash {
-        0% { background-color: rgba(239, 68, 68, 0.25); }
-        100% { background-color: transparent; }
+        0% {
+          background-color: rgba(239, 68, 68, 0.25);
+        }
+
+        100% {
+          background-color: transparent;
+        }
       }
 
       .flash-up {
@@ -457,6 +536,7 @@
       }
     </style>
   </head>
+
   <body>
     <header class="sticky">
       <div
@@ -597,33 +677,52 @@
           </div>
 
           <div class="nav-profile-wrapper">
-                <button id="user-profile-btn" title="View Profile">
-                    <span id="user-avatar-initial">U</span>
-                </button>
-                <div id="profile-dropdown" class="profile-dropdown glass hidden">
-                    <div class="profile-header">
-                        <div class="profile-avatar-large">U</div>
-                        <div class="profile-meta">
-                            <h5>User</h5>
-                            <span>Code: </span>
-                        </div>
-                    </div>
-                    <div class="profile-body">
-                        <div class="profile-info-item">
-                            <i class="fas fa-envelope"></i>
-                            <span></span>
-                        </div>
-                    </div>
-                    <div class="profile-footer">
-                        <button id="notif-settings-btn" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;color:#a5b4fc;font-size:0.82rem;font-weight:600;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
-                            <i class="fas fa-bell" style="font-size:0.8rem"></i> Notification Settings
-                        </button>
-                        <button id="logout-btn" class="btn-logout">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </div>
+            <button id="user-profile-btn" title="View Profile">
+              <span id="user-avatar-initial">U</span>
+            </button>
+            <div id="profile-dropdown" class="profile-dropdown glass hidden">
+              <div class="profile-header">
+                <div class="profile-avatar-large">U</div>
+                <div class="profile-meta">
+                  <h5>User</h5>
+                  <span>Code: </span>
                 </div>
+              </div>
+              <div class="profile-body">
+                <div class="profile-info-item">
+                  <i class="fas fa-envelope"></i>
+                  <span></span>
+                </div>
+              </div>
+              <div class="profile-footer">
+                <button
+                  id="notif-settings-btn"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    width: 100%;
+                    padding: 9px 12px;
+                    background: rgba(99, 102, 241, 0.08);
+                    border: 1px solid rgba(99, 102, 241, 0.2);
+                    border-radius: 10px;
+                    color: #a5b4fc;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-bottom: 8px;
+                    transition: all 0.2s;
+                  "
+                >
+                  <i class="fas fa-bell" style="font-size: 0.8rem"></i>
+                  Notification Settings
+                </button>
+                <button id="logout-btn" class="btn-logout">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+              </div>
             </div>
+          </div>
         </div>
       </div>
     </header>
@@ -632,129 +731,209 @@
       <div id="sidebar-container"></div>
       <main class="main-content">
         <div id="app">
-          <div class="fade-in">
-            
-            <!-- Live Market Overviews -->
-            <div class="market-overview-grid">
-              <!-- Market Breadth Widget -->
-              <div class="glass overview-card">
-                <div class="overview-header">
-                  <span class="overview-title"><i class="fas fa-chart-pie"></i> MARKET BREADTH (TODAY)</span>
-                  <div class="refresh-status">
-                    <div class="status-dot"></div>
-                    LIVE MARKET
-                  </div>
-                </div>
-                <div class="breadth-container">
-                  <div class="breadth-stats">
-                    <span class="breadth-label advances"><i class="fas fa-arrow-up"></i> <span id="advancesCount">0</span> Advances</span>
-                    <span class="breadth-label neutral"><i class="fas fa-minus"></i> <span id="neutralCount">0</span> Neutral</span>
-                    <span class="breadth-label declines"><i class="fas fa-arrow-down"></i> <span id="declinesCount">0</span> Declines</span>
-                  </div>
-                  <div class="breadth-bar-wrapper">
-                    <div class="breadth-bar-segment segment-advances" id="barAdvances" style="width: 0%"></div>
-                    <div class="breadth-bar-segment segment-neutral" id="barNeutral" style="width: 0%"></div>
-                    <div class="breadth-bar-segment segment-declines" id="barDeclines" style="width: 0%"></div>
-                  </div>
+          <!-- Live Market Overviews -->
+          <div class="market-overview-grid">
+            <!-- Market Breadth Widget -->
+            <div class="glass overview-card">
+              <div class="overview-header">
+                <span class="overview-title"
+                  ><i class="fas fa-chart-pie"></i> MARKET BREADTH (TODAY)</span
+                >
+                <div class="refresh-status">
+                  <div class="status-dot"></div>
+                  LIVE MARKET
                 </div>
               </div>
-
-              <!-- Market Sentiment Gauge -->
-              <div class="glass overview-card">
-                <div class="overview-header">
-                  <span class="overview-title"><i class="fas fa-tachometer-alt"></i> MARKET SENTIMENT</span>
+              <div class="breadth-container">
+                <div class="breadth-stats">
+                  <span class="breadth-label advances"
+                    ><i class="fas fa-arrow-up"></i>
+                    <span id="advancesCount">0</span> Advances</span
+                  >
+                  <span class="breadth-label neutral"
+                    ><i class="fas fa-minus"></i>
+                    <span id="neutralCount">0</span> Neutral</span
+                  >
+                  <span class="breadth-label declines"
+                    ><i class="fas fa-arrow-down"></i>
+                    <span id="declinesCount">0</span> Declines</span
+                  >
                 </div>
-                <div class="sentiment-gauge-container">
-                  <div class="gauge-display">
-                    <div class="gauge-needle" id="gaugeNeedle"></div>
-                    <div class="gauge-value" id="sentimentValue">50%</div>
-                    <div class="gauge-label" id="sentimentLabel">NEUTRAL</div>
-                  </div>
+                <div class="breadth-bar-wrapper">
+                  <div
+                    class="breadth-bar-segment segment-advances"
+                    id="barAdvances"
+                    style="width: 0%"
+                  ></div>
+                  <div
+                    class="breadth-bar-segment segment-neutral"
+                    id="barNeutral"
+                    style="width: 0%"
+                  ></div>
+                  <div
+                    class="breadth-bar-segment segment-declines"
+                    id="barDeclines"
+                    style="width: 0%"
+                  ></div>
                 </div>
               </div>
             </div>
 
-            <!-- Horizontal Sector Carousel -->
-            <div class="sector-carousel-container">
-              <button class="carousel-btn prev-btn" id="carouselPrevBtn"><i class="fas fa-chevron-left"></i></button>
-              <div class="sector-carousel" id="sectorCarousel">
-                <div class="glass sector-pill-card active" data-sector="all">
-                  <div class="sector-pill-name">All Sectors</div>
-                  <div class="sector-pill-chg neutral">Market</div>
-                </div>
-                <!-- Populated dynamically via JS -->
+            <!-- Market Sentiment Gauge -->
+            <div class="glass overview-card">
+              <div class="overview-header">
+                <span class="overview-title"
+                  ><i class="fas fa-tachometer-alt"></i> MARKET SENTIMENT</span
+                >
               </div>
-              <button class="carousel-btn next-btn" id="carouselNextBtn"><i class="fas fa-chevron-right"></i></button>
+              <div class="sentiment-gauge-container">
+                <div class="gauge-display">
+                  <div class="gauge-needle" id="gaugeNeedle"></div>
+                  <div class="gauge-value" id="sentimentValue">50%</div>
+                  <div class="gauge-label" id="sentimentLabel">NEUTRAL</div>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <!-- Table Card -->
+          <!-- Horizontal Sector Carousel -->
+          <div class="sector-carousel-container">
+            <button class="carousel-btn prev-btn" id="carouselPrevBtn">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="sector-carousel" id="sectorCarousel">
+              <div class="glass sector-pill-card active" data-sector="all">
+                <div class="sector-pill-name">All Sectors</div>
+                <div class="sector-pill-chg neutral">Market</div>
+              </div>
+              <!-- Populated dynamically via JS -->
+            </div>
+            <button class="carousel-btn next-btn" id="carouselNextBtn">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- Table Card -->
+          <div
+            class="glass"
+            style="padding: 1.5rem; border-radius: 20px; margin-top: 1.5rem"
+          >
             <div
-              class="glass"
-              style="padding: 1.5rem; border-radius: 20px; margin-top: 1.5rem"
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+                gap: 1rem;
+              "
             >
               <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                  margin-bottom: 1rem;
-                  gap: 1rem;
-                "
+                style="display: flex; gap: 1rem; align-items: center; flex: 1"
               >
-                <div style="display: flex; gap: 1rem; align-items: center; flex: 1;">
-                  <input
-                    type="text"
-                    id="marketSearch"
-                    class="search-bar"
-                    placeholder="Search Symbol or Company..."
-                    style="flex: 1; max-width: 300px;"
-                  />
-                </div>
-                
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                  <div id="marketSummary" style="font-size: 0.9rem; color: var(--text-secondary)">
-                    Showing <span id="filteredCount">0</span> of <span id="totalCount">0</span> stocks
-                  </div>
-                  <div style="position: relative;">
-                    <button id="columnSettingsBtn" class="btn btn-secondary btn-sm" title="Customize Columns">
-                        <i class="fas fa-columns"></i>
-                    </button>
-                    <div id="columnSettingsPopup" class="column-settings">
-                        <h4 style="margin-bottom: 0.8rem; font-size: 0.9rem;">Show Columns</h4>
-                        <label class="column-option"><input type="checkbox" data-col="symbol" checked disabled> Symbol</label>
-                        <label class="column-option"><input type="checkbox" data-col="price" checked> LTP</label>
-                        <label class="column-option"><input type="checkbox" data-col="ltq" checked> LTQ</label>
-                        <label class="column-option"><input type="checkbox" data-col="changePercent" checked> %Change</label>
-                        <label class="column-option"><input type="checkbox" data-col="open" checked> OPEN</label>
-                        <label class="column-option"><input type="checkbox" data-col="high" checked> High</label>
-                        <label class="column-option"><input type="checkbox" data-col="low" checked> LOW</label>
-                        <label class="column-option"><input type="checkbox" data-col="volume" checked> TTQ</label>
-                        <label class="column-option"><input type="checkbox" data-col="previousClose" checked> PrevClosing</label>
-                    </div>
-                  </div>
-                </div>
+                <input
+                  type="text"
+                  id="marketSearch"
+                  class="search-bar"
+                  placeholder="Search Symbol or Company..."
+                  style="flex: 1; max-width: 300px"
+                />
               </div>
 
-              <div class="market-table-container">
-                <table class="market-table">
-                  <thead>
-                    <tr>
-                      <th class="sortable" data-sort="symbol">Symbol</th>
-                      <th class="sortable" data-sort="price">LTP</th>
-                      <th class="sortable" data-sort="ltq">LTQ</th>
-                      <th class="sortable" data-sort="changePercent">%Change</th>
-                      <th class="sortable" data-sort="open">OPEN</th>
-                      <th class="sortable" data-sort="high">High</th>
-                      <th class="sortable" data-sort="low">LOW</th>
-                      <th class="sortable" data-sort="volume">TTQ</th>
-                      <th class="sortable" data-sort="previousClose">PrevClosing</th>
-                    </tr>
-                  </thead>
-                  <tbody id="marketBody">
-                    <!-- Data injected here -->
-                  </tbody>
-                </table>
+              <div style="display: flex; gap: 1rem; align-items: center">
+                <div
+                  id="marketSummary"
+                  style="font-size: 0.9rem; color: var(--text-secondary)"
+                >
+                  Showing <span id="filteredCount">0</span> of
+                  <span id="totalCount">0</span> stocks
+                </div>
+                <div style="position: relative">
+                  <button
+                    id="columnSettingsBtn"
+                    class="btn btn-secondary btn-sm"
+                    title="Customize Columns"
+                  >
+                    <i class="fas fa-columns"></i>
+                  </button>
+                  <div id="columnSettingsPopup" class="column-settings">
+                    <h4 style="margin-bottom: 0.8rem; font-size: 0.9rem">
+                      Show Columns
+                    </h4>
+                    <label class="column-option"
+                      ><input
+                        type="checkbox"
+                        data-col="symbol"
+                        checked
+                        disabled
+                      />
+                      Symbol</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="price" checked />
+                      LTP</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="ltq" checked />
+                      LTQ</label
+                    >
+                    <label class="column-option"
+                      ><input
+                        type="checkbox"
+                        data-col="changePercent"
+                        checked
+                      />
+                      %Change</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="open" checked />
+                      OPEN</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="high" checked />
+                      High</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="low" checked />
+                      LOW</label
+                    >
+                    <label class="column-option"
+                      ><input type="checkbox" data-col="volume" checked />
+                      TTQ</label
+                    >
+                    <label class="column-option"
+                      ><input
+                        type="checkbox"
+                        data-col="previousClose"
+                        checked
+                      />
+                      PrevClosing</label
+                    >
+                  </div>
+                </div>
               </div>
+            </div>
+
+            <div class="market-table-container">
+              <table class="market-table">
+                <thead>
+                  <tr>
+                    <th class="sortable" data-sort="symbol">Symbol</th>
+                    <th class="sortable" data-sort="price">LTP</th>
+                    <th class="sortable" data-sort="ltq">LTQ</th>
+                    <th class="sortable" data-sort="changePercent">%Change</th>
+                    <th class="sortable" data-sort="open">OPEN</th>
+                    <th class="sortable" data-sort="high">High</th>
+                    <th class="sortable" data-sort="low">LOW</th>
+                    <th class="sortable" data-sort="volume">TTQ</th>
+                    <th class="sortable" data-sort="previousClose">
+                      PrevClosing
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="marketBody">
+                  <!-- Data injected here -->
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -764,7 +943,9 @@
     <!-- Quick Action Side Panel -->
     <div class="side-panel-overlay" id="panelOverlay"></div>
     <div class="side-panel" id="quickPanel">
-      <div class="close-panel" id="closePanel"><i class="fas fa-times"></i></div>
+      <div class="close-panel" id="closePanel">
+        <i class="fas fa-times"></i>
+      </div>
       <div id="panelContent">
         <!-- Content injected dynamically -->
       </div>

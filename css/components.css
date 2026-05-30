@@ -265,6 +265,7 @@
     transition: var(--transition-fast);
     z-index: 1000;
     backdrop-filter: blur(10px);
+    flex-direction: column;
 }
 
 .nav-dropdown:hover .dropdown-menu {

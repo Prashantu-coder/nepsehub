@@ -11,8 +11,7 @@
     <link rel="stylesheet" href="../../css/base.css" />
     <link rel="stylesheet" href="../../css/layout.css" />
     <link rel="stylesheet" href="../../css/components.css" />
-    <link rel="stylesheet" href="../../css/themes.css" />
-    <link rel="stylesheet" href="../../css/easy.css">
+    <link rel="stylesheet" href="../../css/easy.css" />
   </head>
   <body>
     <header class="sticky">
@@ -154,33 +153,52 @@
           </div>
 
           <div class="nav-profile-wrapper">
-                <button id="user-profile-btn" title="View Profile">
-                    <span id="user-avatar-initial">U</span>
-                </button>
-                <div id="profile-dropdown" class="profile-dropdown glass hidden">
-                    <div class="profile-header">
-                        <div class="profile-avatar-large">U</div>
-                        <div class="profile-meta">
-                            <h5>User</h5>
-                            <span>Code: </span>
-                        </div>
-                    </div>
-                    <div class="profile-body">
-                        <div class="profile-info-item">
-                            <i class="fas fa-envelope"></i>
-                            <span></span>
-                        </div>
-                    </div>
-                    <div class="profile-footer">
-                        <button id="notif-settings-btn" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;color:#a5b4fc;font-size:0.82rem;font-weight:600;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
-                            <i class="fas fa-bell" style="font-size:0.8rem"></i> Notification Settings
-                        </button>
-                        <button id="logout-btn" class="btn-logout">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </div>
+            <button id="user-profile-btn" title="View Profile">
+              <span id="user-avatar-initial">U</span>
+            </button>
+            <div id="profile-dropdown" class="profile-dropdown glass hidden">
+              <div class="profile-header">
+                <div class="profile-avatar-large">U</div>
+                <div class="profile-meta">
+                  <h5>User</h5>
+                  <span>Code: </span>
                 </div>
+              </div>
+              <div class="profile-body">
+                <div class="profile-info-item">
+                  <i class="fas fa-envelope"></i>
+                  <span></span>
+                </div>
+              </div>
+              <div class="profile-footer">
+                <button
+                  id="notif-settings-btn"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    width: 100%;
+                    padding: 9px 12px;
+                    background: rgba(99, 102, 241, 0.08);
+                    border: 1px solid rgba(99, 102, 241, 0.2);
+                    border-radius: 10px;
+                    color: #a5b4fc;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-bottom: 8px;
+                    transition: all 0.2s;
+                  "
+                >
+                  <i class="fas fa-bell" style="font-size: 0.8rem"></i>
+                  Notification Settings
+                </button>
+                <button id="logout-btn" class="btn-logout">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+              </div>
             </div>
+          </div>
         </div>
       </div>
     </header>
@@ -190,181 +208,179 @@
       <main class="main-content">
         <div id="app">
           <!-- Calculator Content -->
-          <div class="fade-in">
-            <div class="section-header">
-              <h2>Calculator</h2>
-            </div>
+          <div class="section-header">
+            <h2>Calculator</h2>
+          </div>
 
+          <div
+            class="tools-grid"
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 1.5rem;
+              margin-bottom: 2rem;
+            "
+          >
+            <!-- Buy Calculator -->
             <div
-              class="tools-grid"
+              class="glass"
               style="
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 1.5rem;
-                margin-bottom: 2rem;
+                padding: 1.5rem;
+                border-radius: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
               "
             >
-              <!-- Buy Calculator -->
               <div
-                class="glass"
                 style="
-                  padding: 1.5rem;
-                  border-radius: 20px;
-                  border: 1px solid rgba(255, 255, 255, 0.2);
+                  display: flex;
+                  align-items: center;
+                  gap: 1rem;
+                  margin-bottom: 1.5rem;
                 "
               >
                 <div
                   style="
+                    background: var(--secondary);
+                    color: white;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 12px;
                     display: flex;
                     align-items: center;
-                    gap: 1rem;
-                    margin-bottom: 1.5rem;
+                    justify-content: center;
                   "
                 >
-                  <div
-                    style="
-                      background: var(--secondary);
-                      color: white;
-                      width: 40px;
-                      height: 40px;
-                      border-radius: 12px;
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                    "
-                  >
-                    <i class="fas fa-shopping-cart"></i>
-                  </div>
-                  <h3 style="font-weight: 700">Buy Calculator</h3>
+                  <i class="fas fa-shopping-cart"></i>
                 </div>
-                <div class="form-group">
-                  <label>Units / Quantity</label>
-                  <input
-                    type="number"
-                    id="buyQty"
-                    placeholder="e.g. 10"
-                    value=""
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Purchase Price (Rs.)</label>
-                  <input
-                    type="number"
-                    id="buyPrice"
-                    placeholder="e.g. 100"
-                    value=""
-                  />
-                </div>
-                <div
-                  id="buyResults"
-                  class="calculator-results"
-                  style="
-                    margin-top: 1.5rem;
-                    padding: 1.25rem;
-                    border-radius: 12px;
-                    background: rgba(0, 0, 0, 0.03);
-                  "
-                ></div>
+                <h3 style="font-weight: 700">Buy Calculator</h3>
               </div>
-
-              <!-- Sell Calculator -->
+              <div class="form-group">
+                <label>Units / Quantity</label>
+                <input
+                  type="number"
+                  id="buyQty"
+                  placeholder="e.g. 10"
+                  value=""
+                />
+              </div>
+              <div class="form-group">
+                <label>Purchase Price (Rs.)</label>
+                <input
+                  type="number"
+                  id="buyPrice"
+                  placeholder="e.g. 100"
+                  value=""
+                />
+              </div>
               <div
-                class="glass"
+                id="buyResults"
+                class="calculator-results"
                 style="
-                  padding: 1.5rem;
-                  border-radius: 20px;
-                  border: 1px solid rgba(255, 255, 255, 0.2);
+                  margin-top: 1.5rem;
+                  padding: 1.25rem;
+                  border-radius: 12px;
+                  background: rgba(0, 0, 0, 0.03);
+                "
+              ></div>
+            </div>
+
+            <!-- Sell Calculator -->
+            <div
+              class="glass"
+              style="
+                padding: 1.5rem;
+                border-radius: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 1rem;
+                  margin-bottom: 1.5rem;
                 "
               >
                 <div
                   style="
+                    background: var(--danger);
+                    color: white;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 12px;
                     display: flex;
                     align-items: center;
-                    gap: 1rem;
-                    margin-bottom: 1.5rem;
+                    justify-content: center;
                   "
                 >
-                  <div
-                    style="
-                      background: var(--danger);
-                      color: white;
-                      width: 40px;
-                      height: 40px;
-                      border-radius: 12px;
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                    "
-                  >
-                    <i class="fas fa-tags"></i>
-                  </div>
-                  <h3 style="font-weight: 700">Sell Calculator</h3>
+                  <i class="fas fa-tags"></i>
                 </div>
-                <div class="form-group">
-                  <label>Units / Quantity</label>
-                  <input
-                    type="number"
-                    id="sellQty"
-                    placeholder="e.g. 10"
-                    value=""
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Selling Price (Rs.)</label>
-                  <input
-                    type="number"
-                    id="sellPrice"
-                    placeholder="e.g. 200"
-                    value=""
-                  />
-                </div>
-
-                <!-- WACC Selection -->
-                <div class="form-group">
-                  <label>WACC Mode</label>
-                  <select
-                    id="waccMode"
-                    style="
-                      width: 100%;
-                      padding: 0.75rem;
-                      border-radius: 10px;
-                      border: 1px solid var(--surface-border);
-                      background: var(--surface);
-                      color: var(--text-primary);
-                      font-family: inherit;
-                    "
-                  >
-                    <option value="auto">Automatic (From Buy Calc)</option>
-                    <option value="manual">Manual Entry</option>
-                  </select>
-                </div>
-
-                <div
-                  id="manualWaccContainer"
-                  class="form-group"
-                  style="display: none"
-                >
-                  <label>Purchase WACC (Rs.)</label>
-                  <input
-                    type="number"
-                    id="manualWacc"
-                    placeholder="e.g. 505.2534"
-                    step="0.0001"
-                    value="0.0000"
-                  />
-                </div>
-
-                <div
-                  id="sellResults"
-                  class="calculator-results"
-                  style="
-                    margin-top: 1.5rem;
-                    padding: 1.25rem;
-                    border-radius: 12px;
-                    background: rgba(0, 0, 0, 0.03);
-                  "
-                ></div>
+                <h3 style="font-weight: 700">Sell Calculator</h3>
               </div>
+              <div class="form-group">
+                <label>Units / Quantity</label>
+                <input
+                  type="number"
+                  id="sellQty"
+                  placeholder="e.g. 10"
+                  value=""
+                />
+              </div>
+              <div class="form-group">
+                <label>Selling Price (Rs.)</label>
+                <input
+                  type="number"
+                  id="sellPrice"
+                  placeholder="e.g. 200"
+                  value=""
+                />
+              </div>
+
+              <!-- WACC Selection -->
+              <div class="form-group">
+                <label>WACC Mode</label>
+                <select
+                  id="waccMode"
+                  style="
+                    width: 100%;
+                    padding: 0.75rem;
+                    border-radius: 10px;
+                    border: 1px solid var(--surface-border);
+                    background: var(--surface);
+                    color: var(--text-primary);
+                    font-family: inherit;
+                  "
+                >
+                  <option value="auto">Automatic (From Buy Calc)</option>
+                  <option value="manual">Manual Entry</option>
+                </select>
+              </div>
+
+              <div
+                id="manualWaccContainer"
+                class="form-group"
+                style="display: none"
+              >
+                <label>Purchase WACC (Rs.)</label>
+                <input
+                  type="number"
+                  id="manualWacc"
+                  placeholder="e.g. 505.2534"
+                  step="0.0001"
+                  value="0.0000"
+                />
+              </div>
+
+              <div
+                id="sellResults"
+                class="calculator-results"
+                style="
+                  margin-top: 1.5rem;
+                  padding: 1.25rem;
+                  border-radius: 12px;
+                  background: rgba(0, 0, 0, 0.03);
+                "
+              ></div>
             </div>
           </div>
         </div>
