@@ -295,23 +295,23 @@
 
             <!-- Tab Contents -->
             <div id="tab-overview">
-              <!-- <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
                 <button class="btn btn-secondary btn-sm" id="toggle-charts" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">
                   <i class="fas fa-eye-slash"></i> <span>Hide Charts</span>
                 </button>
               </div>
               <div class="portfolio-charts-grid" id="charts-grid">
-                Performance Chart 
+                <!-- Performance Chart -->
                 <div class="chart-card">
                   <h4>Portfolio Performance</h4>
-                  <canvas id="performanceChart"></canvas>
+                  <div class="skeleton skeleton-chart"></div>
                 </div>
-                Sector Allocation
+                <!-- Sector Allocation -->
                 <div class="chart-card">
                   <h4>Sector Allocation</h4>
-                  <canvas id="sectorChart"></canvas>
+                  <div class="skeleton skeleton-chart"></div>
                 </div>
-              </div> -->
+              </div>
 
               <!-- Current Holdings Table -->
               <div class="content-section" style="margin-top: 2rem">
@@ -563,6 +563,17 @@
                   <!-- ══ REAL DATA ROWS ══ -->
                   <tbody id="transaction-history-body" class="portfolio-data-body pf-loading"></tbody>
                 </table>
+              </div>
+
+              <!-- Pagination Controls -->
+              <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding: 0.5rem 1rem;">
+                <button class="btn btn-secondary btn-sm" id="tx-prev-btn" style="padding: 0.45rem 0.9rem; font-size: 0.8rem;">
+                  <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span id="tx-page-info" style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 600;">Page 1 of 1</span>
+                <button class="btn btn-secondary btn-sm" id="tx-next-btn" style="padding: 0.45rem 0.9rem; font-size: 0.8rem;">
+                  Next <i class="fas fa-chevron-right"></i>
+                </button>
               </div>
 
               <!-- ══ EMPTY STATE for Transactions ══ -->

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Screener | NEPSE HUB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="../../css/themes.css">
+    <link rel="stylesheet" href="../../css/pages/screener.css">
+    <link rel="stylesheet" href="../../css/easy.css">
+</head>
+<body>
+    <header class="sticky">
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          width: 100%;
+        "
+      >
+        <!-- logo -->
+        <div style="display: flex; align-items: center; gap: 1.5rem">
+          <div id="burgerMenu" class="burger-menu">
+            <i class="fas fa-bars"></i>
+          </div>
+
+          <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            <span class="logo-text">NEPSE HUB</span>
+          </div>
+        </div>
+
+        <!-- nepse values -->
+        <div
+          style="
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+          "
+        >
+          <div id="marketDot" class="blinking-dot"></div>
+          <div>
+            <h6 class="nepse">NEPSE</h6>
+          </div>
+          <div id="index-value">
+            <div class="flex-col">
+              <span
+                id="header-nepse-val"
+                style="
+                  font-weight: 700;
+                  font-size: 1rem;
+                  color: var(--text-primary);
+                "
+                >—</span
+              >
+              <span
+                id="header-nepse-change"
+                style="
+                  font-size: 0.78rem;
+                  font-weight: 600;
+                  margin-right: 0.5rem;
+                "
+                >—</span
+              >
+            </div>
+            <span
+              class="pc-only"
+              style="
+                height: 12px;
+                width: 1px;
+                background: rgba(255, 255, 255, 0.15);
+              "
+            ></span>
+            <div class="flex-col">
+              <span class="pc-only font-1rem text-secondary"
+                >Turnover:
+                <strong id="header-nepse-turnover" class="text-primary"
+                  >—</strong
+                ></span
+              >
+              <span class="pc-only font-1rem text-secondary"
+                >Volume:
+                <strong id="header-nepse-volume" class="text-primary"
+                  >—</strong
+                ></span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- clock and notification -->
+        <div
+          style="
+            display: flex;
+            gap: 5px;
+            padding: 0.5rem 0rem;
+            padding-right: 1rem;
+          "
+        >
+          <!-- Combined Market Status & Clock Pill -->
+          <div class="market-status-pill pc-only">
+            <div id="navbar-clock" class="navbar-clock-sub"></div>
+            <div id="market-status" class="market-status-sub"></div>
+          </div>
+
+          <!-- Notification Bell -->
+          <div class="nav-notification-wrapper">
+            <button id="notification-bell" class="btn-icon">
+              <i class="far fa-bell"></i>
+              <span id="notif-badge" class="notif-badge hidden">0</span>
+            </button>
+            <div id="notif-dropdown" class="notif-dropdown glass hidden">
+              <div class="notif-header">
+                <h5>Notifications</h5>
+                <div style="display: flex; align-items: center; gap: 0.5rem">
+                  <button
+                    id="sound-toggle-btn"
+                    class="sound-toggle"
+                    title="Toggle alert sound"
+                  >
+                    <i class="fas fa-volume-up"></i>
+                  </button>
+                  <button id="mark-read-btn">Mark all as read</button>
+                </div>
+              </div>
+              <div class="notif-filters">
+                <button class="notif-filter-btn active" data-filter="all">
+                  All
+                </button>
+                <button class="notif-filter-btn" data-filter="buy">
+                  Buy Signals
+                </button>
+                <button class="notif-filter-btn" data-filter="sell">
+                  Sell Signals
+                </button>
+                <button class="notif-filter-btn" data-filter="stoploss">
+                  Stop Loss
+                </button>
+              </div>
+              <div id="notif-list" class="notif-list">
+                <div class="notif-empty">
+                  No notifications in the last 7 days
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="nav-profile-wrapper">
+                <button id="user-profile-btn" title="View Profile">
+                    <span id="user-avatar-initial">U</span>
+                </button>
+                <div id="profile-dropdown" class="profile-dropdown glass hidden">
+                    <div class="profile-header">
+                        <div class="profile-avatar-large">U</div>
+                        <div class="profile-meta">
+                            <h5>User</h5>
+                            <span>Code: </span>
+                        </div>
+                    </div>
+                    <div class="profile-body">
+                        <div class="profile-info-item">
+                            <i class="fas fa-envelope"></i>
+                            <span></span>
+                        </div>
+                    </div>
+                    <div class="profile-footer">
+                        <button id="notif-settings-btn" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;color:#a5b4fc;font-size:0.82rem;font-weight:600;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
+                            <i class="fas fa-bell" style="font-size:0.8rem"></i> Notification Settings
+                        </button>
+                        <button id="logout-btn" class="btn-logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </header>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+        <main class="main-content">
+            <div id="app">
+                <div class="fade-in">
+                    <!-- Page Header -->
+                    <div class="screener-page-header">
+                        <div class="page-title">
+                            <h2><i class="fas fa-crosshairs" style="color: var(--primary); margin-right: 0.5rem;"></i>Technical Screener</h2>
+                            <p class="page-subtitle">Automated market scanning across 380+ NEPSE symbols — RSI, MACD, Moving Averages & more</p>
+                        </div>
+                        <div class="market-badge">
+                            <i class="fas fa-robot"></i> AI POWERED
+                        </div>
+                    </div>
+
+                    <!-- Stats Summary Row -->
+                    <div class="screener-stats-row" id="screener-stats">
+                        <div class="glass screener-stat-card">
+                            <div class="screener-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                                <i class="fas fa-arrow-trend-up"></i>
+                            </div>
+                            <div class="screener-stat-info">
+                                <span class="screener-stat-label">Bullish</span>
+                                <span class="screener-stat-value" id="stat-bullish">—</span>
+                            </div>
+                        </div>
+                        <div class="glass screener-stat-card">
+                            <div class="screener-stat-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                                <i class="fas fa-arrow-trend-down"></i>
+                            </div>
+                            <div class="screener-stat-info">
+                                <span class="screener-stat-label">Bearish</span>
+                                <span class="screener-stat-value" id="stat-bearish">—</span>
+                            </div>
+                        </div>
+                        <div class="glass screener-stat-card">
+                            <div class="screener-stat-icon" style="background: rgba(99, 102, 241, 0.1); color: #818cf8;">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="screener-stat-info">
+                                <span class="screener-stat-label">Oversold (RSI≤30)</span>
+                                <span class="screener-stat-value" id="stat-oversold">—</span>
+                            </div>
+                        </div>
+                        <div class="glass screener-stat-card">
+                            <div class="screener-stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="screener-stat-info">
+                                <span class="screener-stat-label">Overbought (RSI≥70)</span>
+                                <span class="screener-stat-value" id="stat-overbought">—</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controls: Search + Filters -->
+                    <div class="screener-controls">
+                        <div class="screener-search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="screener-search" placeholder="Search symbol..." autocomplete="off">
+                        </div>
+
+                        <!-- Analysis Dropdown -->
+                        <div class="custom-dropdown" id="analysis-dropdown-container">
+                            <button class="dropdown-trigger-btn" id="analysis-dropdown-trigger">
+                                <i class="fas fa-chart-pie" style="color: var(--primary);"></i>
+                                <span>Analysis</span>
+                                <i class="fas fa-chevron-down dropdown-chevron"></i>
+                            </button>
+                            <div class="dropdown-menu-list" id="analysis-dropdown-menu">
+                                <div class="dropdown-group-label">Overall Trend</div>
+                                <div class="dropdown-item active" data-filter="all">All Symbols</div>
+                                <div class="dropdown-item" data-filter="bullish">Bullish Trend</div>
+                                <div class="dropdown-item" data-filter="bearish">Bearish Trend</div>
+                                
+                                <div class="dropdown-group-label">RSI Indicators</div>
+                                <div class="dropdown-item" data-filter="oversold">Oversold (RSI ≤ 30)</div>
+                                <div class="dropdown-item" data-filter="overbought">Overbought (RSI ≥ 70)</div>
+                                
+                                <div class="dropdown-group-label">Crossover Signals</div>
+                                <div class="dropdown-item" data-filter="golden_cross">Golden Cross (50/200 SMA)</div>
+                                <div class="dropdown-item" data-filter="death_cross">Death Cross (50/200 SMA)</div>
+                                
+                                <div class="dropdown-group-label">Short-Term (5/20 SMA)</div>
+                                <div class="dropdown-item" data-filter="short_bullish">Short-Term Bullish</div>
+                                <div class="dropdown-item" data-filter="short_bearish">Short-Term Bearish</div>
+                                
+                                <div class="dropdown-group-label">Swing (10/50 SMA)</div>
+                                <div class="dropdown-item" data-filter="swing_bullish">Swing Bullish</div>
+                                <div class="dropdown-item" data-filter="swing_bearish">Swing Bearish</div>
+                                
+                                <div class="dropdown-group-label">Medium-Term (20/50 SMA)</div>
+                                <div class="dropdown-item" data-filter="medium_bullish">Medium-Term Bullish</div>
+                                <div class="dropdown-item" data-filter="medium_bearish">Medium-Term Bearish</div>
+                            </div>
+                        </div>
+
+                        <div class="screener-filter-chips" id="filter-chips">
+                            <div class="filter-chip active" data-filter="all">All <span class="chip-count" id="chip-all">0</span></div>
+                            <div class="filter-chip" data-filter="bullish"><i class="fas fa-arrow-up" style="margin-right:3px;font-size:0.65rem;"></i>Bullish <span class="chip-count" id="chip-bullish">0</span></div>
+                            <div class="filter-chip" data-filter="bearish"><i class="fas fa-arrow-down" style="margin-right:3px;font-size:0.65rem;"></i>Bearish <span class="chip-count" id="chip-bearish">0</span></div>
+                            <div class="filter-chip" data-filter="oversold"><i class="fas fa-chart-line" style="margin-right:3px;font-size:0.65rem;"></i>Oversold <span class="chip-count" id="chip-oversold">0</span></div>
+                            <div class="filter-chip" data-filter="overbought"><i class="fas fa-fire" style="margin-right:3px;font-size:0.65rem;"></i>Overbought <span class="chip-count" id="chip-overbought">0</span></div>
+                            <div class="filter-chip" data-filter="golden_cross"><i class="fas fa-star" style="margin-right:3px;font-size:0.65rem;color:#f59e0b;"></i>Golden Cross</div>
+                            <div class="filter-chip" data-filter="death_cross"><i class="fas fa-skull" style="margin-right:3px;font-size:0.65rem;"></i>Death Cross</div>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="glass screener-table-wrapper">
+                        <div class="screener-table-scroll">
+                            <table class="screener-table" id="screener-table">
+                                <thead>
+                                    <tr>
+                                        <th data-sort="symbol">Symbol <i class="fas fa-sort sort-icon"></i></th>
+                                        <th data-sort="close">Close <i class="fas fa-sort sort-icon"></i></th>
+                                        <th data-sort="rsi">RSI (14) <i class="fas fa-sort sort-icon"></i></th>
+                                        <th>MACD</th>
+                                        <th data-sort="histogram">Histogram <i class="fas fa-sort sort-icon"></i></th>
+                                        <th data-sort="atr">ATR <i class="fas fa-sort sort-icon"></i></th>
+                                        <th>MA Cross</th>
+                                        <th>Trend</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="screener-body">
+                                    <!-- Rows loaded via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="screener-pagination" id="screener-pagination">
+                        <div class="pagination-info" id="pagination-info">Loading...</div>
+                        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                            <div class="per-page-select">
+                                <span>Show</span>
+                                <select id="per-page-select">
+                                    <option value="20" selected>20</option>
+                                    <option value="50">50</option>
+                                </select>
+                                <span>per page</span>
+                            </div>
+                            <div class="pagination-controls" id="pagination-controls">
+                                <!-- Pagination buttons rendered via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="../../js/pages/market/screener.js"></script>
+    <script src="../../js/security.js"></script>
+</body>
+</html>

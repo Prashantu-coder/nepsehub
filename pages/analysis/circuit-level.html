@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Circuit Levels | NEPSE HUB</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/themes.css" />
+    <link rel="stylesheet" href="../../css/pages/market.css" />
+    <link rel="stylesheet" href="../../css/pages/circuit-level.css" />
+    <link rel="stylesheet" href="../../css/easy.css" />
+  </head>
+  <body>
+    <header class="sticky">
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          width: 100%;
+        "
+      >
+        <!-- logo -->
+        <div style="display: flex; align-items: center; gap: 1.5rem">
+          <div id="burgerMenu" class="burger-menu">
+            <i class="fas fa-bars"></i>
+          </div>
+
+          <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            <span class="logo-text">NEPSE HUB</span>
+          </div>
+        </div>
+
+        <!-- nepse values -->
+        <div
+          style="
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+          "
+        >
+          <div id="marketDot" class="blinking-dot"></div>
+          <div>
+            <h6 class="nepse">NEPSE</h6>
+          </div>
+          <div id="index-value">
+            <div class="flex-col">
+              <span
+                id="header-nepse-val"
+                style="
+                  font-weight: 700;
+                  font-size: 1rem;
+                  color: var(--text-primary);
+                "
+                >—</span
+              >
+              <span
+                id="header-nepse-change"
+                style="
+                  font-size: 0.78rem;
+                  font-weight: 600;
+                  margin-right: 0.5rem;
+                "
+                >—</span
+              >
+            </div>
+            <span
+              class="pc-only"
+              style="
+                height: 12px;
+                width: 1px;
+                background: rgba(255, 255, 255, 0.15);
+              "
+            ></span>
+            <div class="flex-col">
+              <span class="pc-only font-1rem text-secondary"
+                >Turnover:
+                <strong id="header-nepse-turnover" class="text-primary"
+                  >—</strong
+                ></span
+              >
+              <span class="pc-only font-1rem text-secondary"
+                >Volume:
+                <strong id="header-nepse-volume" class="text-primary"
+                  >—</strong
+                ></span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- clock and notification -->
+        <div
+          style="
+            display: flex;
+            gap: 5px;
+            padding: 0.5rem 0rem;
+            padding-right: 1rem;
+          "
+        >
+          <!-- Combined Market Status & Clock Pill -->
+          <div class="market-status-pill pc-only">
+            <div id="navbar-clock" class="navbar-clock-sub"></div>
+            <div id="market-status" class="market-status-sub"></div>
+          </div>
+
+          <!-- Notification Bell -->
+          <div class="nav-notification-wrapper">
+            <button id="notification-bell" class="btn-icon">
+              <i class="far fa-bell"></i>
+              <span id="notif-badge" class="notif-badge hidden">0</span>
+            </button>
+            <div id="notif-dropdown" class="notif-dropdown glass hidden">
+              <div class="notif-header">
+                <h5>Notifications</h5>
+                <div style="display: flex; align-items: center; gap: 0.5rem">
+                  <button
+                    id="sound-toggle-btn"
+                    class="sound-toggle"
+                    title="Toggle alert sound"
+                  >
+                    <i class="fas fa-volume-up"></i>
+                  </button>
+                  <button id="mark-read-btn">Mark all as read</button>
+                </div>
+              </div>
+              <div class="notif-filters">
+                <button class="notif-filter-btn active" data-filter="all">
+                  All
+                </button>
+                <button class="notif-filter-btn" data-filter="buy">
+                  Buy Signals
+                </button>
+                <button class="notif-filter-btn" data-filter="sell">
+                  Sell Signals
+                </button>
+                <button class="notif-filter-btn" data-filter="stoploss">
+                  Stop Loss
+                </button>
+              </div>
+              <div id="notif-list" class="notif-list">
+                <div class="notif-empty">
+                  No notifications in the last 7 days
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="nav-profile-wrapper">
+                <button id="user-profile-btn" title="View Profile">
+                    <span id="user-avatar-initial">U</span>
+                </button>
+                <div id="profile-dropdown" class="profile-dropdown glass hidden">
+                    <div class="profile-header">
+                        <div class="profile-avatar-large">U</div>
+                        <div class="profile-meta">
+                            <h5>User</h5>
+                            <span>Code: </span>
+                        </div>
+                    </div>
+                    <div class="profile-body">
+                        <div class="profile-info-item">
+                            <i class="fas fa-envelope"></i>
+                            <span></span>
+                        </div>
+                    </div>
+                    <div class="profile-footer">
+                        <button id="notif-settings-btn" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;color:#a5b4fc;font-size:0.82rem;font-weight:600;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
+                            <i class="fas fa-bell" style="font-size:0.8rem"></i> Notification Settings
+                        </button>
+                        <button id="logout-btn" class="btn-logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </header>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+      <div id="sidebar-container"></div>
+      <main class="main-content">
+        <div id="app">
+          <div class="fade-in">
+            <!-- Header Block -->
+            <div class="circuit-header">
+              <div class="circuit-title-area">
+                <h1 class="circuit-main-title">
+                  <i class="fas fa-bolt text-gradient" style="margin-right: 0.5rem;"></i>Daily Circuit Levels
+                </h1>
+                <p class="circuit-sub-title">Monitor stocks approaching or hitting the 15% daily limit boundaries</p>
+              </div>
+              <div class="circuit-timestamp" id="circuitTimestamp">
+                As of: --/--/---- --:-- --
+              </div>
+            </div>
+
+            <!-- High Level Summary Stats -->
+            <div class="circuit-stats-grid">
+              <div class="circuit-stat-card glass border-success">
+                <div class="stat-icon icon-success"><i class="fas fa-arrow-trend-up"></i></div>
+                <div class="stat-info">
+                  <span class="stat-label">Upper Circuit Hits</span>
+                  <span class="stat-value text-success" id="upperHitsCount">0</span>
+                </div>
+              </div>
+              <div class="circuit-stat-card glass border-danger">
+                <div class="stat-icon icon-danger"><i class="fas fa-arrow-trend-down"></i></div>
+                <div class="stat-info">
+                  <span class="stat-label">Lower Circuit Hits</span>
+                  <span class="stat-value text-danger" id="lowerHitsCount">0</span>
+                </div>
+              </div>
+              <div class="circuit-stat-card glass border-warning-up">
+                <div class="stat-icon icon-warning-up"><i class="fas fa-angles-up"></i></div>
+                <div class="stat-info">
+                  <span class="stat-label">Near Upper Circuit (&lt;3%)</span>
+                  <span class="stat-value text-warning-up" id="nearUpperCount">0</span>
+                </div>
+              </div>
+              <div class="circuit-stat-card glass border-warning-down">
+                <div class="stat-icon icon-warning-down"><i class="fas fa-angles-down"></i></div>
+                <div class="stat-info">
+                  <span class="stat-label">Near Lower Circuit (&lt;3%)</span>
+                  <span class="stat-value text-warning-down" id="nearLowerCount">0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Toolbar & Filter Controls -->
+            <div class="circuit-toolbar glass">
+              <div class="toolbar-filters">
+                <select id="circuitSectorFilter" class="circuit-select">
+                  <option value="all">All Sectors</option>
+                  <option value="Commercial Banks">Commercial Banks</option>
+                  <option value="Development Banks">Development Banks</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Hotel & Tourism">Hotel & Tourism</option>
+                  <option value="Hydro Power">Hydro Power</option>
+                  <option value="Life Insurance">Life Insurance</option>
+                  <option value="Non-Life Insurance">Non-Life Insurance</option>
+                  <option value="Microfinance">Microfinance</option>
+                  <option value="Manufacturing & Processing">Manufacturing & Processing</option>
+                  <option value="Trading">Trading</option>
+                  <option value="Investment">Investment</option>
+                  <option value="Others">Others</option>
+                </select>
+
+                <div class="circuit-search-wrapper">
+                  <i class="fas fa-search search-icon-inside"></i>
+                  <input
+                    type="text"
+                    id="circuitSearch"
+                    class="circuit-search"
+                    placeholder="Search by symbol or name..."
+                  />
+                </div>
+              </div>
+
+              <!-- Filter Tabs -->
+              <div class="circuit-tabs-wrapper">
+                <div class="circuit-filter-tabs" id="circuitTabs">
+                  <button class="circuit-tab active" data-filter="all">All Stocks</button>
+                  <button class="circuit-tab" data-filter="near-upper">Near Upper (&lt;3%)</button>
+                  <button class="circuit-tab" data-filter="near-lower">Near Lower (&lt;3%)</button>
+                  <button class="circuit-tab" data-filter="hit-upper">Hit Upper (+15%)</button>
+                  <button class="circuit-tab" data-filter="hit-lower">Hit Lower (-15%)</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Main Data Table -->
+            <div class="glass" style="padding: 1rem 0; border-radius: 20px; margin-top: 1.5rem;">
+              <div class="table-meta-header">
+                <div id="tableSummaryText">Showing <span id="filteredCount">0</span> of <span id="totalCount">0</span> stocks</div>
+                <div class="table-info-note"><i class="fas fa-circle-info"></i> Limit thresholds are ±15% relative to Previous Close</div>
+              </div>
+
+              <div class="circuit-table-container">
+                <table class="circuit-table-element">
+                  <thead>
+                    <tr>
+                      <th class="sortable" data-sort="symbol">SYMBOL</th>
+                      <th class="sortable" data-sort="name">COMPANY NAME</th>
+                      <th class="sortable" data-sort="price">LTP (Rs.)</th>
+                      <th class="sortable" data-sort="previousClose">PREV CLOSE (Rs.)</th>
+                      <th class="sortable" data-sort="lowerLimit">LOWER LIMIT (Rs.)</th>
+                      <th class="sortable" data-sort="upperLimit">UPPER LIMIT (Rs.)</th>
+                      <th class="sortable text-right" data-sort="toUpper">% TO UPPER</th>
+                      <th class="sortable text-right" data-sort="toLower">% TO LOWER</th>
+                      <th class="sortable text-center" data-sort="status">STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="circuitTableBody">
+                    <!-- Dynamic rendering -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Quick Action Side Panel Overlay (Triggers global view) -->
+    <div class="side-panel-overlay" id="panelOverlay"></div>
+    <div class="side-panel" id="quickPanel">
+      <div class="close-panel" id="closePanel"><i class="fas fa-times"></i></div>
+      <div id="panelContent"></div>
+    </div>
+
+    <script type="module" src="../../js/pages/market/circuit-level.js"></script>
+    <script src="../../js/security.js"></script>
+  </body>
+</html>

@@ -14,6 +14,10 @@ let computedHoldings = [];     // Derived: unsold units per symbol
 let currentSellSymbol = null;
 let performanceChart, sectorChart, growthChart;
 
+let txCurrentPage = 1;
+const txItemsPerPage = 10;
+let chartsInitialized = false;
+
 
 
 // ─────────────────────────────────────────────
