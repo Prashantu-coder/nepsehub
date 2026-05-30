@@ -17,7 +17,7 @@ export const Layout = {
         // Count how many directories deep we are relative to index.html
         // We expect: root, pages/, or pages/calculator/, or pages/trade/, or pages/market/
         let prefix = '';
-        if (path.includes('/pages/calculator/') || path.includes('/pages/trade/') || path.includes('/pages/market/')) {
+        if (path.includes('/pages/calculator/') || path.includes('/pages/analysis/') || path.includes('/pages/market/')) {
             prefix = '../../';
         } else if (path.includes('/pages/')) {
             prefix = '../';
