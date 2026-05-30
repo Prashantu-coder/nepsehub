@@ -15,9 +15,9 @@ export const Layout = {
         // Let's use a simpler way: check how many '../' we need to get to root.
 
         // Count how many directories deep we are relative to index.html
-        // We expect: root, pages/, or pages/calculator/, or pages/trade/, or pages/market/
+        // We expect: root, pages/, pages/calculator/, pages/analysis/, pages/market/, or pages/investment/
         let prefix = '';
-        if (path.includes('/pages/calculator/') || path.includes('/pages/analysis/') || path.includes('/pages/market/')) {
+        if (path.includes('/pages/calculator/') || path.includes('/pages/analysis/') || path.includes('/pages/market/') || path.includes('/pages/investment/')) {
             prefix = '../../';
         } else if (path.includes('/pages/')) {
             prefix = '../';
@@ -97,7 +97,7 @@ export const Layout = {
         this.initQuickView();
 
         // Initialize Notifications
-        this.initNotifications();
+        // this.initNotifications();
 
         // Initialize User Profile Dropdown
         this.initUserProfile();
@@ -106,134 +106,134 @@ export const Layout = {
         this.setupGlobalSearch();
     },
 
-    initNotifications() {
-        const bell = document.getElementById('notification-bell');
-        const dropdown = document.getElementById('notif-dropdown');
-        const badge = document.getElementById('notif-badge');
-        const list = document.getElementById('notif-list');
-        const markReadBtn = document.getElementById('mark-read-btn');
-        const soundToggle = document.getElementById('sound-toggle-btn');
+    // initNotifications() {
+    //     const bell = document.getElementById('notification-bell');
+    //     const dropdown = document.getElementById('notif-dropdown');
+    //     const badge = document.getElementById('notif-badge');
+    //     const list = document.getElementById('notif-list');
+    //     const markReadBtn = document.getElementById('mark-read-btn');
+    //     const soundToggle = document.getElementById('sound-toggle-btn');
 
-        if (!bell) return;
+    //     if (!bell) return;
 
-        let allNotifs = [];
-        let activeFilter = 'all';
+    //     let allNotifs = [];
+    //     let activeFilter = 'all';
 
-        // --- Sound Toggle ---
-        const syncSoundIcon = () => {
-            if (!soundToggle) return;
-            const muted = NotificationService.isSoundMuted();
-            soundToggle.innerHTML = muted
-                ? '<i class="fas fa-volume-mute"></i>'
-                : '<i class="fas fa-volume-up"></i>';
-            soundToggle.classList.toggle('muted', muted);
-            soundToggle.title = muted ? 'Sound muted — click to unmute' : 'Sound on — click to mute';
-        };
+    //     // --- Sound Toggle ---
+    //     const syncSoundIcon = () => {
+    //         if (!soundToggle) return;
+    //         const muted = NotificationService.isSoundMuted();
+    //         soundToggle.innerHTML = muted
+    //             ? '<i class="fas fa-volume-mute"></i>'
+    //             : '<i class="fas fa-volume-up"></i>';
+    //         soundToggle.classList.toggle('muted', muted);
+    //         soundToggle.title = muted ? 'Sound muted — click to unmute' : 'Sound on — click to mute';
+    //     };
 
-        if (soundToggle) {
-            syncSoundIcon();
-            soundToggle.onclick = (e) => {
-                e.stopPropagation();
-                NotificationService.toggleSound();
-                syncSoundIcon();
-            };
-        }
+    //     if (soundToggle) {
+    //         syncSoundIcon();
+    //         soundToggle.onclick = (e) => {
+    //             e.stopPropagation();
+    //             NotificationService.toggleSound();
+    //             syncSoundIcon();
+    //         };
+    //     }
 
-        // --- Render notifications with active filter ---
-        const renderNotifs = () => {
-            let filtered = allNotifs;
-            if (activeFilter !== 'all') {
-                filtered = allNotifs.filter(n => n.type === activeFilter);
-            }
+    //     // --- Render notifications with active filter ---
+    //     const renderNotifs = () => {
+    //         let filtered = allNotifs;
+    //         if (activeFilter !== 'all') {
+    //             filtered = allNotifs.filter(n => n.type === activeFilter);
+    //         }
 
-            if (filtered.length === 0) {
-                const emptyMsg = activeFilter === 'all'
-                    ? 'No notifications in the last 7 days'
-                    : `No ${activeFilter} alerts found`;
-                list.innerHTML = `<div class="notif-empty">${emptyMsg}</div>`;
-            } else {
-                list.innerHTML = filtered.map(n => {
-                    const date = new Date(n.created_at);
-                    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    //         if (filtered.length === 0) {
+    //             const emptyMsg = activeFilter === 'all'
+    //                 ? 'No notifications in the last 7 days'
+    //                 : `No ${activeFilter} alerts found`;
+    //             list.innerHTML = `<div class="notif-empty">${emptyMsg}</div>`;
+    //         } else {
+    //             list.innerHTML = filtered.map(n => {
+    //                 const date = new Date(n.created_at);
+    //                 const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    //                 const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 
-                    let icon = 'fa-info-circle';
-                    if (n.type === 'buy') icon = 'fa-shopping-cart';
-                    if (n.type === 'sell') icon = 'fa-hand-holding-usd';
-                    if (n.type === 'stoploss') icon = 'fa-exclamation-triangle';
+    //                 let icon = 'fa-info-circle';
+    //                 if (n.type === 'buy') icon = 'fa-shopping-cart';
+    //                 if (n.type === 'sell') icon = 'fa-hand-holding-usd';
+    //                 if (n.type === 'stoploss') icon = 'fa-exclamation-triangle';
 
-                    return `
-                        <div class="notif-item ${n.is_read ? '' : 'unread'}">
-                            <div class="notif-icon ${n.type}">
-                                <i class="fas ${icon}"></i>
-                            </div>
-                            <div class="notif-body">
-                                <div class="notif-title">${n.title}</div>
-                                <div class="notif-msg">${n.message}</div>
-                                <div class="notif-time">${dateStr} at ${timeStr}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-        };
+    //                 return `
+    //                     <div class="notif-item ${n.is_read ? '' : 'unread'}">
+    //                         <div class="notif-icon ${n.type}">
+    //                             <i class="fas ${icon}"></i>
+    //                         </div>
+    //                         <div class="notif-body">
+    //                             <div class="notif-title">${n.title}</div>
+    //                             <div class="notif-msg">${n.message}</div>
+    //                             <div class="notif-time">${dateStr} at ${timeStr}</div>
+    //                         </div>
+    //                     </div>
+    //                 `;
+    //             }).join('');
+    //         }
+    //     };
 
-        // --- Fetch & refresh ---
-        const refreshNotifs = async () => {
-            allNotifs = await StorageService.getNotifications();
-            const unreadCount = allNotifs.filter(n => !n.is_read).length;
+    //     // --- Fetch & refresh ---
+    //     const refreshNotifs = async () => {
+    //         allNotifs = await StorageService.getNotifications();
+    //         const unreadCount = allNotifs.filter(n => !n.is_read).length;
 
-            if (unreadCount > 0) {
-                badge.innerText = unreadCount;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
+    //         if (unreadCount > 0) {
+    //             badge.innerText = unreadCount;
+    //             badge.classList.remove('hidden');
+    //         } else {
+    //             badge.classList.add('hidden');
+    //         }
 
-            renderNotifs();
-        };
+    //         renderNotifs();
+    //     };
 
-        // --- Filter tabs ---
-        const filterBtns = dropdown?.querySelectorAll('.notif-filter-btn');
-        if (filterBtns) {
-            filterBtns.forEach(btn => {
-                btn.onclick = (e) => {
-                    e.stopPropagation();
-                    filterBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    activeFilter = btn.dataset.filter;
-                    renderNotifs();
-                };
-            });
-        }
+    //     // --- Filter tabs ---
+    //     const filterBtns = dropdown?.querySelectorAll('.notif-filter-btn');
+    //     if (filterBtns) {
+    //         filterBtns.forEach(btn => {
+    //             btn.onclick = (e) => {
+    //                 e.stopPropagation();
+    //                 filterBtns.forEach(b => b.classList.remove('active'));
+    //                 btn.classList.add('active');
+    //                 activeFilter = btn.dataset.filter;
+    //                 renderNotifs();
+    //             };
+    //         });
+    //     }
 
-        // --- Bell toggle ---
-        bell.onclick = (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('hidden');
-            if (!dropdown.classList.contains('hidden')) {
-                refreshNotifs();
-            }
-        };
+    //     // --- Bell toggle ---
+    //     bell.onclick = (e) => {
+    //         e.stopPropagation();
+    //         dropdown.classList.toggle('hidden');
+    //         if (!dropdown.classList.contains('hidden')) {
+    //             refreshNotifs();
+    //         }
+    //     };
 
-        // --- Mark all read ---
-        markReadBtn.onclick = async (e) => {
-            e.stopPropagation();
-            await StorageService.markNotificationsAsRead();
-            refreshNotifs();
-        };
+    //     // --- Mark all read ---
+    //     markReadBtn.onclick = async (e) => {
+    //         e.stopPropagation();
+    //         await StorageService.markNotificationsAsRead();
+    //         refreshNotifs();
+    //     };
 
-        // --- Close on outside click ---
-        document.addEventListener('click', () => {
-            dropdown.classList.add('hidden');
-        });
+    //     // --- Close on outside click ---
+    //     document.addEventListener('click', () => {
+    //         dropdown.classList.add('hidden');
+    //     });
 
-        dropdown.onclick = (e) => e.stopPropagation();
+    //     dropdown.onclick = (e) => e.stopPropagation();
 
-        // Initial check and periodic refresh
-        refreshNotifs();
-        setInterval(refreshNotifs, 60000);
-    },
+    //     // Initial check and periodic refresh
+    //     refreshNotifs();
+    //     setInterval(refreshNotifs, 60000);
+    // },
 
     initUserProfile() {
         // Populate the static profile HTML already in index.html
@@ -353,7 +353,7 @@ export const Layout = {
                         <div style="margin-bottom:24px">
                             <label style="display:block;font-size:0.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Delivery Channels</label>
                             
-                            <!-- Email toggle -->
+                            <!-- Email toggle 
                             <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 16px;margin-bottom:10px">
                                 <div style="display:flex;align-items:center;gap:12px">
                                     <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center">
@@ -369,7 +369,7 @@ export const Layout = {
                                     <span style="position:absolute;inset:0;background:#334155;border-radius:999px;transition:0.3s" class="toggle-track"></span>
                                     <span style="position:absolute;left:3px;top:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.3)" class="toggle-thumb"></span>
                                 </label>
-                            </div>
+                            </div> -->
 
                             <!-- Telegram toggle + connect -->
                             <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 16px">
@@ -469,9 +469,9 @@ export const Layout = {
         const emailToggle = document.getElementById('email-enabled-toggle');
         const tgToggle = document.getElementById('telegram-enabled-toggle');
 
-        applyToggle(emailToggle, settings.emailEnabled || false);
+        // applyToggle(emailToggle, settings.emailEnabled || false);
         applyToggle(tgToggle, settings.telegramEnabled || false);
-        bindToggle(emailToggle);
+        // bindToggle(emailToggle);
         bindToggle(tgToggle);
 
         // Telegram connect section
