@@ -1,117 +1,139 @@
 <!doctype html>
-<html lang="en" data-theme="light">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Position Sizing | NEPSE HUB</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="../../css/base.css" />
-    <link rel="stylesheet" href="../../css/layout.css" />
-    <link rel="stylesheet" href="../../css/components.css" />
-    <link rel="stylesheet" href="../../css/easy.css" />
-  </head>
-  <body>
-    <header class="sticky">
-      <div
-        style="
+<html
+  lang="en"
+  data-theme="light"
+>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Position Sizing | NEPSE HUB</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="../../css/base.css"
+  />
+  <link
+    rel="stylesheet"
+    href="../../css/layout.css"
+  />
+  <link
+    rel="stylesheet"
+    href="../../css/components.css"
+  />
+  <link
+    rel="stylesheet"
+    href="../../css/easy.css"
+  />
+</head>
+
+<body>
+  <header class="sticky">
+    <div style="
           display: flex;
           flex-direction: row;
           justify-content: space-between;
           width: 100%;
-        "
-      >
-        <!-- logo -->
-        <div style="display: flex; align-items: center; gap: 1.5rem">
-          <div id="burgerMenu" class="burger-menu">
-            <i class="fas fa-bars"></i>
-          </div>
-
-          <div class="logo">
-            <i class="fas fa-chart-line"></i>
-            <span class="logo-text">NEPSE HUB</span>
-          </div>
+        ">
+      <!-- logo -->
+      <div style="display: flex; align-items: center; gap: 1.5rem">
+        <div
+          id="burgerMenu"
+          class="burger-menu"
+        >
+          <i class="fas fa-bars"></i>
         </div>
 
-        <!-- nepse values -->
-        <div
-          style="
+        <div class="logo">
+          <i class="fas fa-chart-line"></i>
+          <span class="logo-text">NEPSE HUB</span>
+        </div>
+      </div>
+
+      <!-- nepse values -->
+      <div style="
             display: flex;
             flex-direction: row;
             justify-content: center;
             align-items: center;
             gap: 6px;
-          "
-        >
-          <div id="marketDot" class="blinking-dot"></div>
-          <div>
-            <h6 class="nepse">NEPSE</h6>
-          </div>
-          <div id="index-value">
-            <div class="flex-col">
-              <span
-                id="header-nepse-val"
-                style="
+          ">
+        <div
+          id="marketDot"
+          class="blinking-dot"
+        ></div>
+        <div>
+          <h6 class="nepse">NEPSE</h6>
+        </div>
+        <div id="index-value">
+          <div class="flex-col">
+            <span
+              id="header-nepse-val"
+              style="
                   font-weight: 700;
                   font-size: 1rem;
                   color: var(--text-primary);
                 "
-                >—</span
-              >
-              <span
-                id="header-nepse-change"
-                style="
+            >—</span>
+            <span
+              id="header-nepse-change"
+              style="
                   font-size: 0.78rem;
                   font-weight: 600;
                   margin-right: 0.5rem;
                 "
-                >—</span
-              >
-            </div>
-            <span
-              class="pc-only"
-              style="
+            >—</span>
+          </div>
+          <span
+            class="pc-only"
+            style="
                 height: 12px;
                 width: 1px;
                 background: rgba(255, 255, 255, 0.15);
               "
-            ></span>
-            <div class="flex-col">
-              <span class="pc-only font-1rem text-secondary"
-                >Turnover:
-                <strong id="header-nepse-turnover" class="text-primary"
-                  >—</strong
-                ></span
-              >
-              <span class="pc-only font-1rem text-secondary"
-                >Volume:
-                <strong id="header-nepse-volume" class="text-primary"
-                  >—</strong
-                ></span
-              >
-            </div>
+          ></span>
+          <div class="flex-col">
+            <span class="pc-only font-1rem text-secondary">Turnover:
+              <strong
+                id="header-nepse-turnover"
+                class="text-primary"
+              >—</strong></span>
+            <span class="pc-only font-1rem text-secondary">Volume:
+              <strong
+                id="header-nepse-volume"
+                class="text-primary"
+              >—</strong></span>
           </div>
         </div>
+      </div>
 
-        <!-- clock and notification -->
-        <div
-          style="
+      <!-- clock and notification -->
+      <div style="
             display: flex;
             gap: 5px;
             padding: 0.5rem 0rem;
             padding-right: 1rem;
-          "
-        >
-          <!-- Combined Market Status & Clock Pill -->
-          <div class="market-status-pill pc-only">
-            <div id="navbar-clock" class="navbar-clock-sub"></div>
-            <div id="market-status" class="market-status-sub"></div>
-          </div>
+          ">
+        <!-- Combined Market Status & Clock Pill -->
+        <div class="market-status-pill pc-only">
+          <div
+            id="navbar-clock"
+            class="navbar-clock-sub"
+          ></div>
+          <div
+            id="market-status"
+            class="market-status-sub"
+          ></div>
+        </div>
 
-          <!-- Notification Bell -->
-          <div class="nav-notification-wrapper">
+        <!-- Notification Bell -->
+        <!-- <div class="nav-notification-wrapper">
             <button id="notification-bell" class="btn-icon">
               <i class="far fa-bell"></i>
               <span id="notif-badge" class="notif-badge hidden">0</span>
@@ -150,30 +172,36 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
 
-          <div class="nav-profile-wrapper">
-            <button id="user-profile-btn" title="View Profile">
-              <span id="user-avatar-initial">U</span>
-            </button>
-            <div id="profile-dropdown" class="profile-dropdown glass hidden">
-              <div class="profile-header">
-                <div class="profile-avatar-large">U</div>
-                <div class="profile-meta">
-                  <h5>User</h5>
-                  <span>Code: </span>
-                </div>
+        <div class="nav-profile-wrapper">
+          <button
+            id="user-profile-btn"
+            title="View Profile"
+          >
+            <span id="user-avatar-initial">U</span>
+          </button>
+          <div
+            id="profile-dropdown"
+            class="profile-dropdown glass hidden"
+          >
+            <div class="profile-header">
+              <div class="profile-avatar-large">U</div>
+              <div class="profile-meta">
+                <h5>User</h5>
+                <span>Code: </span>
               </div>
-              <div class="profile-body">
-                <div class="profile-info-item">
-                  <i class="fas fa-envelope"></i>
-                  <span></span>
-                </div>
+            </div>
+            <div class="profile-body">
+              <div class="profile-info-item">
+                <i class="fas fa-envelope"></i>
+                <span></span>
               </div>
-              <div class="profile-footer">
-                <button
-                  id="notif-settings-btn"
-                  style="
+            </div>
+            <div class="profile-footer">
+              <button
+                id="notif-settings-btn"
+                style="
                     display: flex;
                     align-items: center;
                     gap: 8px;
@@ -189,55 +217,58 @@
                     margin-bottom: 8px;
                     transition: all 0.2s;
                   "
-                >
-                  <i class="fas fa-bell" style="font-size: 0.8rem"></i>
-                  Notification Settings
-                </button>
-                <button id="logout-btn" class="btn-logout">
-                  <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-              </div>
+              >
+                <i
+                  class="fas fa-bell"
+                  style="font-size: 0.8rem"
+                ></i>
+                Notification Settings
+              </button>
+              <button
+                id="logout-btn"
+                class="btn-logout"
+              >
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </header>
-    <div id="navbar-container"></div>
-    <div class="app-container">
-      <div id="sidebar-container"></div>
-      <main class="main-content">
-        <div id="app">
-          <div class="section-header">
-            <h2>Position Sizing Calculator</h2>
-          </div>
+    </div>
+  </header>
+  <div id="navbar-container"></div>
+  <div class="app-container">
+    <div id="sidebar-container"></div>
+    <main class="main-content">
+      <div id="app">
+        <div class="section-header">
+          <h2>Position Sizing Calculator</h2>
+        </div>
 
-          <div
-            class="tools-grid"
-            style="
+        <div
+          class="tools-grid"
+          style="
               display: grid;
               grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
               gap: 1.5rem;
             "
-          >
-            <!-- Input Section -->
-            <div
-              class="glass"
-              style="
+        >
+          <!-- Input Section -->
+          <div
+            class="glass"
+            style="
                 padding: 1.5rem;
                 border-radius: 20px;
                 border: 1px solid rgba(255, 255, 255, 0.2);
               "
-            >
-              <div
-                style="
+          >
+            <div style="
                   display: flex;
                   align-items: center;
                   gap: 1rem;
                   margin-bottom: 1.5rem;
-                "
-              >
-                <div
-                  style="
+                ">
+              <div style="
                     background: var(--primary);
                     color: white;
                     width: 40px;
@@ -246,59 +277,58 @@
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                  "
-                >
-                  <i class="fas fa-chart-pie"></i>
-                </div>
-                <h3 style="font-weight: 700">Trade Parameters</h3>
+                  ">
+                <i class="fas fa-chart-pie"></i>
               </div>
-
-              <div class="form-group">
-                <label>Total Account Balance (Rs.)</label>
-                <input
-                  type="number"
-                  id="balance"
-                  placeholder="e.g. 100000"
-                  value=""
-                />
-              </div>
-
-              <div class="form-group">
-                <label>Risk Percentage (%)</label>
-                <input
-                  type="number"
-                  id="riskPercent"
-                  placeholder="e.g. 1"
-                  value=""
-                  step="0.1"
-                />
-              </div>
-
-              <div class="form-group">
-                <label>Entry Price (Rs.)</label>
-                <input
-                  type="number"
-                  id="entryPrice"
-                  placeholder="e.g. 500"
-                  value=""
-                />
-              </div>
-
-              <div class="form-group">
-                <label>Stop Loss (Rs.)</label>
-                <input
-                  type="number"
-                  id="stopLoss"
-                  placeholder="e.g. 480"
-                  value=""
-                />
-              </div>
+              <h3 style="font-weight: 700">Trade Parameters</h3>
             </div>
 
-            <!-- Results Section -->
-            <div
-              class="glass"
-              style="
+            <div class="form-group">
+              <label>Total Account Balance (Rs.)</label>
+              <input
+                type="number"
+                id="balance"
+                placeholder="e.g. 100000"
+                value=""
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Risk Percentage (%)</label>
+              <input
+                type="number"
+                id="riskPercent"
+                placeholder="e.g. 1"
+                value=""
+                step="0.1"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Entry Price (Rs.)</label>
+              <input
+                type="number"
+                id="entryPrice"
+                placeholder="e.g. 500"
+                value=""
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Stop Loss (Rs.)</label>
+              <input
+                type="number"
+                id="stopLoss"
+                placeholder="e.g. 480"
+                value=""
+              />
+            </div>
+          </div>
+
+          <!-- Results Section -->
+          <div
+            class="glass"
+            style="
                 padding: 1.5rem;
                 border-radius: 20px;
                 border: 1px solid rgba(255, 255, 255, 0.2);
@@ -306,18 +336,15 @@
                 flex-direction: column;
                 justify-content: space-between;
               "
-            >
-              <div>
-                <div
-                  style="
+          >
+            <div>
+              <div style="
                     display: flex;
                     align-items: center;
                     gap: 1rem;
                     margin-bottom: 1.5rem;
-                  "
-                >
-                  <div
-                    style="
+                  ">
+                <div style="
                       background: var(--secondary);
                       color: white;
                       width: 40px;
@@ -326,40 +353,43 @@
                       display: flex;
                       align-items: center;
                       justify-content: center;
-                    "
-                  >
-                    <i class="fas fa-calculator"></i>
-                  </div>
-                  <h3 style="font-weight: 700">Recommended Size</h3>
+                    ">
+                  <i class="fas fa-calculator"></i>
                 </div>
-
-                <div id="sizingResults" class="calculator-results">
-                  <!-- Results injected here -->
-                </div>
+                <h3 style="font-weight: 700">Recommended Size</h3>
               </div>
 
               <div
-                id="riskWarning"
-                style="
+                id="sizingResults"
+                class="calculator-results"
+              >
+                <!-- Results injected here -->
+              </div>
+            </div>
+
+            <div
+              id="riskWarning"
+              style="
                   margin-top: 1.5rem;
                   padding: 1rem;
                   border-radius: 12px;
                   font-size: 0.85rem;
                   display: none;
                 "
-              >
-                <!-- Warning injected here -->
-              </div>
+            >
+              <!-- Warning injected here -->
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
+  </div>
 
-    <script
-      type="module"
-      src="../../js/pages/calculator/position-sizing.js"
-    ></script>
-    <script src="../../js/security.js"></script>
-  </body>
+  <script
+    type="module"
+    src="../../js/pages/calculator/position-sizing.js"
+  ></script>
+  <script src="../../js/security.js"></script>
+</body>
+
 </html>
