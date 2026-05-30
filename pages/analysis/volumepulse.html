@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Circuit Levels | NEPSE HUB</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Chart.js for Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/layout.css" />
+    <link rel="stylesheet" href="../../css/components.css" />
+    <link rel="stylesheet" href="../../css/themes.css" />
+    <link rel="stylesheet" href="../../css/pages/market.css" />
+    <link rel="stylesheet" href="../../css/easy.css" />
+    <link rel="stylesheet" href="../../css/analysis/volumepulse.css" />
+</head>
+
+<body>
+    <header class="sticky">
+        <div style="display: flex;flex-direction: row;justify-content: space-between;width: 100%;">
+            <!-- logo -->
+            <div style="display: flex; align-items: center; gap: 1.5rem">
+                <div id="burgerMenu" class="burger-menu">
+                    <i class="fas fa-bars"></i>
+                </div>
+
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="logo-text">NEPSE HUB</span>
+                </div>
+            </div>
+
+            <!-- nepse values -->
+            <div style="
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+          ">
+                <div id="marketDot" class="blinking-dot"></div>
+                <div>
+                    <h6 class="nepse">NEPSE</h6>
+                </div>
+                <div id="index-value">
+                    <div class="flex-col">
+                        <span id="header-nepse-val" style="
+                  font-weight: 700;
+                  font-size: 1rem;
+                  color: var(--text-primary);
+                ">—</span>
+                        <span id="header-nepse-change" style="
+                  font-size: 0.78rem;
+                  font-weight: 600;
+                  margin-right: 0.5rem;
+                ">—</span>
+                    </div>
+                    <span class="pc-only" style="
+                height: 12px;
+                width: 1px;
+                background: rgba(255, 255, 255, 0.15);
+              "></span>
+                    <div class="flex-col">
+                        <span class="pc-only font-1rem text-secondary">Turnover:
+                            <strong id="header-nepse-turnover" class="text-primary">—</strong></span>
+                        <span class="pc-only font-1rem text-secondary">Volume:
+                            <strong id="header-nepse-volume" class="text-primary">—</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- clock and notification -->
+            <div style="
+            display: flex;
+            gap: 5px;
+            padding: 0.5rem 0rem;
+            padding-right: 1rem;
+          ">
+                <!-- Combined Market Status & Clock Pill -->
+                <div class="market-status-pill pc-only">
+                    <div id="navbar-clock" class="navbar-clock-sub"></div>
+                    <div id="market-status" class="market-status-sub"></div>
+                </div>
+
+                <!-- Notification Bell -->
+                <div class="nav-notification-wrapper">
+                    <button id="notification-bell" class="btn-icon">
+                        <i class="far fa-bell"></i>
+                        <span id="notif-badge" class="notif-badge hidden">0</span>
+                    </button>
+                    <div id="notif-dropdown" class="notif-dropdown glass hidden">
+                        <div class="notif-header">
+                            <h5>Notifications</h5>
+                            <div style="display: flex; align-items: center; gap: 0.5rem">
+                                <button id="sound-toggle-btn" class="sound-toggle" title="Toggle alert sound">
+                                    <i class="fas fa-volume-up"></i>
+                                </button>
+                                <button id="mark-read-btn">Mark all as read</button>
+                            </div>
+                        </div>
+                        <div class="notif-filters">
+                            <button class="notif-filter-btn active" data-filter="all">
+                                All
+                            </button>
+                            <button class="notif-filter-btn" data-filter="buy">
+                                Buy Signals
+                            </button>
+                            <button class="notif-filter-btn" data-filter="sell">
+                                Sell Signals
+                            </button>
+                            <button class="notif-filter-btn" data-filter="stoploss">
+                                Stop Loss
+                            </button>
+                        </div>
+                        <div id="notif-list" class="notif-list">
+                            <div class="notif-empty">
+                                No notifications in the last 7 days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-profile-wrapper">
+                    <button id="user-profile-btn" title="View Profile">
+                        <span id="user-avatar-initial">U</span>
+                    </button>
+                    <div id="profile-dropdown" class="profile-dropdown glass hidden">
+                        <div class="profile-header">
+                            <div class="profile-avatar-large">U</div>
+                            <div class="profile-meta">
+                                <h5>User</h5>
+                                <span>Code: </span>
+                            </div>
+                        </div>
+                        <div class="profile-body">
+                            <div class="profile-info-item">
+                                <i class="fas fa-envelope"></i>
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="profile-footer">
+                            <button id="notif-settings-btn"
+                                style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;color:#a5b4fc;font-size:0.82rem;font-weight:600;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
+                                <i class="fas fa-bell" style="font-size:0.8rem"></i> Notification Settings
+                            </button>
+                            <button id="logout-btn" class="btn-logout">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div id="navbar-container"></div>
+    <div class="app-container">
+        <div id="sidebar-container"></div>
+        <main class="main-content">
+            <div id="app">
+                <div class="fade-in">
+                    <!-- Header Block -->
+                    <div class="volume-header">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <i class="fas fa-chart-line" style="font-size: 2.2rem; color: #38bdf8;"></i>
+                                <h1 style="font-size: 1.8rem; font-weight: 700;">NEPSE <span class="gradient-text">Volume Pulse</span></h1>
+                            </div>
+                            <p style="color: #9ca3af; margin-top: 6px;">20-day average volume leaders </p>
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <div class="badge-volume" style="background: rgba(192, 132, 252, 0.15); color: #c084fc;">
+                                <i class="fas fa-chart-simple"></i> Premium insights
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- stats row: total companies, avg volume, top symbol -->
+                    <div class="stats-grid" id="statsPanel">
+                        <div class="stat-card shimmer" style="border-left-color: #c084fc;"></div>
+                        <div class="stat-card shimmer"></div>
+                        <div class="stat-card shimmer"></div>
+                        <div class="stat-card shimmer"></div>
+                    </div>
+
+                    <!-- visual + controls row -->
+                    <div class="glass-card" style="padding: 1.5rem;">
+                        <div
+                            style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                            <h2 style="font-weight: 600; font-size: 1.4rem; display: flex; gap: 8px;"><i
+                                    class="fas fa-chart-column" style="color: #38bdf8;"></i> Volume Distribution <span
+                                    style="font-size: 0.8rem; align-self: flex-end; color: #8b9bb5;">(top 15 by
+                                    volume)</span></h2>
+                            <div style="display: flex; gap: 10px;">
+                                <div class="badge-volume" id="chartUpdateTime" style="font-family: monospace;">
+                                    loading...</div>    
+                            </div>
+                        </div>
+                        <div class="chart-volume">
+                            <canvas id="volumeChart" width="400" height="200"
+                                style="max-height: 280px; width: 100%;"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- main table panel with search & sort -->
+                    <div class="glass-card" style="padding: 1.5rem;">
+                        <div
+                            style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.8rem;">
+                            <div>
+                                <h2 style="font-weight: 600; font-size: 1.4rem;"><i class="fas fa-table-list"></i>
+                                    Complete Volume Registry</h2>
+                                <p style="font-size: 0.8rem; color: #a5b4d4;">All NEPSE symbols · 20-day avg volume
+                                    sorted by rank</p>
+                            </div>
+                            <div style="position: relative; min-width: 240px;">
+                                <i class="fas fa-search"
+                                    style="position: absolute; left: 16px; top: 12px; color: #6b7280;"></i>
+                                <input type="text" id="searchInput" class="premium-input" placeholder="Search symbol..."
+                                    style="padding-left: 2.5rem;">
+                            </div>
+                        </div>
+
+                        <div class="data-table-container">
+                            <table class="data-table" id="volumeTable">
+                                <thead>
+                                    <tr>
+                                        <th class="sortable" data-sort="symbol"><i class="fas fa-code"></i> Symbol <span
+                                                id="sortSymbolIcon"></span></th>
+                                        <th class="sortable" data-sort="volume"><i class="fas fa-chart-simple"></i> Avg
+                                            Volume (20d) <span id="sortVolIcon"></span></th>
+                                        <th><i class="fas fa-tachometer-alt"></i> Market Activity</th>
+                                        <th><i class="fas fa-chart-line"></i> Volume Tier</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; padding: 3rem;"><i
+                                                class="fas fa-spinner fa-pulse"></i> Fetching live NEPSE volume data...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div
+                            style="margin-top: 1.2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div><span id="recordsCount" class="badge-volume">0 records</span></div>
+                        </div>
+                    </div>
+                    <div class="footer-note">
+                        <i class="fas fa-chart-line"></i> 20-day average volume — updated after daily market closes from NEPSE
+                            technical API.
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Quick Action Side Panel Overlay (Triggers global view) -->
+    <div class="side-panel-overlay" id="panelOverlay"></div>
+    <div class="side-panel" id="quickPanel">
+        <div class="close-panel" id="closePanel"><i class="fas fa-times"></i></div>
+        <div id="panelContent"></div>
+    </div>
+
+    <script type="module" src="../../js/pages/analysis/volumepulse.js"></script>
+    <script src="../../js/security.js"></script>
+</body>
+
+</html>
