@@ -1,642 +1,470 @@
 <!doctype html>
 <html lang="en" data-theme="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Investment Portfolio | NEPSE HUB</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="../css/base.css" />
-    <link rel="stylesheet" href="../css/layout.css" />
-    <link rel="stylesheet" href="../css/components.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="../css/pages/portfolio.css" />
-    <link rel="stylesheet" href="../css/easy.css" />
-  </head>
-  <body>
-    <header class="sticky">
-      <div
-        style="
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          width: 100%;
-        "
-      >
-        <!-- logo -->
-        <div style="display: flex; align-items: center; gap: 1.5rem">
-          <div id="burgerMenu" class="burger-menu">
-            <i class="fas fa-bars"></i>
-          </div>
 
-          <div class="logo">
-            <i class="fas fa-chart-line"></i>
-            <span class="logo-text">NEPSE HUB</span>
-          </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investment Portfolio | NEPSE HUB</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/layout.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../css/pages/portfolio.css" />
+  <link rel="stylesheet" href="../css/easy.css" />
+</head>
+
+<body>
+  <header class="sticky">
+    <div class="flex-row space-between w-full">
+      <!-- logo -->
+      <div class="flex items-center gap-24">
+        <div id="burgerMenu" class="burger-menu">
+          <i class="fas fa-bars"></i>
         </div>
 
-        <!-- nepse values -->
-        <div
-          style="
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-          "
-        >
-          <div id="marketDot" class="blinking-dot"></div>
-          <div>
-            <h6 class="nepse">NEPSE</h6>
+        <div class="logo">
+          <i class="fas fa-chart-line"></i>
+          <span class="logo-text mobile-hide">NEPSE HUB</span>
+        </div>
+      </div>
+
+      <!-- nepse values -->
+      <div class="flex-row content-center items-center gap-5">
+        <div id="marketDot" class="blinking-dot"></div>
+        <div>
+          <h6 class="nepse">NEPSE</h6>
+        </div>
+        <div id="index-value">
+          <div class="flex-col">
+            <span id="header-nepse-val" class="font-weight-700 f-16 text-primary">—</span>
+            <span id="header-nepse-change" class="f-12 font-weight-600 mr-8">—</span>
           </div>
-          <div id="index-value">
-            <div class="flex-col">
-              <span
-                id="header-nepse-val"
-                style="
-                  font-weight: 700;
-                  font-size: 1rem;
-                  color: var(--text-primary);
-                "
-                >—</span
-              >
-              <span
-                id="header-nepse-change"
-                style="
-                  font-size: 0.78rem;
-                  font-weight: 600;
-                  margin-right: 0.5rem;
-                "
-                >—</span
-              >
-            </div>
+          <span class="pc-only bg-secondary w-1 h-12"></span>
+          <div class="flex-col">
+            <span class="pc-only f-16 text-secondary">Turnover:
+              <strong id="header-nepse-turnover" class="text-primary">—</strong></span>
+            <span class="pc-only f-16 text-secondary">Volume:
+              <strong id="header-nepse-volume" class="text-primary">—</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- clock and notification -->
+      <div class="flex gap-5 py-8 pr-16">
+        <!-- Combined Market Status & Clock Pill -->
+        <div class="market-status-pill pc-only">
+          <div id="navbar-clock" class="navbar-clock-sub"></div>
+          <div id="market-status" class="market-status-sub"></div>
+        </div>
+
+        <!-- Notification Bell -->
+        <!-- <div class="nav-notification-wrapper">
+          <button
+            id="notification-bell"
+            class="btn-icon"
+          >
+            <i class="far fa-bell"></i>
             <span
-              class="pc-only"
-              style="
-                height: 12px;
-                width: 1px;
-                background: rgba(255, 255, 255, 0.15);
-              "
-            ></span>
-            <div class="flex-col">
-              <span class="pc-only font-1rem text-secondary"
-                >Turnover:
-                <strong id="header-nepse-turnover" class="text-primary"
-                  >—</strong
-                ></span
-              >
-              <span class="pc-only font-1rem text-secondary"
-                >Volume:
-                <strong id="header-nepse-volume" class="text-primary"
-                  >—</strong
-                ></span
-              >
-            </div>
-          </div>
-        </div>
-
-        <!-- clock and notification -->
-        <div
-          style="
-            display: flex;
-            gap: 5px;
-            padding: 0.5rem 0rem;
-            padding-right: 1rem;
-          "
-        >
-          <!-- Combined Market Status & Clock Pill -->
-          <div class="market-status-pill pc-only">
-            <div id="navbar-clock" class="navbar-clock-sub"></div>
-            <div id="market-status" class="market-status-sub"></div>
-          </div>
-
-          <!-- Notification Bell -->
-          <!-- <div class="nav-notification-wrapper">
-            <button id="notification-bell" class="btn-icon">
-              <i class="far fa-bell"></i>
-              <span id="notif-badge" class="notif-badge hidden">0</span>
-            </button>
-            <div id="notif-dropdown" class="notif-dropdown glass hidden">
-              <div class="notif-header">
-                <h5>Notifications</h5>
-                <div style="display: flex; align-items: center; gap: 0.5rem">
-                  <button
-                    id="sound-toggle-btn"
-                    class="sound-toggle"
-                    title="Toggle alert sound"
-                  >
-                    <i class="fas fa-volume-up"></i>
-                  </button>
-                  <button id="mark-read-btn">Mark all as read</button>
-                </div>
-              </div>
-              <div class="notif-filters">
-                <button class="notif-filter-btn active" data-filter="all">
-                  All
-                </button>
-                <button class="notif-filter-btn" data-filter="buy">
-                  Buy Signals
-                </button>
-                <button class="notif-filter-btn" data-filter="sell">
-                  Sell Signals
-                </button>
-                <button class="notif-filter-btn" data-filter="stoploss">
-                  Stop Loss
-                </button>
-              </div>
-              <div id="notif-list" class="notif-list">
-                <div class="notif-empty">
-                  No notifications in the last 7 days
-                </div>
-              </div>
-            </div>
-          </div> -->
-
-          <div class="nav-profile-wrapper">
-            <button id="user-profile-btn" title="View Profile">
-              <span id="user-avatar-initial">U</span>
-            </button>
-            <div id="profile-dropdown" class="profile-dropdown glass hidden">
-              <div class="profile-header">
-                <div class="profile-avatar-large">U</div>
-                <div class="profile-meta">
-                  <h5>User</h5>
-                  <span>Code: </span>
-                </div>
-              </div>
-              <div class="profile-body">
-                <div class="profile-info-item">
-                  <i class="fas fa-envelope"></i>
-                  <span></span>
-                </div>
-              </div>
-              <div class="profile-footer">
+              id="notif-badge"
+              class="notif-badge hidden"
+            >0</span>
+          </button>
+          <div
+            id="notif-dropdown"
+            class="notif-dropdown glass hidden"
+          >
+            <div class="notif-header">
+              <h5>Notifications</h5>
+              <div class="flex items-center gap-8">
                 <button
-                  id="notif-settings-btn"
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    width: 100%;
-                    padding: 9px 12px;
+                  id="sound-toggle-btn"
+                  class="sound-toggle"
+                  title="Toggle alert sound"
+                >
+                  <i class="fas fa-volume-up"></i>
+                </button>
+                <button id="mark-read-btn">Mark all as read</button>
+              </div>
+            </div>
+            <div class="notif-filters">
+              <button
+                class="notif-filter-btn active"
+                data-filter="all"
+              >
+                All
+              </button>
+              <button
+                class="notif-filter-btn"
+                data-filter="buy"
+              >
+                Buy Signals
+              </button>
+              <button
+                class="notif-filter-btn"
+                data-filter="sell"
+              >
+                Sell Signals
+              </button>
+              <button
+                class="notif-filter-btn"
+                data-filter="stoploss"
+              >
+                Stop Loss
+              </button>
+            </div>
+            <div
+              id="notif-list"
+              class="notif-list">
+              <div class="notif-empty">
+                No notifications in the last 7 days
+              </div>
+            </div>
+          </div>
+        </div> -->
+
+        <div class="nav-profile-wrapper">
+          <button id="user-profile-btn" title="View Profile">
+            <span id="user-avatar-initial">U</span>
+          </button>
+          <div id="profile-dropdown" class="profile-dropdown glass hidden">
+            <div class="profile-header">
+              <div class="profile-avatar-large">U</div>
+              <div class="profile-meta">
+                <h5>User</h5>
+                <span>Code: </span>
+              </div>
+            </div>
+            <div class="profile-body">
+              <div class="profile-info-item">
+                <i class="fas fa-envelope"></i>
+                <span></span>
+              </div>
+            </div>
+            <div class="profile-footer">
+              <button id="notif-settings-btn" class="flex justify-center items-center gap-8 px-12 py-9 w-full rounded-10 f-13 font-weight-600 cursor-pointer mb-8" style="
                     background: rgba(99, 102, 241, 0.08);
                     border: 1px solid rgba(99, 102, 241, 0.2);
-                    border-radius: 10px;
                     color: #a5b4fc;
-                    font-size: 0.82rem;
-                    font-weight: 600;
-                    cursor: pointer;
-                    margin-bottom: 8px;
                     transition: all 0.2s;
-                  "
-                >
-                  <i class="fas fa-bell" style="font-size: 0.8rem"></i>
-                  Notification Settings
-                </button>
-                <button id="logout-btn" class="btn-logout">
-                  <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-              </div>
+                  ">
+                <i class="fas fa-bell f-12"></i>
+                Notification Settings
+              </button>
+              <button id="logout-btn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <div id="navbar-container"></div>
-    <div class="app-container">
-      <div id="sidebar-container"></div>
-      <main class="main-content">
-        <div id="app">
-          <!-- Page Header -->
-          <div
-            style="
+  <div id="navbar-container"></div>
+  <div class="app-container">
+    <div id="sidebar-container"></div>
+    <main class="main-content">
+      <div id="app">
+        <!-- Page Header -->
+        <div style="
               display: flex;
               justify-content: space-between;
               align-items: center;
               margin-bottom: 2rem;
-            "
-          >
-            <div>
-              <h2 style="margin-bottom: 0.25rem">
-                <i class="fas fa-briefcase" style="margin-right: 0.75rem"></i
-                >PORTFOLIO
-              </h2>
-              <p style="color: var(--text-secondary); font-size: 0.85rem">
-                Track your NEPSE investments & performance
-              </p>
-            </div>
-            <button class="btn btn-primary" id="open-portfolio-modal">
-              <i class="fas fa-plus-circle"></i> Add Transaction
-            </button>
+            ">
+          <div>
+            <h2 style="margin-bottom: 0.25rem">
+              <i class="fas fa-briefcase" style="margin-right: 0.75rem"></i>PORTFOLIO
+            </h2>
+            <p style="color: var(--text-secondary); font-size: 0.85rem">
+              Track your NEPSE investments & performance
+            </p>
           </div>
+          <button class="btn btn-primary" id="open-portfolio-modal">
+            <i class="fas fa-plus-circle"></i> Add Transaction
+          </button>
+        </div>
 
-          <!-- 5 Summary Cards -->
-          <div class="portfolio-stats-grid">
-            <div class="summary-card glass">
-              <div class="summary-card-inner">
-                <div
-                  class="summary-icon-box"
-                  style="
+        <!-- 5 Summary Cards -->
+        <div class="portfolio-stats-grid">
+          <div class="summary-card glass">
+            <div class="summary-card-inner">
+              <div class="summary-icon-box" style="
                     background: rgba(99, 102, 241, 0.1);
                     color: var(--primary);
-                  "
-                >
-                  <i class="fas fa-wallet"></i>
-                </div>
-                <div class="summary-details">
-                  <div class="summary-label">Total Investment</div>
-                  <div class="summary-value" id="stat-total-inv">Rs. 0.00</div>
-                </div>
+                  ">
+                <i class="fas fa-wallet"></i>
+              </div>
+              <div class="summary-details">
+                <div class="summary-label">Total Investment</div>
+                <div class="summary-value" id="stat-total-inv">Rs. 0.00</div>
               </div>
             </div>
+          </div>
 
-            <div class="summary-card glass">
-              <div class="summary-card-inner">
-                <div
-                  class="summary-icon-box"
-                  style="
+          <div class="summary-card glass">
+            <div class="summary-card-inner">
+              <div class="summary-icon-box" style="
                     background: rgba(16, 185, 129, 0.1);
                     color: var(--secondary);
-                  "
-                >
-                  <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="summary-details">
-                  <div class="summary-label">Current Value</div>
-                  <div class="summary-value" id="stat-current-val">
-                    Rs. 0.00
-                  </div>
-                  <div class="summary-change" id="stat-total-pnl-pct">
-                    0.00% unrealized
-                  </div>
-                </div>
+                  ">
+                <i class="fas fa-chart-line"></i>
               </div>
-            </div>
-
-            <div class="summary-card glass">
-              <div class="summary-card-inner">
-                <div
-                  class="summary-icon-box"
-                  style="
-                    background: rgba(16, 185, 129, 0.1);
-                    color: var(--secondary);
-                  "
-                >
-                  <i class="fas fa-arrow-trend-up"></i>
+              <div class="summary-details">
+                <div class="summary-label">Current Value</div>
+                <div class="summary-value" id="stat-current-val">
+                  Rs. 0.00
                 </div>
-                <div class="summary-details">
-                  <div class="summary-label">Unrealized P&L</div>
-                  <div class="summary-value" id="stat-unrealized-pnl">
-                    Rs. 0.00
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="summary-card glass">
-              <div class="summary-card-inner">
-                <div
-                  class="summary-icon-box"
-                  style="background: rgba(6, 182, 212, 0.1); color: #06b6d4"
-                >
-                  <i class="fas fa-sack-dollar"></i>
-                </div>
-                <div class="summary-details">
-                  <div class="summary-label">Realized P&L</div>
-                  <div class="summary-value" id="stat-realized-pnl">
-                    Rs. 0.00
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="summary-card glass">
-              <div class="summary-card-inner">
-                <div
-                  class="summary-icon-box"
-                  style="background: rgba(245, 158, 11, 0.1); color: #f59e0b"
-                >
-                  <i class="fas fa-calendar-day"></i>
-                </div>
-                <div class="summary-details">
-                  <div class="summary-label">Today's Change</div>
-                  <div class="summary-value" id="stat-today-change">
-                    Rs. 0.00
-                  </div>
-                  <div class="summary-change" id="stat-today-pct">+0.00%</div>
+                <div class="summary-change" id="stat-total-pnl-pct">
+                  0.00% unrealized
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Tabs Navigation -->
-          <div class="tab-nav" style="margin-bottom: 2rem">
-            <button class="tab-btn active" data-tab="overview">Overview</button>
-            <button class="tab-btn" data-tab="analytics">Analytics</button>
-            <button class="tab-btn" data-tab="transactions">
-              Transactions
-            </button>
-            <button class="tab-btn" data-tab="reports">Tax Reports</button>
+          <div class="summary-card glass">
+            <div class="summary-card-inner">
+              <div class="summary-icon-box" style="
+                    background: rgba(16, 185, 129, 0.1);
+                    color: var(--secondary);
+                  ">
+                <i class="fas fa-arrow-trend-up"></i>
+              </div>
+              <div class="summary-details">
+                <div class="summary-label">Unrealized P&L</div>
+                <div class="summary-value" id="stat-unrealized-pnl">
+                  Rs. 0.00
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Tab Contents -->
-          <div id="tab-overview">
-            <div
-              style="
+          <div class="summary-card glass">
+            <div class="summary-card-inner">
+              <div class="summary-icon-box" style="background: rgba(6, 182, 212, 0.1); color: #06b6d4">
+                <i class="fas fa-sack-dollar"></i>
+              </div>
+              <div class="summary-details">
+                <div class="summary-label">Realized P&L</div>
+                <div class="summary-value" id="stat-realized-pnl">
+                  Rs. 0.00
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card glass">
+            <div class="summary-card-inner">
+              <div class="summary-icon-box" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b">
+                <i class="fas fa-calendar-day"></i>
+              </div>
+              <div class="summary-details">
+                <div class="summary-label">Today's Change</div>
+                <div class="summary-value" id="stat-today-change">
+                  Rs. 0.00
+                </div>
+                <div class="summary-change" id="stat-today-pct">+0.00%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tab-nav" style="margin-bottom: 2rem">
+          <button class="tab-btn active" data-tab="overview">Overview</button>
+          <button class="tab-btn" data-tab="analytics">Analytics</button>
+          <button class="tab-btn" data-tab="transactions">
+            Transactions
+          </button>
+          <button class="tab-btn" data-tab="reports">Tax Reports</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div id="tab-overview">
+          <div style="
                 display: flex;
                 justify-content: flex-end;
                 margin-bottom: 1rem;
-              "
-            >
-              <button
-                class="btn btn-secondary btn-sm"
-                id="toggle-charts"
-                style="padding: 0.4rem 0.8rem; font-size: 0.75rem"
-              >
-                <i class="fas fa-eye-slash"></i> <span>Hide Charts</span>
-              </button>
+              ">
+            <button class="btn btn-secondary btn-sm" id="toggle-charts" style="padding: 0.4rem 0.8rem; font-size: 0.75rem">
+              <i class="fas fa-eye-slash"></i> <span>Hide Charts</span>
+            </button>
+          </div>
+          <div class="portfolio-charts-grid" id="charts-grid">
+            <!-- Performance Chart -->
+            <div class="chart-card">
+              <h4>Portfolio Performance</h4>
+              <div class="skeleton skeleton-chart"></div>
             </div>
-            <div class="portfolio-charts-grid" id="charts-grid">
-              <!-- Performance Chart -->
-              <div class="chart-card">
-                <h4>Portfolio Performance</h4>
-                <div class="skeleton skeleton-chart"></div>
-              </div>
-              <!-- Sector Allocation -->
-              <div class="chart-card">
-                <h4>Sector Allocation</h4>
-                <div class="skeleton skeleton-chart"></div>
-              </div>
+            <!-- Sector Allocation -->
+            <div class="chart-card">
+              <h4>Sector Allocation</h4>
+              <div class="skeleton skeleton-chart"></div>
+            </div>
+          </div>
+
+          <!-- Current Holdings Table -->
+          <div class="content-section" style="margin-top: 2rem">
+            <h4 style="margin-bottom: 1.5rem">Current Holdings</h4>
+            <div id="holdings-table-wrap" class="table-container glass">
+              <table class="data-table" id="holdings-table">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Qty</th>
+                    <th>WACC</th>
+                    <th>LTP</th>
+                    <th>Invested</th>
+                    <th>Current Value</th>
+                    <th>Today Change</th>
+                    <th>P&amp;L</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <!-- ══ SHIMMER ROWS — visible while loading ══ -->
+                <tbody id="holdings-shimmer-body" class="portfolio-shimmer-body">
+                  <tr>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 70px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 35px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 65px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 65px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 80px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 80px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 75px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 75px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 50px"></div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 55px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 30px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 70px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 70px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 85px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 85px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 70px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 70px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 50px"></div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 80px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 38px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 60px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 60px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 90px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 90px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 80px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 80px"></div>
+                    </td>
+                    <td>
+                      <div class="skeleton skeleton-text" style="width: 50px"></div>
+                    </td>
+                  </tr>
+                </tbody>
+
+                <!-- ══ REAL DATA ROWS — filled by portfolio.js ══ -->
+                <tbody id="portfolio-list-body" class="portfolio-data-body pf-loading"></tbody>
+              </table>
             </div>
 
-            <!-- Current Holdings Table -->
-            <div class="content-section" style="margin-top: 2rem">
-              <h4 style="margin-bottom: 1.5rem">Current Holdings</h4>
-              <div id="holdings-table-wrap" class="table-container glass">
-                <table class="data-table" id="holdings-table">
-                  <thead>
-                    <tr>
-                      <th>Symbol</th>
-                      <th>Qty</th>
-                      <th>WACC</th>
-                      <th>LTP</th>
-                      <th>Invested</th>
-                      <th>Current Value</th>
-                      <th>Today Change</th>
-                      <th>P&amp;L</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-
-                  <!-- ══ SHIMMER ROWS — visible while loading ══ -->
-                  <tbody
-                    id="holdings-shimmer-body"
-                    class="portfolio-shimmer-body"
-                  >
-                    <tr>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 70px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 35px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 65px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 65px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 80px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 80px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 75px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 75px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 50px"
-                        ></div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 55px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 30px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 70px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 70px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 85px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 85px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 70px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 70px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 50px"
-                        ></div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 80px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 38px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 60px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 60px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 90px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 90px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 80px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 80px"
-                        ></div>
-                      </td>
-                      <td>
-                        <div
-                          class="skeleton skeleton-text"
-                          style="width: 50px"
-                        ></div>
-                      </td>
-                    </tr>
-                  </tbody>
-
-                  <!-- ══ REAL DATA ROWS — filled by portfolio.js ══ -->
-                  <tbody
-                    id="portfolio-list-body"
-                    class="portfolio-data-body pf-loading"
-                  ></tbody>
-                </table>
+            <!-- ══ EMPTY STATE CARD — shown when no holdings ══ -->
+            <div id="portfolio-empty-msg" class="pf-empty-card" style="display: none">
+              <div class="pf-empty-glow"></div>
+              <div class="pf-empty-icon">
+                <i class="fas fa-chart-pie"></i>
               </div>
-
-              <!-- ══ EMPTY STATE CARD — shown when no holdings ══ -->
-              <div
-                id="portfolio-empty-msg"
-                class="pf-empty-card"
-                style="display: none"
-              >
-                <div class="pf-empty-glow"></div>
-                <div class="pf-empty-icon">
-                  <i class="fas fa-chart-pie"></i>
-                </div>
-                <h3 class="pf-empty-title">Your Portfolio is Empty</h3>
-                <p class="pf-empty-sub">
-                  Start building your NEPSE investment portfolio.<br />Every
-                  great journey begins with a single trade.
-                </p>
-                <div class="pf-empty-quote">
-                  <i
-                    class="fas fa-quote-left"
-                    style="
+              <h3 class="pf-empty-title">Your Portfolio is Empty</h3>
+              <p class="pf-empty-sub">
+                Start building your NEPSE investment portfolio.<br />Every
+                great journey begins with a single trade.
+              </p>
+              <div class="pf-empty-quote">
+                <i class="fas fa-quote-left" style="
                       opacity: 0.4;
                       font-size: 0.85rem;
                       margin-right: 0.4rem;
-                    "
-                  ></i>
-                  The stock market is a device for transferring money from the
-                  impatient to the patient.
-                  <i
-                    class="fas fa-quote-right"
-                    style="
+                    "></i>
+                The stock market is a device for transferring money from the
+                impatient to the patient.
+                <i class="fas fa-quote-right" style="
                       opacity: 0.4;
                       font-size: 0.85rem;
                       margin-left: 0.4rem;
-                    "
-                  ></i>
-                  <div
-                    style="
+                    "></i>
+                <div style="
                       font-size: 0.72rem;
                       color: var(--text-secondary);
                       margin-top: 0.4rem;
                       font-style: normal;
-                    "
-                  >
-                    — Warren Buffett
-                  </div>
+                    ">
+                  — Warren Buffett
                 </div>
-                <button
-                  class="btn btn-primary pf-empty-btn"
-                  onclick="
-                    document.getElementById('open-portfolio-modal').click()
-                  "
-                >
-                  <i class="fas fa-plus-circle"></i> Add Your First Transaction
-                </button>
               </div>
+              <button class="btn btn-primary pf-empty-btn" onclick="
+                    document.getElementById('open-portfolio-modal').click()
+                  ">
+                <i class="fas fa-plus-circle"></i> Add Your First Transaction
+              </button>
             </div>
           </div>
+        </div>
 
-          <div id="tab-analytics" style="display: none">
-            <div class="risk-analytics-container">
-              <!-- Capital Config Row -->
-              <div
-                class="glass"
-                style="
+        <div id="tab-analytics" style="display: none">
+          <div class="risk-analytics-container">
+            <!-- Capital Config Row -->
+            <div class="glass" style="
                   padding: 1rem 1.5rem;
                   border-radius: 16px;
                   margin-bottom: 1.5rem;
@@ -644,41 +472,26 @@
                   align-items: center;
                   justify-content: space-between;
                   flex-direction: row;
-                "
-              >
-                <div style="display: flex; align-items: center; gap: 1rem">
-                  <i
-                    class="fas fa-wallet"
-                    style="color: var(--primary); font-size: 1.2rem"
-                  ></i>
-                  <div>
-                    <div
-                      style="
+                ">
+              <div style="display: flex; align-items: center; gap: 1rem">
+                <i class="fas fa-wallet" style="color: var(--primary); font-size: 1.2rem"></i>
+                <div>
+                  <div style="
                         font-size: 0.75rem;
                         color: var(--text-secondary);
                         text-transform: uppercase;
                         font-weight: 700;
-                      "
-                    >
-                      Total Trading Capital
-                    </div>
-                    <div
-                      style="
+                      ">
+                    Total Trading Capital
+                  </div>
+                  <div style="
                         display: flex;
                         align-items: center;
                         gap: 0.5rem;
                         margin-top: 2px;
-                      "
-                    >
-                      <span
-                        style="font-weight: 700; color: var(--text-secondary)"
-                        >Rs.</span
-                      >
-                      <input
-                        type="number"
-                        id="config-total-capital"
-                        placeholder="e.g. 500000"
-                        style="
+                      ">
+                    <span style="font-weight: 700; color: var(--text-secondary)">Rs.</span>
+                    <input type="number" id="config-total-capital" placeholder="e.g. 500000" style="
                           background: transparent;
                           border: none;
                           border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
@@ -688,281 +501,208 @@
                           width: 150px;
                           outline: none;
                           padding: 0;
-                        "
-                      />
-                    </div>
+                        " />
                   </div>
                 </div>
-                <div style="text-align: right">
-                  <div
-                    style="
+              </div>
+              <div style="text-align: right">
+                <div style="
                       font-size: 0.75rem;
                       color: var(--text-secondary);
                       text-transform: uppercase;
                       font-weight: 700;
-                    "
-                  >
-                    Buying Power (Cash)
-                  </div>
-                  <div
-                    id="risk-buying-power"
-                    style="
+                    ">
+                  Buying Power (Cash)
+                </div>
+                <div id="risk-buying-power" style="
                       font-weight: 800;
                       font-size: 1.1rem;
                       color: var(--secondary);
                       margin-top: 2px;
-                    "
-                  >
-                    Rs. 0.00
-                  </div>
+                    ">
+                  Rs. 0.00
+                </div>
+              </div>
+            </div>
+
+            <!-- Risk Overview Row -->
+            <div class="risk-stats-grid">
+              <div class="risk-card glass">
+                <div class="risk-card-header">
+                  <span class="risk-label">Total Risk at Stake</span>
+                  <i class="fas fa-shield-alt risk-icon"></i>
+                </div>
+                <div class="risk-value" id="risk-total-stake">Rs. 0.00</div>
+                <div class="risk-sub-label" id="risk-total-pct">
+                  0.00% of capital
                 </div>
               </div>
 
-              <!-- Risk Overview Row -->
-              <div class="risk-stats-grid">
-                <div class="risk-card glass">
-                  <div class="risk-card-header">
-                    <span class="risk-label">Total Risk at Stake</span>
-                    <i class="fas fa-shield-alt risk-icon"></i>
-                  </div>
-                  <div class="risk-value" id="risk-total-stake">Rs. 0.00</div>
-                  <div class="risk-sub-label" id="risk-total-pct">
-                    0.00% of capital
-                  </div>
+              <div class="risk-card glass">
+                <div class="risk-card-header">
+                  <span class="risk-label">Capital Exposure</span>
+                  <i class="fas fa-balance-scale risk-icon"></i>
                 </div>
-
-                <div class="risk-card glass">
-                  <div class="risk-card-header">
-                    <span class="risk-label">Capital Exposure</span>
-                    <i class="fas fa-balance-scale risk-icon"></i>
-                  </div>
-                  <div class="risk-value" id="risk-cap-exposure">Rs. 0.00</div>
-                  <div class="risk-sub-label" id="risk-cap-pct">
-                    0.00% of portfolio
-                  </div>
-                </div>
-
-                <div class="risk-card glass">
-                  <div class="risk-card-header">
-                    <span class="risk-label">Diversification</span>
-                    <i class="fas fa-th-large risk-icon"></i>
-                  </div>
-                  <div class="risk-value" id="risk-diversification">Good</div>
-                  <div class="risk-sub-label" id="risk-sector-count">
-                    across 0 sectors
-                  </div>
+                <div class="risk-value" id="risk-cap-exposure">Rs. 0.00</div>
+                <div class="risk-sub-label" id="risk-cap-pct">
+                  0.00% of portfolio
                 </div>
               </div>
 
-              <!-- Concentration and Exposure -->
-              <div
-                class="exposure-grid"
-                style="
+              <div class="risk-card glass">
+                <div class="risk-card-header">
+                  <span class="risk-label">Diversification</span>
+                  <i class="fas fa-th-large risk-icon"></i>
+                </div>
+                <div class="risk-value" id="risk-diversification">Good</div>
+                <div class="risk-sub-label" id="risk-sector-count">
+                  across 0 sectors
+                </div>
+              </div>
+            </div>
+
+            <!-- Concentration and Exposure -->
+            <div class="exposure-grid" style="
                   display: grid;
                   grid-template-columns: 1fr 1fr;
                   gap: 1.5rem;
                   margin-top: 1.5rem;
-                "
-              >
-                <div
-                  class="exposure-card glass"
-                  style="padding: 1.5rem; border-radius: 20px"
-                >
-                  <h4 style="margin-bottom: 1.25rem">
-                    <i
-                      class="fas fa-chart-pie"
-                      style="margin-right: 0.5rem; color: var(--primary)"
-                    ></i>
-                    Sector Concentration
-                  </h4>
-                  <div
-                    id="sector-concentration-list"
-                    class="concentration-list"
-                  >
-                    <!-- Sectors injected here -->
-                  </div>
-                </div>
-
-                <div
-                  class="exposure-card glass"
-                  style="padding: 1.5rem; border-radius: 20px"
-                >
-                  <h4 style="margin-bottom: 1.25rem">
-                    <i
-                      class="fas fa-exclamation-triangle"
-                      style="margin-right: 0.5rem; color: var(--danger)"
-                    ></i>
-                    Risk Warnings
-                  </h4>
-                  <div
-                    id="risk-warnings-list"
-                    class="warnings-list"
-                    style="display: flex; flex-direction: column; gap: 0.75rem"
-                  >
-                    <!-- Warnings injected here -->
-                  </div>
+                ">
+              <div class="exposure-card glass" style="padding: 1.5rem; border-radius: 20px">
+                <h4 style="margin-bottom: 1.25rem">
+                  <i class="fas fa-chart-pie" style="margin-right: 0.5rem; color: var(--primary)"></i>
+                  Sector Concentration
+                </h4>
+                <div id="sector-concentration-list" class="concentration-list">
+                  <!-- Sectors injected here -->
                 </div>
               </div>
 
-              <!-- Portfolio Growth & CAGR Module -->
-              <div
-                class="glass"
-                style="
+              <div class="exposure-card glass" style="padding: 1.5rem; border-radius: 20px">
+                <h4 style="margin-bottom: 1.25rem">
+                  <i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem; color: var(--danger)"></i>
+                  Risk Warnings
+                </h4>
+                <div id="risk-warnings-list" class="warnings-list" style="display: flex; flex-direction: column; gap: 0.75rem">
+                  <!-- Warnings injected here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Portfolio Growth & CAGR Module -->
+            <div class="glass" style="
                   padding: 1.5rem;
                   border-radius: 20px;
                   margin-top: 1.5rem;
                   margin-bottom: 1.5rem;
-                "
-              >
-                <h4
-                  style="
+                ">
+              <h4 style="
                     margin-bottom: 1.25rem;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                  "
-                >
-                  <span
-                    ><i
-                      class="fas fa-arrow-trend-up"
-                      style="margin-right: 0.5rem; color: var(--secondary)"
-                    ></i>
-                    Historical Growth & CAGR</span
-                  >
-                  <span
-                    id="stat-cagr-value"
-                    style="
+                  ">
+                <span><i class="fas fa-arrow-trend-up" style="margin-right: 0.5rem; color: var(--secondary)"></i>
+                  Historical Growth & CAGR</span>
+                <span id="stat-cagr-value" style="
                       font-weight: 800;
                       font-size: 1.25rem;
                       color: var(--secondary);
-                    "
-                    >0.00% CAGR</span
-                  >
-                </h4>
-                <div
-                  class="growth-insights-grid"
-                  style="
+                    ">0.00% CAGR</span>
+              </h4>
+              <div class="growth-insights-grid" style="
                     display: grid;
                     grid-template-columns: 1.8fr 1fr;
                     gap: 1.5rem;
                     min-height: 250px;
-                  "
-                >
-                  <!-- Chart on Left -->
-                  <div style="position: relative; height: 260px">
-                    <canvas id="historicalGrowthChart"></canvas>
-                  </div>
-                  <!-- Performance Insights & Stats on Right -->
-                  <div
-                    style="
+                  ">
+                <!-- Chart on Left -->
+                <div style="position: relative; height: 260px">
+                  <canvas id="historicalGrowthChart"></canvas>
+                </div>
+                <!-- Performance Insights & Stats on Right -->
+                <div style="
                       display: flex;
                       flex-direction: column;
                       justify-content: center;
                       gap: 1rem;
                       padding-left: 1rem;
                       border-left: 1px solid rgba(255, 255, 255, 0.06);
-                    "
-                  >
-                    <div
-                      class="glass"
-                      style="
+                    ">
+                  <div class="glass" style="
                         padding: 0.75rem 1rem;
                         border-radius: 12px;
                         border: 1px solid rgba(255, 255, 255, 0.03);
-                      "
-                    >
-                      <div
-                        style="
+                      ">
+                    <div style="
                           font-size: 0.7rem;
                           color: var(--text-secondary);
                           text-transform: uppercase;
                           font-weight: 700;
-                        "
-                      >
-                        Total Invested Cashflow
-                      </div>
-                      <div
-                        id="analytics-total-invested"
-                        style="
+                        ">
+                      Total Invested Cashflow
+                    </div>
+                    <div id="analytics-total-invested" style="
                           font-weight: 800;
                           font-size: 1.1rem;
                           color: var(--text-primary);
                           margin-top: 2px;
-                        "
-                      >
-                        Rs. 0.00
-                      </div>
+                        ">
+                      Rs. 0.00
                     </div>
-                    <div
-                      class="glass"
-                      style="
+                  </div>
+                  <div class="glass" style="
                         padding: 0.75rem 1rem;
                         border-radius: 12px;
                         border: 1px solid rgba(255, 255, 255, 0.03);
-                      "
-                    >
-                      <div
-                        style="
+                      ">
+                    <div style="
                           font-size: 0.7rem;
                           color: var(--text-secondary);
                           text-transform: uppercase;
                           font-weight: 700;
-                        "
-                      >
-                        CAGR Time Horizon
-                      </div>
-                      <div
-                        id="analytics-time-horizon"
-                        style="
+                        ">
+                      CAGR Time Horizon
+                    </div>
+                    <div id="analytics-time-horizon" style="
                           font-weight: 800;
                           font-size: 1.1rem;
                           color: var(--text-primary);
                           margin-top: 2px;
-                        "
-                      >
-                        0.00 Years
-                      </div>
+                        ">
+                      0.00 Years
                     </div>
-                    <div
-                      class="glass"
-                      style="
+                  </div>
+                  <div class="glass" style="
                         padding: 0.75rem 1rem;
                         border-radius: 12px;
                         border: 1px solid rgba(255, 255, 255, 0.03);
-                      "
-                    >
-                      <div
-                        style="
+                      ">
+                    <div style="
                           font-size: 0.7rem;
                           color: var(--text-secondary);
                           text-transform: uppercase;
                           font-weight: 700;
-                        "
-                      >
-                        All-Time Net Performance
-                      </div>
-                      <div
-                        id="analytics-alltime-perf"
-                        style="
+                        ">
+                      All-Time Net Performance
+                    </div>
+                    <div id="analytics-alltime-perf" style="
                           font-weight: 800;
                           font-size: 1.1rem;
                           color: var(--secondary);
                           margin-top: 2px;
-                        "
-                      >
-                        0.00%
-                      </div>
+                        ">
+                      0.00%
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div id="tab-transactions" style="display: none">
-            <div
-              class="glass"
-              style="
+        <div id="tab-transactions" style="display: none">
+          <div class="glass" style="
                 padding: 1rem 1.5rem;
                 border-radius: 16px;
                 margin-bottom: 1.5rem;
@@ -970,352 +710,233 @@
                 align-items: center;
                 justify-content: space-between;
                 flex-direction: row;
-              "
-            >
-              <div style="display: flex; gap: 2rem">
-                <div>
-                  <div
-                    style="
+              ">
+            <div style="display: flex; gap: 2rem">
+              <div>
+                <div style="
                       font-size: 0.7rem;
                       color: var(--text-secondary);
                       text-transform: uppercase;
                       font-weight: 700;
-                    "
-                  >
-                    Total Purchase
-                  </div>
-                  <div
-                    id="tx-buy-total"
-                    style="font-weight: 800; color: var(--text-primary)"
-                  >
-                    Rs. 0.00
-                  </div>
+                    ">
+                  Total Purchase
                 </div>
-                <div>
-                  <div
-                    style="
+                <div id="tx-buy-total" style="font-weight: 800; color: var(--text-primary)">
+                  Rs. 0.00
+                </div>
+              </div>
+              <div>
+                <div style="
                       font-size: 0.7rem;
                       color: var(--text-secondary);
                       text-transform: uppercase;
                       font-weight: 700;
-                    "
-                  >
-                    Total Sales
-                  </div>
-                  <div
-                    id="tx-sell-total"
-                    style="font-weight: 800; color: var(--text-primary)"
-                  >
-                    Rs. 0.00
-                  </div>
+                    ">
+                  Total Sales
+                </div>
+                <div id="tx-sell-total" style="font-weight: 800; color: var(--text-primary)">
+                  Rs. 0.00
                 </div>
               </div>
-              <div style="font-size: 0.8rem; color: var(--text-secondary)">
-                <i class="fas fa-info-circle"></i> Showing full ledger
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary)">
+              <i class="fas fa-info-circle"></i> Showing full ledger
+            </div>
+          </div>
+
+          <div class="table-container glass">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Symbol</th>
+                  <th>Qty</th>
+                  <th>Rate</th>
+                  <th>Fees</th>
+                  <th>Total</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <!-- ══ SHIMMER ROWS ══ -->
+              <tbody id="tx-shimmer-body" class="portfolio-shimmer-body">
+                <tr>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 70px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 40px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 55px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 30px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 65px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 55px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 75px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 30px"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 65px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 45px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 60px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 28px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 60px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 50px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 80px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 30px"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 68px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 42px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 52px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 32px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 63px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 52px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 78px"></div>
+                  </td>
+                  <td>
+                    <div class="skeleton skeleton-text" style="width: 30px"></div>
+                  </td>
+                </tr>
+              </tbody>
+
+              <!-- ══ REAL DATA ROWS ══ -->
+              <tbody id="transaction-history-body" class="portfolio-data-body pf-loading"></tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div class="pagination-controls" style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 1rem;
+                padding: 0.5rem 1rem;
+              ">
+            <button class="btn btn-secondary btn-sm" id="tx-prev-btn" style="padding: 0.45rem 0.9rem; font-size: 0.8rem">
+              <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <span id="tx-page-info" style="
+                  font-size: 0.82rem;
+                  color: var(--text-secondary);
+                  font-weight: 600;
+                ">Page 1 of 1</span>
+            <button class="btn btn-secondary btn-sm" id="tx-next-btn" style="padding: 0.45rem 0.9rem; font-size: 0.8rem">
+              Next <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- ══ EMPTY STATE for Transactions ══ -->
+          <div id="tx-empty-msg" class="pf-empty-card pf-empty-sm" style="display: none">
+            <div class="pf-empty-icon" style="width: 56px; height: 56px; font-size: 1.4rem">
+              <i class="fas fa-receipt"></i>
+            </div>
+            <h3 class="pf-empty-title" style="font-size: 1.1rem">
+              No Transactions Yet
+            </h3>
+            <p class="pf-empty-sub" style="font-size: 0.82rem">
+              Your full trade ledger will appear here once you add a
+              transaction.
+            </p>
+            <button class="btn btn-primary pf-empty-btn" onclick="
+                  document.getElementById('open-portfolio-modal').click()
+                ">
+              <i class="fas fa-plus-circle"></i> Add Transaction
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab: Tax Reports -->
+        <div id="tab-reports" style="display: none">
+          <div class="card">
+            <div style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 1.5rem;
+                ">
+              <div>
+                <h4 style="margin: 0">Capital Gains & Tax Report</h4>
+                <p style="
+                      font-size: 0.8rem;
+                      color: var(--text-secondary);
+                      margin-top: 0.25rem;
+                    ">
+                  Based on FIFO method and Nepal CGT rates (5% > 1yr, 7.5% <= 1yr) </p>
               </div>
+              <button class="btn btn-secondary" id="export-tax-csv">
+                <i class="fas fa-file-export"></i> Export CSV
+              </button>
             </div>
 
             <div class="table-container glass">
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Type</th>
                     <th>Symbol</th>
-                    <th>Qty</th>
-                    <th>Rate</th>
-                    <th>Fees</th>
-                    <th>Total</th>
-                    <th>Action</th>
+                    <th>Sell Date</th>
+                    <th>Hold Days</th>
+                    <th>Quantity</th>
+                    <th>Sell Price</th>
+                    <th>WACC</th>
+                    <th>Net P&L</th>
+                    <th>Tax (CGT)</th>
                   </tr>
                 </thead>
-
-                <!-- ══ SHIMMER ROWS ══ -->
-                <tbody id="tx-shimmer-body" class="portfolio-shimmer-body">
-                  <tr>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 70px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 40px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 55px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 30px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 65px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 55px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 75px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 30px"
-                      ></div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 65px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 45px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 60px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 28px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 60px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 50px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 80px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 30px"
-                      ></div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 68px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 42px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 52px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 32px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 63px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 52px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 78px"
-                      ></div>
-                    </td>
-                    <td>
-                      <div
-                        class="skeleton skeleton-text"
-                        style="width: 30px"
-                      ></div>
-                    </td>
-                  </tr>
+                <tbody id="tax-report-body">
+                  <!-- Data injected via JS -->
                 </tbody>
-
-                <!-- ══ REAL DATA ROWS ══ -->
-                <tbody
-                  id="transaction-history-body"
-                  class="portfolio-data-body pf-loading"
-                ></tbody>
               </table>
-            </div>
-
-            <!-- Pagination Controls -->
-            <div
-              class="pagination-controls"
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-top: 1rem;
-                padding: 0.5rem 1rem;
-              "
-            >
-              <button
-                class="btn btn-secondary btn-sm"
-                id="tx-prev-btn"
-                style="padding: 0.45rem 0.9rem; font-size: 0.8rem"
-              >
-                <i class="fas fa-chevron-left"></i> Previous
-              </button>
-              <span
-                id="tx-page-info"
-                style="
-                  font-size: 0.82rem;
-                  color: var(--text-secondary);
-                  font-weight: 600;
-                "
-                >Page 1 of 1</span
-              >
-              <button
-                class="btn btn-secondary btn-sm"
-                id="tx-next-btn"
-                style="padding: 0.45rem 0.9rem; font-size: 0.8rem"
-              >
-                Next <i class="fas fa-chevron-right"></i>
-              </button>
-            </div>
-
-            <!-- ══ EMPTY STATE for Transactions ══ -->
-            <div
-              id="tx-empty-msg"
-              class="pf-empty-card pf-empty-sm"
-              style="display: none"
-            >
-              <div
-                class="pf-empty-icon"
-                style="width: 56px; height: 56px; font-size: 1.4rem"
-              >
-                <i class="fas fa-receipt"></i>
-              </div>
-              <h3 class="pf-empty-title" style="font-size: 1.1rem">
-                No Transactions Yet
-              </h3>
-              <p class="pf-empty-sub" style="font-size: 0.82rem">
-                Your full trade ledger will appear here once you add a
-                transaction.
-              </p>
-              <button
-                class="btn btn-primary pf-empty-btn"
-                onclick="
-                  document.getElementById('open-portfolio-modal').click()
-                "
-              >
-                <i class="fas fa-plus-circle"></i> Add Transaction
-              </button>
-            </div>
-          </div>
-
-          <!-- Tab: Tax Reports -->
-          <div id="tab-reports" style="display: none">
-            <div class="card">
-              <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                  margin-bottom: 1.5rem;
-                "
-              >
-                <div>
-                  <h4 style="margin: 0">Capital Gains & Tax Report</h4>
-                  <p
-                    style="
-                      font-size: 0.8rem;
-                      color: var(--text-secondary);
-                      margin-top: 0.25rem;
-                    "
-                  >
-                    Based on FIFO method and Nepal CGT rates (5% > 1yr, 7.5% <=
-                    1yr)
-                  </p>
-                </div>
-                <button class="btn btn-secondary" id="export-tax-csv">
-                  <i class="fas fa-file-export"></i> Export CSV
-                </button>
-              </div>
-
-              <div class="table-container glass">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Symbol</th>
-                      <th>Sell Date</th>
-                      <th>Hold Days</th>
-                      <th>Quantity</th>
-                      <th>Sell Price</th>
-                      <th>WACC</th>
-                      <th>Net P&L</th>
-                      <th>Tax (CGT)</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tax-report-body">
-                    <!-- Data injected via JS -->
-                  </tbody>
-                </table>
-              </div>
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
+  </div>
 
-    <!-- TRANSACTION MODAL (PREMIUM DESIGN) -->
-    <div
-      id="portfolio-modal-overlay"
-      style="
+  <!-- TRANSACTION MODAL (PREMIUM DESIGN) -->
+  <div id="portfolio-modal-overlay" style="
         display: none;
         position: fixed;
         top: 0;
@@ -1327,174 +948,130 @@
         align-items: center;
         justify-content: center;
         backdrop-filter: blur(8px);
-      "
-    >
-      <div class="modal-content-box glass" style="max-width: 500px">
-        <div
-          style="
+      ">
+    <div class="modal-content-box glass" style="max-width: 500px">
+      <div style="
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
-          "
-        >
-          <h3 style="margin: 0">Add Transaction</h3>
-          <button
-            id="close-portfolio-modal"
-            style="color: var(--text-secondary); font-size: 1.25rem"
-          >
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
+          ">
+        <h3 style="margin: 0">Add Transaction</h3>
+        <button id="close-portfolio-modal" style="color: var(--text-secondary); font-size: 1.25rem">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
 
-        <div
-          style="
+      <div style="
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
             margin-bottom: 1.5rem;
-          "
-        >
-          <div class="form-group">
-            <label>Symbol *</label>
-            <div id="portfolio-symbol-search"></div>
-          </div>
-          <div class="form-group">
-            <label>Date *</label>
-            <input type="date" id="input-date" style="width: 100%" />
-          </div>
+          ">
+        <div class="form-group">
+          <label>Symbol *</label>
+          <div id="portfolio-symbol-search"></div>
         </div>
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" id="input-date" style="width: 100%" />
+        </div>
+      </div>
 
-        <div
-          style="
+      <div style="
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 1rem;
             margin-bottom: 1.5rem;
-          "
-        >
-          <div class="form-group">
-            <label>Quantity *</label>
-            <input
-              type="number"
-              id="input-qty"
-              placeholder="0"
-              style="width: 100%"
-            />
-          </div>
-          <div class="form-group">
-            <label>Rate (Rs.) *</label>
-            <input
-              type="number"
-              id="input-price"
-              placeholder="0.00"
-              style="width: 100%"
-            />
-          </div>
-          <div class="form-group">
-            <label>Stop Loss (Rs.)</label>
-            <input
-              type="number"
-              id="input-stop-loss"
-              placeholder="Optional"
-              style="width: 100%; border-color: rgba(244, 63, 94, 0.3)"
-            />
-          </div>
+          ">
+        <div class="form-group">
+          <label>Quantity *</label>
+          <input type="number" id="input-qty" placeholder="0" style="width: 100%" />
         </div>
+        <div class="form-group">
+          <label>Rate (Rs.) *</label>
+          <input type="number" id="input-price" placeholder="0.00" style="width: 100%" />
+        </div>
+        <div class="form-group">
+          <label>Stop Loss (Rs.)</label>
+          <input type="number" id="input-stop-loss" placeholder="Optional" style="width: 100%; border-color: rgba(244, 63, 94, 0.3)" />
+        </div>
+      </div>
 
-        <div class="form-group" style="margin-bottom: 1.5rem">
-          <label>Source</label>
-          <select
-            id="input-source"
-            style="
+      <div class="form-group" style="margin-bottom: 1.5rem">
+        <label>Source</label>
+        <select id="input-source" style="
               width: 100%;
               padding: 0.75rem;
               background: var(--surface-bg);
               border: 1px solid var(--surface-border);
               border-radius: 10px;
               color: var(--text-primary);
-            "
-          >
-            <option value="Secondary">Secondary Market</option>
-            <option value="IPO">IPO</option>
-            <option value="Bonus">Bonus</option>
-            <option value="FPO">FPO</option>
-            <option value="Right">Right Share</option>
-          </select>
-        </div>
+            ">
+          <option value="Secondary">Secondary Market</option>
+          <option value="IPO">IPO</option>
+          <option value="Bonus">Bonus</option>
+          <option value="FPO">FPO</option>
+          <option value="Right">Right Share</option>
+        </select>
+      </div>
 
-        <!-- Fee Calculation Preview (Matching Screenshot) -->
-        <div class="fee-preview-box">
-          <div
-            style="
+      <!-- Fee Calculation Preview (Matching Screenshot) -->
+      <div class="fee-preview-box">
+        <div style="
               display: flex;
               align-items: center;
               gap: 0.5rem;
               color: var(--primary);
               margin-bottom: 0.75rem;
               font-weight: 600;
-            "
-          >
-            <i class="fas fa-calculator"></i> Fee Calculation Preview
-          </div>
-          <div class="fee-row">
-            <span>Transaction Value</span>
-            <span id="preview-value">Rs. 0.00</span>
-          </div>
-          <div class="fee-row">
-            <span>Broker Commission</span>
-            <span id="preview-broker">Rs. 0.00</span>
-          </div>
-          <div class="fee-row">
-            <span>SEBON Fee (0.015%)</span>
-            <span id="preview-sebon">Rs. 0.00</span>
-          </div>
-          <div class="fee-row">
-            <span>DP Charge</span>
-            <span>Rs. 25.00</span>
-          </div>
-          <hr
-            style="
+            ">
+          <i class="fas fa-calculator"></i> Fee Calculation Preview
+        </div>
+        <div class="fee-row">
+          <span>Transaction Value</span>
+          <span id="preview-value">Rs. 0.00</span>
+        </div>
+        <div class="fee-row">
+          <span>Broker Commission</span>
+          <span id="preview-broker">Rs. 0.00</span>
+        </div>
+        <div class="fee-row">
+          <span>SEBON Fee (0.015%)</span>
+          <span id="preview-sebon">Rs. 0.00</span>
+        </div>
+        <div class="fee-row">
+          <span>DP Charge</span>
+          <span>Rs. 25.00</span>
+        </div>
+        <hr style="
               border: none;
               border-top: 1px solid rgba(16, 185, 129, 0.2);
               margin: 0.75rem 0;
-            "
-          />
-          <div
-            class="fee-row"
-            style="color: var(--danger); font-weight: 700; font-size: 1rem"
-          >
-            <span>Total Cost</span>
-            <span id="preview-total-cost">Rs. 0.00</span>
-          </div>
-          <div
-            class="fee-row"
-            style="color: var(--text-secondary); font-size: 0.75rem"
-          >
-            <span>Cost per Share</span>
-            <span id="preview-wacc">Rs. 0.00</span>
-          </div>
+            " />
+        <div class="fee-row" style="color: var(--danger); font-weight: 700; font-size: 1rem">
+          <span>Total Cost</span>
+          <span id="preview-total-cost">Rs. 0.00</span>
         </div>
-
-        <div style="display: flex; gap: 1rem; margin-top: 2rem">
-          <button class="btn btn-secondary" id="cancel-modal" style="flex: 1">
-            Cancel
-          </button>
-          <button
-            class="btn btn-primary"
-            id="save-holding-btn"
-            style="flex: 1; background: var(--primary); color: white"
-          >
-            Confirm Buy
-          </button>
+        <div class="fee-row" style="color: var(--text-secondary); font-size: 0.75rem">
+          <span>Cost per Share</span>
+          <span id="preview-wacc">Rs. 0.00</span>
         </div>
       </div>
-    </div>
 
-    <!-- SELL MODAL -->
-    <div
-      id="sell-modal-overlay"
-      style="
+      <div style="display: flex; gap: 1rem; margin-top: 2rem">
+        <button class="btn btn-secondary" id="cancel-modal" style="flex: 1">
+          Cancel
+        </button>
+        <button class="btn btn-primary" id="save-holding-btn" style="flex: 1; background: var(--primary); color: white">
+          Confirm Buy
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SELL MODAL -->
+  <div id="sell-modal-overlay" style="
         display: none;
         position: fixed;
         top: 0;
@@ -1506,52 +1083,40 @@
         align-items: center;
         justify-content: center;
         backdrop-filter: blur(5px);
-      "
-    >
-      <div class="modal-content-box glass">
-        <h3 id="sell-modal-title" style="margin-bottom: 1.5rem">Sell Stock</h3>
-        <div class="form-group" style="margin-bottom: 1rem">
-          <label>Sell Rate (Rs.)</label>
-          <input type="number" id="sell-input-price" style="width: 100%" />
-        </div>
-        <div class="form-group" style="margin-bottom: 1rem">
-          <label id="sell-max-label">Quantity (Max: 0)</label>
-          <input type="number" id="sell-input-qty" style="width: 100%" />
-        </div>
-        <div class="form-group" style="margin-bottom: 1.5rem">
-          <label>Sell Date *</label>
-          <input type="date" id="sell-input-date" style="width: 100%" />
-        </div>
-        <div
-          id="sell-fee-preview"
-          class="fee-preview-box"
-          style="
+      ">
+    <div class="modal-content-box glass">
+      <h3 id="sell-modal-title" style="margin-bottom: 1.5rem">Sell Stock</h3>
+      <div class="form-group" style="margin-bottom: 1rem">
+        <label>Sell Rate (Rs.)</label>
+        <input type="number" id="sell-input-price" style="width: 100%" />
+      </div>
+      <div class="form-group" style="margin-bottom: 1rem">
+        <label id="sell-max-label">Quantity (Max: 0)</label>
+        <input type="number" id="sell-input-qty" style="width: 100%" />
+      </div>
+      <div class="form-group" style="margin-bottom: 1.5rem">
+        <label>Sell Date *</label>
+        <input type="date" id="sell-input-date" style="width: 100%" />
+      </div>
+      <div id="sell-fee-preview" class="fee-preview-box" style="
             background: rgba(244, 63, 94, 0.05);
             border-color: rgba(244, 63, 94, 0.2);
-          "
-        >
-          <!-- Sell fees populated by JS -->
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1.5rem">
-          <button
-            class="btn btn-secondary"
-            id="close-sell-modal"
-            style="flex: 1"
-          >
-            Cancel
-          </button>
-          <button
-            class="btn btn-danger"
-            id="confirm-sell-btn"
-            style="flex: 1; background: var(--danger)"
-          >
-            Confirm Sell
-          </button>
-        </div>
+          ">
+        <!-- Sell fees populated by JS -->
+      </div>
+      <div style="display: flex; gap: 1rem; margin-top: 1.5rem">
+        <button class="btn btn-secondary" id="close-sell-modal" style="flex: 1">
+          Cancel
+        </button>
+        <button class="btn btn-danger" id="confirm-sell-btn" style="flex: 1; background: var(--danger)">
+          Confirm Sell
+        </button>
       </div>
     </div>
+  </div>
 
-    <script type="module" src="../js/pages/portfolio.js"></script>
-    <script src="../js/security.js"></script>
-  </body>
+  <script type="module" src="../js/pages/portfolio.js"></script>
+  <script src="../js/security.js"></script>
+</body>
+
 </html>
