@@ -1,957 +1,825 @@
 <!doctype html>
 <html lang="en" data-theme="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stocks Today | NEPSE HUB</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="../../css/base.css" />
-    <link rel="stylesheet" href="../../css/layout.css" />
-    <link rel="stylesheet" href="../../css/components.css" />
-    <link rel="stylesheet" href="../../css/pages/market.css" />
-    <link rel="stylesheet" href="../../css/easy.css" />
 
-    <!-- Chart.js for premium side panel intraday charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stocks Today | NEPSE HUB</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="../../css/base.css" />
+  <link rel="stylesheet" href="../../css/layout.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <link rel="stylesheet" href="../../css/pages/market.css" />
+  <link rel="stylesheet" href="../../css/easy.css" />
 
-    <style>
-      .market-table-container {
-        overflow-x: auto;
-        border-radius: 16px;
-        margin-top: 1rem;
-      }
+  <!-- Chart.js for premium side panel intraday charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-      .market-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9rem;
-      }
+  <style>
+    .market-table-container {
+      overflow-x: auto;
+      border-radius: 16px;
+      margin-top: 1rem;
+    }
 
-      /* Sticky Header fix */
-      .market-table thead {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        background: var(--surface-bg) !important;
-      }
+    .market-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
 
-      .market-table thead th {
-        background: var(--surface-bg) !important;
-      }
+    /* Sticky Header fix */
+    .market-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--surface-bg) !important;
+    }
 
-      /* Row Background Color Overrides based on Market Status */
-      .market-table tr {
-        transition: all 0.3s ease;
-      }
+    .market-table thead th {
+      background: var(--surface-bg) !important;
+    }
 
-      .tr-up {
-        background: linear-gradient(
-          90deg,
+    /* Row Background Color Overrides based on Market Status */
+    .market-table tr {
+      transition: all 0.3s ease;
+    }
+
+    .tr-up {
+      background: linear-gradient(90deg,
           rgba(16, 185, 129, 0.04) 0%,
-          rgba(16, 185, 129, 0.005) 100%
-        ) !important;
-      }
+          rgba(16, 185, 129, 0.005) 100%) !important;
+    }
 
-      .tr-down {
-        background: linear-gradient(
-          90deg,
+    .tr-down {
+      background: linear-gradient(90deg,
           rgba(239, 68, 68, 0.04) 0%,
-          rgba(239, 68, 68, 0.005) 100%
-        ) !important;
-      }
+          rgba(239, 68, 68, 0.005) 100%) !important;
+    }
 
-      .tr-neutral {
-        background: linear-gradient(
-          90deg,
+    .tr-neutral {
+      background: linear-gradient(90deg,
           rgba(59, 130, 246, 0.04) 0%,
-          rgba(59, 130, 246, 0.005) 100%
-        ) !important;
-      }
+          rgba(59, 130, 246, 0.005) 100%) !important;
+    }
 
-      /* Hover effects */
-      .tr-up:hover {
-        background: linear-gradient(
-          90deg,
+    /* Hover effects */
+    .tr-up:hover {
+      background: linear-gradient(90deg,
           rgba(16, 185, 129, 0.08) 0%,
-          rgba(16, 185, 129, 0.02) 100%
-        ) !important;
-      }
+          rgba(16, 185, 129, 0.02) 100%) !important;
+    }
 
-      .tr-down:hover {
-        background: linear-gradient(
-          90deg,
+    .tr-down:hover {
+      background: linear-gradient(90deg,
           rgba(239, 68, 68, 0.08) 0%,
-          rgba(239, 68, 68, 0.02) 100%
-        ) !important;
-      }
+          rgba(239, 68, 68, 0.02) 100%) !important;
+    }
 
-      .tr-neutral:hover {
-        background: linear-gradient(
-          90deg,
+    .tr-neutral:hover {
+      background: linear-gradient(90deg,
           rgba(59, 130, 246, 0.08) 0%,
-          rgba(59, 130, 246, 0.02) 100%
-        ) !important;
+          rgba(59, 130, 246, 0.02) 100%) !important;
+    }
+
+    /* Style Symbol (Company Name) Cell */
+    .symbol-cell,
+    .symbol-cell div {
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      padding-left: 3px !important;
+    }
+
+    /* Column Settings Popup */
+    .column-settings {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      width: 200px;
+      background: var(--surface-bg);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 1rem;
+      z-index: 100;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      display: none;
+    }
+
+    .column-settings.active {
+      display: block;
+    }
+
+    .column-option {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .column-option input {
+      cursor: pointer;
+    }
+
+    .market-table th,
+    .market-table td {
+      padding: 1.25rem 1rem;
+      border-bottom: 1px solid var(--surface-border);
+      white-space: nowrap;
+      text-align: right;
+      /* Default right alignment for numbers */
+      transition: background-color 0.5s ease;
+    }
+
+    .market-table th:first-child,
+    .market-table td:first-child {
+      text-align: left;
+      /* Symbol left aligned */
+      padding-left: 0.5rem;
+    }
+
+    .market-table th:last-child,
+    .market-table td:last-child {
+      padding-right: 0.5rem;
+    }
+
+    .market-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .market-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .symbol-cell {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .price-up {
+      color: var(--secondary);
+      font-weight: 600;
+    }
+
+    .price-down {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    .search-bar {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--surface-border);
+      padding: 0.75rem 1.25rem;
+      border-radius: 12px;
+      color: var(--text-primary);
+      width: 300px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .search-bar:focus {
+      border-color: var(--primary);
+    }
+
+    .refresh-status {
+      font-size: 0.75rem;
+      color: #4ade80;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(74, 222, 128, 0.1);
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      border: 1px solid rgba(74, 222, 128, 0.2);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--secondary);
+      box-shadow: 0 0 10px var(--secondary);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.5;
       }
 
-      /* Style Symbol (Company Name) Cell */
-      .symbol-cell,
-      .symbol-cell div {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-        padding-left: 3px !important;
+      50% {
+        opacity: 1;
       }
 
-      /* Column Settings Popup */
-      .column-settings {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        width: 200px;
-        background: var(--surface-bg);
-        border: 1px solid var(--surface-border);
-        border-radius: 12px;
-        padding: 1rem;
-        z-index: 100;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-        display: none;
+      100% {
+        opacity: 0.5;
       }
+    }
 
-      .column-settings.active {
-        display: block;
-      }
+    /* Overview Widgets Styling */
+    .market-overview-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
 
-      .column-option {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        margin-bottom: 0.5rem;
-        cursor: pointer;
-        font-size: 0.85rem;
-      }
-
-      .column-option input {
-        cursor: pointer;
-      }
-
-      .market-table th,
-      .market-table td {
-        padding: 1.25rem 1rem;
-        border-bottom: 1px solid var(--surface-border);
-        white-space: nowrap;
-        text-align: right;
-        /* Default right alignment for numbers */
-        transition: background-color 0.5s ease;
-      }
-
-      .market-table th:first-child,
-      .market-table td:first-child {
-        text-align: left;
-        /* Symbol left aligned */
-        padding-left: 0.5rem;
-      }
-
-      .market-table th:last-child,
-      .market-table td:last-child {
-        padding-right: 0.5rem;
-      }
-
-      .market-table tr:last-child td {
-        border-bottom: none;
-      }
-
-      .market-table tr:hover {
-        background: rgba(255, 255, 255, 0.02);
-      }
-
-      .symbol-cell {
-        font-weight: 700;
-        color: var(--primary);
-      }
-
-      .price-up {
-        color: var(--secondary);
-        font-weight: 600;
-      }
-
-      .price-down {
-        color: var(--danger);
-        font-weight: 600;
-      }
-
-      .search-bar {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--surface-border);
-        padding: 0.75rem 1.25rem;
-        border-radius: 12px;
-        color: var(--text-primary);
-        width: 300px;
-        outline: none;
-        transition: border-color 0.3s;
-      }
-
-      .search-bar:focus {
-        border-color: var(--primary);
-      }
-
-      .refresh-status {
-        font-size: 0.75rem;
-        color: #4ade80;
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        background: rgba(74, 222, 128, 0.1);
-        padding: 0.4rem 0.8rem;
-        border-radius: 20px;
-        border: 1px solid rgba(74, 222, 128, 0.2);
-        font-weight: 700;
-        letter-spacing: 0.05em;
-      }
-
-      .status-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--secondary);
-        box-shadow: 0 0 10px var(--secondary);
-        animation: pulse 2s infinite;
-      }
-
-      @keyframes pulse {
-        0% {
-          opacity: 0.5;
-        }
-
-        50% {
-          opacity: 1;
-        }
-
-        100% {
-          opacity: 0.5;
-        }
-      }
-
-      /* Overview Widgets Styling */
+    @media (max-width: 992px) {
       .market-overview-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 1.5rem;
-        margin-top: 1rem;
+        grid-template-columns: 1fr;
       }
+    }
 
-      @media (max-width: 992px) {
-        .market-overview-grid {
-          grid-template-columns: 1fr;
-        }
-      }
+    .overview-card {
+      padding: 1.5rem;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-      .overview-card {
-        padding: 1.5rem;
-        border-radius: 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
+    .overview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
 
-      .overview-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.2rem;
-      }
+    .overview-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
-      .overview-title {
-        font-size: 0.85rem;
-        font-weight: 800;
-        color: var(--text-secondary);
-        letter-spacing: 0.05em;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
+    .breadth-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
 
-      .breadth-container {
-        display: flex;
-        flex-direction: column;
-        gap: 0.8rem;
-      }
+    .breadth-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
 
-      .breadth-stats {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.85rem;
-        font-weight: 700;
-      }
+    .breadth-label.advances {
+      color: #10b981;
+    }
 
-      .breadth-label.advances {
-        color: #10b981;
-      }
+    .breadth-label.neutral {
+      color: var(--text-secondary);
+    }
 
-      .breadth-label.neutral {
-        color: var(--text-secondary);
-      }
+    .breadth-label.declines {
+      color: #ef4444;
+    }
 
-      .breadth-label.declines {
-        color: #ef4444;
-      }
+    .breadth-bar-wrapper {
+      display: flex;
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.05);
+    }
 
-      .breadth-bar-wrapper {
-        display: flex;
-        height: 12px;
-        border-radius: 6px;
-        overflow: hidden;
-        background: rgba(255, 255, 255, 0.05);
-      }
+    .breadth-bar-segment {
+      height: 100%;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-      .breadth-bar-segment {
-        height: 100%;
-        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-      }
+    .segment-advances {
+      background: linear-gradient(90deg, #059669, #10b981);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    }
 
-      .segment-advances {
-        background: linear-gradient(90deg, #059669, #10b981);
-        box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
-      }
+    .segment-neutral {
+      background: #64748b;
+    }
 
-      .segment-neutral {
-        background: #64748b;
-      }
+    .segment-declines {
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+    }
 
-      .segment-declines {
-        background: linear-gradient(90deg, #ef4444, #dc2626);
-        box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
-      }
+    /* Sentiment Gauge CSS */
+    .sentiment-gauge-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      padding-top: 0.5rem;
+    }
 
-      /* Sentiment Gauge CSS */
-      .sentiment-gauge-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        padding-top: 0.5rem;
-      }
-
-      .gauge-display {
-        position: relative;
-        width: 140px;
-        height: 70px;
-        /* Semi-circle */
-        border-radius: 140px 140px 0 0;
-        background: conic-gradient(
-          from 180deg at 50% 100%,
+    .gauge-display {
+      position: relative;
+      width: 140px;
+      height: 70px;
+      /* Semi-circle */
+      border-radius: 140px 140px 0 0;
+      background: conic-gradient(from 180deg at 50% 100%,
           #ef4444 0deg,
           #facc15 90deg,
           #10b981 180deg,
-          transparent 180deg
-        );
-        overflow: hidden;
-      }
+          transparent 180deg);
+      overflow: hidden;
+    }
 
-      .gauge-display::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 110px;
-        height: 55px;
-        border-radius: 110px 110px 0 0;
-        background: var(--surface-bg);
-        /* Mask inside */
-        z-index: 2;
-      }
+    .gauge-display::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 110px;
+      height: 55px;
+      border-radius: 110px 110px 0 0;
+      background: var(--surface-bg);
+      /* Mask inside */
+      z-index: 2;
+    }
 
-      .gauge-needle {
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        width: 4px;
-        height: 60px;
-        background: var(--text-primary);
-        border-radius: 4px 4px 0 0;
-        transform-origin: 50% 100%;
-        z-index: 5;
-        transform: rotate(0deg);
-        transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-      }
+    .gauge-needle {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 4px;
+      height: 60px;
+      background: var(--text-primary);
+      border-radius: 4px 4px 0 0;
+      transform-origin: 50% 100%;
+      z-index: 5;
+      transform: rotate(0deg);
+      transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
 
-      .gauge-value {
-        position: absolute;
-        bottom: 20px;
-        left: 0;
-        right: 0;
-        text-align: center;
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: var(--text-primary);
-        z-index: 10;
-      }
+    .gauge-value {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      z-index: 10;
+    }
 
-      .gauge-label {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        text-align: center;
-        font-size: 0.75rem;
-        font-weight: 800;
-        color: var(--text-secondary);
-        letter-spacing: 0.05em;
-        z-index: 10;
-      }
+    .gauge-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      z-index: 10;
+    }
 
-      /* Sector Pills Carousel CSS */
-      .sector-carousel-container {
-        position: relative;
-        display: flex;
-        align-items: center;
-        margin-top: 1.5rem;
-        gap: 0.5rem;
-      }
+    /* Sector Pills Carousel CSS */
+    .sector-carousel-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-top: 1.5rem;
+      gap: 0.5rem;
+    }
 
-      .sector-carousel {
-        display: flex;
-        gap: 0.8rem;
-        overflow-x: auto;
-        scroll-behavior: smooth;
-        padding: 0.4rem 0.2rem;
-        width: 100%;
-        scrollbar-width: none;
-        /* Firefox */
-      }
+    .sector-carousel {
+      display: flex;
+      gap: 0.8rem;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 0.4rem 0.2rem;
+      width: 100%;
+      scrollbar-width: none;
+      /* Firefox */
+    }
 
-      .sector-carousel::-webkit-scrollbar {
-        display: none;
-        /* Chrome/Safari */
-      }
+    .sector-carousel::-webkit-scrollbar {
+      display: none;
+      /* Chrome/Safari */
+    }
 
-      .sector-pill-card {
-        flex: 0 0 auto;
-        padding: 0.8rem 1.25rem;
-        border-radius: 14px;
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid var(--surface-border);
-        min-width: 155px;
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-        user-select: none;
-      }
+    .sector-pill-card {
+      flex: 0 0 auto;
+      padding: 0.8rem 1.25rem;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--surface-border);
+      min-width: 155px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      user-select: none;
+    }
 
-      .sector-pill-card:hover {
-        transform: translateY(-2px);
-        border-color: var(--primary);
-        box-shadow: 0 4px 15px rgba(250, 204, 21, 0.1);
-      }
+    .sector-pill-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+      box-shadow: 0 4px 15px rgba(250, 204, 21, 0.1);
+    }
 
-      .sector-pill-card.active {
-        background: linear-gradient(
-          135deg,
+    .sector-pill-card.active {
+      background: linear-gradient(135deg,
           rgba(250, 204, 21, 0.1),
-          rgba(250, 204, 21, 0.05)
-        ) !important;
-        border-color: var(--primary);
-        box-shadow: 0 4px 15px rgba(250, 204, 21, 0.15);
+          rgba(250, 204, 21, 0.05)) !important;
+      border-color: var(--primary);
+      box-shadow: 0 4px 15px rgba(250, 204, 21, 0.15);
+    }
+
+    .sector-pill-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .sector-pill-chg {
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+
+    .sector-pill-chg.up {
+      color: #10b981;
+    }
+
+    .sector-pill-chg.down {
+      color: #ef4444;
+    }
+
+    .sector-pill-chg.neutral {
+      color: var(--text-secondary);
+    }
+
+    .carousel-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--surface-border);
+      background: var(--surface-bg);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.2s;
+      z-index: 5;
+      flex-shrink: 0;
+    }
+
+    .carousel-btn:hover {
+      background: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+    }
+
+    /* Ticker Row Glowing Updates */
+    @keyframes green-flash {
+      0% {
+        background-color: rgba(16, 185, 129, 0.25);
       }
 
-      .sector-pill-name {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
+      100% {
+        background-color: transparent;
+      }
+    }
+
+    @keyframes red-flash {
+      0% {
+        background-color: rgba(239, 68, 68, 0.25);
       }
 
-      .sector-pill-chg {
-        font-size: 0.75rem;
-        font-weight: 800;
+      100% {
+        background-color: transparent;
       }
+    }
 
-      .sector-pill-chg.up {
-        color: #10b981;
-      }
+    .flash-up {
+      animation: green-flash 1s ease-out;
+    }
 
-      .sector-pill-chg.down {
-        color: #ef4444;
-      }
+    .flash-down {
+      animation: red-flash 1s ease-out;
+    }
+  </style>
+</head>
 
-      .sector-pill-chg.neutral {
-        color: var(--text-secondary);
-      }
-
-      .carousel-btn {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        border: 1px solid var(--surface-border);
-        background: var(--surface-bg);
-        color: var(--text-primary);
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: all 0.2s;
-        z-index: 5;
-        flex-shrink: 0;
-      }
-
-      .carousel-btn:hover {
-        background: var(--primary);
-        color: #000;
-        border-color: var(--primary);
-      }
-
-      /* Ticker Row Glowing Updates */
-      @keyframes green-flash {
-        0% {
-          background-color: rgba(16, 185, 129, 0.25);
-        }
-
-        100% {
-          background-color: transparent;
-        }
-      }
-
-      @keyframes red-flash {
-        0% {
-          background-color: rgba(239, 68, 68, 0.25);
-        }
-
-        100% {
-          background-color: transparent;
-        }
-      }
-
-      .flash-up {
-        animation: green-flash 1s ease-out;
-      }
-
-      .flash-down {
-        animation: red-flash 1s ease-out;
-      }
-    </style>
-  </head>
-
-  <body>
-    <header class="sticky">
-      <div
-        style="
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          width: 100%;
-        "
-      >
-        <!-- logo -->
-        <div style="display: flex; align-items: center; gap: 1.5rem">
-          <div id="burgerMenu" class="burger-menu">
-            <i class="fas fa-bars"></i>
-          </div>
-
-          <div class="logo">
-            <i class="fas fa-chart-line"></i>
-            <span class="logo-text">NEPSE HUB</span>
-          </div>
+<body>
+  <header class="sticky">
+    <div class="flex-row space-between w-full">
+      <!-- logo -->
+      <div class="flex items-center gap-24">
+        <div id="burgerMenu" class="burger-menu">
+          <i class="fas fa-bars"></i>
         </div>
 
-        <!-- nepse values -->
-        <div
-          style="
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-          "
-        >
-          <div id="marketDot" class="blinking-dot"></div>
-          <div>
-            <h6 class="nepse">NEPSE</h6>
+        <div class="logo">
+          <i class="fas fa-chart-line"></i>
+          <span class="logo-text mobile-hide">NEPSE HUB</span>
+        </div>
+      </div>
+
+      <!-- nepse values -->
+      <div class="flex-row content-center items-center gap-5">
+        <div id="marketDot" class="blinking-dot"></div>
+        <div>
+          <h6 class="nepse">NEPSE</h6>
+        </div>
+        <div id="index-value">
+          <div class="flex-col">
+            <span id="header-nepse-val" class="font-weight-700 f-16 text-primary">—</span>
+            <span id="header-nepse-change" class="f-12 font-weight-600 mr-8">—</span>
           </div>
-          <div id="index-value">
-            <div class="flex-col">
-              <span
-                id="header-nepse-val"
-                style="
-                  font-weight: 700;
-                  font-size: 1rem;
-                  color: var(--text-primary);
-                "
-                >—</span
-              >
-              <span
-                id="header-nepse-change"
-                style="
-                  font-size: 0.78rem;
-                  font-weight: 600;
-                  margin-right: 0.5rem;
-                "
-                >—</span
-              >
-            </div>
+          <span class="pc-only bg-secondary w-1 h-12"></span>
+          <div class="flex-col">
+            <span class="pc-only f-16 text-secondary">Turnover:
+              <strong id="header-nepse-turnover" class="text-primary">—</strong></span>
+            <span class="pc-only f-16 text-secondary">Volume:
+              <strong id="header-nepse-volume" class="text-primary">—</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- clock and notification -->
+      <div class="flex gap-5 py-8 pr-16">
+        <!-- Combined Market Status & Clock Pill -->
+        <div class="market-status-pill pc-only">
+          <div id="navbar-clock" class="navbar-clock-sub"></div>
+          <div id="market-status" class="market-status-sub"></div>
+        </div>
+
+        <!-- Notification Bell -->
+        <!-- <div class="nav-notification-wrapper">
+          <button
+            id="notification-bell"
+            class="btn-icon"
+          >
+            <i class="far fa-bell"></i>
             <span
-              class="pc-only"
-              style="
-                height: 12px;
-                width: 1px;
-                background: rgba(255, 255, 255, 0.15);
-              "
-            ></span>
-            <div class="flex-col">
-              <span class="pc-only font-1rem text-secondary"
-                >Turnover:
-                <strong id="header-nepse-turnover" class="text-primary"
-                  >—</strong
-                ></span
-              >
-              <span class="pc-only font-1rem text-secondary"
-                >Volume:
-                <strong id="header-nepse-volume" class="text-primary"
-                  >—</strong
-                ></span
-              >
-            </div>
-          </div>
-        </div>
-
-        <!-- clock and notification -->
-        <div
-          style="
-            display: flex;
-            gap: 5px;
-            padding: 0.5rem 0rem;
-            padding-right: 1rem;
-          "
-        >
-          <!-- Combined Market Status & Clock Pill -->
-          <div class="market-status-pill pc-only">
-            <div id="navbar-clock" class="navbar-clock-sub"></div>
-            <div id="market-status" class="market-status-sub"></div>
-          </div>
-
-          <!-- Notification Bell -->
-          <!-- <div class="nav-notification-wrapper">
-            <button id="notification-bell" class="btn-icon">
-              <i class="far fa-bell"></i>
-              <span id="notif-badge" class="notif-badge hidden">0</span>
-            </button>
-            <div id="notif-dropdown" class="notif-dropdown glass hidden">
-              <div class="notif-header">
-                <h5>Notifications</h5>
-                <div style="display: flex; align-items: center; gap: 0.5rem">
-                  <button
-                    id="sound-toggle-btn"
-                    class="sound-toggle"
-                    title="Toggle alert sound"
-                  >
-                    <i class="fas fa-volume-up"></i>
-                  </button>
-                  <button id="mark-read-btn">Mark all as read</button>
-                </div>
-              </div>
-              <div class="notif-filters">
-                <button class="notif-filter-btn active" data-filter="all">
-                  All
-                </button>
-                <button class="notif-filter-btn" data-filter="buy">
-                  Buy Signals
-                </button>
-                <button class="notif-filter-btn" data-filter="sell">
-                  Sell Signals
-                </button>
-                <button class="notif-filter-btn" data-filter="stoploss">
-                  Stop Loss
-                </button>
-              </div>
-              <div id="notif-list" class="notif-list">
-                <div class="notif-empty">
-                  No notifications in the last 7 days
-                </div>
-              </div>
-            </div>
-          </div> -->
-
-          <div class="nav-profile-wrapper">
-            <button id="user-profile-btn" title="View Profile">
-              <span id="user-avatar-initial">U</span>
-            </button>
-            <div id="profile-dropdown" class="profile-dropdown glass hidden">
-              <div class="profile-header">
-                <div class="profile-avatar-large">U</div>
-                <div class="profile-meta">
-                  <h5>User</h5>
-                  <span>Code: </span>
-                </div>
-              </div>
-              <div class="profile-body">
-                <div class="profile-info-item">
-                  <i class="fas fa-envelope"></i>
-                  <span></span>
-                </div>
-              </div>
-              <div class="profile-footer">
+              id="notif-badge"
+              class="notif-badge hidden"
+            >0</span>
+          </button>
+          <div
+            id="notif-dropdown"
+            class="notif-dropdown glass hidden"
+          >
+            <div class="notif-header">
+              <h5>Notifications</h5>
+              <div class="flex items-center gap-8">
                 <button
-                  id="notif-settings-btn"
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    width: 100%;
-                    padding: 9px 12px;
+                  id="sound-toggle-btn"
+                  class="sound-toggle"
+                  title="Toggle alert sound"
+                >
+                  <i class="fas fa-volume-up"></i>
+                </button>
+                <button id="mark-read-btn">Mark all as read</button>
+              </div>
+            </div>
+            <div class="notif-filters">
+              <button
+                class="notif-filter-btn active"
+                data-filter="all"
+              >
+                All
+              </button>
+              <button
+                class="notif-filter-btn"
+                data-filter="buy"
+              >
+                Buy Signals
+              </button>
+              <button
+                class="notif-filter-btn"
+                data-filter="sell"
+              >
+                Sell Signals
+              </button>
+              <button
+                class="notif-filter-btn"
+                data-filter="stoploss"
+              >
+                Stop Loss
+              </button>
+            </div>
+            <div
+              id="notif-list"
+              class="notif-list">
+              <div class="notif-empty">
+                No notifications in the last 7 days
+              </div>
+            </div>
+          </div>
+        </div> -->
+
+        <div class="nav-profile-wrapper">
+          <button id="user-profile-btn" title="View Profile">
+            <span id="user-avatar-initial">U</span>
+          </button>
+          <div id="profile-dropdown" class="profile-dropdown glass hidden">
+            <div class="profile-header">
+              <div class="profile-avatar-large">U</div>
+              <div class="profile-meta">
+                <h5>User</h5>
+                <span>Code: </span>
+              </div>
+            </div>
+            <div class="profile-body">
+              <div class="profile-info-item">
+                <i class="fas fa-envelope"></i>
+                <span></span>
+              </div>
+            </div>
+            <div class="profile-footer">
+              <button id="notif-settings-btn" class="flex justify-center items-center gap-8 px-12 py-9 w-full rounded-10 f-13 font-weight-600 cursor-pointer mb-8" style="
                     background: rgba(99, 102, 241, 0.08);
                     border: 1px solid rgba(99, 102, 241, 0.2);
-                    border-radius: 10px;
                     color: #a5b4fc;
-                    font-size: 0.82rem;
-                    font-weight: 600;
-                    cursor: pointer;
-                    margin-bottom: 8px;
                     transition: all 0.2s;
-                  "
-                >
-                  <i class="fas fa-bell" style="font-size: 0.8rem"></i>
-                  Notification Settings
-                </button>
-                <button id="logout-btn" class="btn-logout">
-                  <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-              </div>
+                  ">
+                <i class="fas fa-bell f-12"></i>
+                Notification Settings
+              </button>
+              <button id="logout-btn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </header>
-    <div id="navbar-container"></div>
-    <div class="app-container">
-      <div id="sidebar-container"></div>
-      <main class="main-content">
-        <div id="app">
-          <!-- Live Market Overviews -->
-          <div class="market-overview-grid">
-            <!-- Market Breadth Widget -->
-            <div class="glass overview-card">
-              <div class="overview-header">
-                <span class="overview-title"
-                  ><i class="fas fa-chart-pie"></i> MARKET BREADTH (TODAY)</span
-                >
-                <div class="refresh-status">
-                  <div class="status-dot"></div>
-                  LIVE MARKET
-                </div>
-              </div>
-              <div class="breadth-container">
-                <div class="breadth-stats">
-                  <span class="breadth-label advances"
-                    ><i class="fas fa-arrow-up"></i>
-                    <span id="advancesCount">0</span> Advances</span
-                  >
-                  <span class="breadth-label neutral"
-                    ><i class="fas fa-minus"></i>
-                    <span id="neutralCount">0</span> Neutral</span
-                  >
-                  <span class="breadth-label declines"
-                    ><i class="fas fa-arrow-down"></i>
-                    <span id="declinesCount">0</span> Declines</span
-                  >
-                </div>
-                <div class="breadth-bar-wrapper">
-                  <div
-                    class="breadth-bar-segment segment-advances"
-                    id="barAdvances"
-                    style="width: 0%"
-                  ></div>
-                  <div
-                    class="breadth-bar-segment segment-neutral"
-                    id="barNeutral"
-                    style="width: 0%"
-                  ></div>
-                  <div
-                    class="breadth-bar-segment segment-declines"
-                    id="barDeclines"
-                    style="width: 0%"
-                  ></div>
-                </div>
+    </div>
+  </header>
+  
+  <div id="navbar-container"></div>
+  <div class="app-container">
+    <div id="sidebar-container"></div>
+    <main class="main-content">
+      <div id="app">
+        <!-- Live Market Overviews -->
+        <div class="market-overview-grid">
+          <!-- Market Breadth Widget -->
+          <div class="glass overview-card">
+            <div class="overview-header">
+              <span class="overview-title"><i class="fas fa-chart-pie"></i> MARKET BREADTH (TODAY)</span>
+              <div class="refresh-status">
+                <div class="status-dot"></div>
+                LIVE MARKET
               </div>
             </div>
-
-            <!-- Market Sentiment Gauge -->
-            <div class="glass overview-card">
-              <div class="overview-header">
-                <span class="overview-title"
-                  ><i class="fas fa-tachometer-alt"></i> MARKET SENTIMENT</span
-                >
+            <div class="breadth-container">
+              <div class="breadth-stats">
+                <span class="breadth-label advances"><i class="fas fa-arrow-up"></i>
+                  <span id="advancesCount">0</span> Advances</span>
+                <span class="breadth-label neutral"><i class="fas fa-minus"></i>
+                  <span id="neutralCount">0</span> Neutral</span>
+                <span class="breadth-label declines"><i class="fas fa-arrow-down"></i>
+                  <span id="declinesCount">0</span> Declines</span>
               </div>
-              <div class="sentiment-gauge-container">
-                <div class="gauge-display">
-                  <div class="gauge-needle" id="gaugeNeedle"></div>
-                  <div class="gauge-value" id="sentimentValue">50%</div>
-                  <div class="gauge-label" id="sentimentLabel">NEUTRAL</div>
-                </div>
+              <div class="breadth-bar-wrapper">
+                <div class="breadth-bar-segment segment-advances" id="barAdvances" style="width: 0%"></div>
+                <div class="breadth-bar-segment segment-neutral" id="barNeutral" style="width: 0%"></div>
+                <div class="breadth-bar-segment segment-declines" id="barDeclines" style="width: 0%"></div>
               </div>
             </div>
           </div>
 
-          <!-- Horizontal Sector Carousel -->
-          <div class="sector-carousel-container">
-            <button class="carousel-btn prev-btn" id="carouselPrevBtn">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <div class="sector-carousel" id="sectorCarousel">
-              <div class="glass sector-pill-card active" data-sector="all">
-                <div class="sector-pill-name">All Sectors</div>
-                <div class="sector-pill-chg neutral">Market</div>
-              </div>
-              <!-- Populated dynamically via JS -->
+          <!-- Market Sentiment Gauge -->
+          <div class="glass overview-card">
+            <div class="overview-header">
+              <span class="overview-title"><i class="fas fa-tachometer-alt"></i> MARKET SENTIMENT</span>
             </div>
-            <button class="carousel-btn next-btn" id="carouselNextBtn">
-              <i class="fas fa-chevron-right"></i>
-            </button>
+            <div class="sentiment-gauge-container">
+              <div class="gauge-display">
+                <div class="gauge-needle" id="gaugeNeedle"></div>
+                <div class="gauge-value" id="sentimentValue">50%</div>
+                <div class="gauge-label" id="sentimentLabel">NEUTRAL</div>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <!-- Table Card -->
-          <div
-            class="glass"
-            style="padding: 1.5rem; border-radius: 20px; margin-top: 1.5rem"
-          >
-            <div
-              style="
+        <!-- Horizontal Sector Carousel -->
+        <div class="sector-carousel-container">
+          <button class="carousel-btn prev-btn" id="carouselPrevBtn">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="sector-carousel" id="sectorCarousel">
+            <div class="glass sector-pill-card active" data-sector="all">
+              <div class="sector-pill-name">All Sectors</div>
+              <div class="sector-pill-chg neutral">Market</div>
+            </div>
+            <!-- Populated dynamically via JS -->
+          </div>
+          <button class="carousel-btn next-btn" id="carouselNextBtn">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Table Card -->
+        <div class="glass" style="padding: 1.5rem; border-radius: 20px; margin-top: 1.5rem">
+          <div style="
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 1rem;
                 gap: 1rem;
-              "
-            >
-              <div
-                style="display: flex; gap: 1rem; align-items: center; flex: 1"
-              >
-                <input
-                  type="text"
-                  id="marketSearch"
-                  class="search-bar"
-                  placeholder="Search Symbol or Company..."
-                  style="flex: 1; max-width: 300px"
-                />
-              </div>
-
-              <div style="display: flex; gap: 1rem; align-items: center">
-                <div
-                  id="marketSummary"
-                  style="font-size: 0.9rem; color: var(--text-secondary)"
-                >
-                  Showing <span id="filteredCount">0</span> of
-                  <span id="totalCount">0</span> stocks
-                </div>
-                <div style="position: relative">
-                  <button
-                    id="columnSettingsBtn"
-                    class="btn btn-secondary btn-sm"
-                    title="Customize Columns"
-                  >
-                    <i class="fas fa-columns"></i>
-                  </button>
-                  <div id="columnSettingsPopup" class="column-settings">
-                    <h4 style="margin-bottom: 0.8rem; font-size: 0.9rem">
-                      Show Columns
-                    </h4>
-                    <label class="column-option"
-                      ><input
-                        type="checkbox"
-                        data-col="symbol"
-                        checked
-                        disabled
-                      />
-                      Symbol</label
-                    >
-                    <label class="column-option"
-                      ><input type="checkbox" data-col="price" checked />
-                      LTP</label
-                    >
-                    <label class="column-option"
-                      ><input type="checkbox" data-col="ltq" checked />
-                      LTQ</label
-                    >
-                    <label class="column-option"
-                      ><input
-                        type="checkbox"
-                        data-col="changePercent"
-                        checked
-                      />
-                      %Change</label
-                    >
-                    <label class="column-option"
-                      ><input type="checkbox" data-col="open" checked />
-                      OPEN</label
-                    >
-                    <label class="column-option"
-                      ><input type="checkbox" data-col="high" checked />
-                      High</label
-                    >
-                    <label class="column-option"
-                      ><input type="checkbox" data-col="low" checked />
-                      LOW</label
-                    >
-                    <label class="column-option"
-                      ><input type="checkbox" data-col="volume" checked />
-                      TTQ</label
-                    >
-                    <label class="column-option"
-                      ><input
-                        type="checkbox"
-                        data-col="previousClose"
-                        checked
-                      />
-                      PrevClosing</label
-                    >
-                  </div>
-                </div>
-              </div>
+              ">
+            <div style="display: flex; gap: 1rem; align-items: center; flex: 1">
+              <input type="text" id="marketSearch" class="search-bar" placeholder="Search Symbol or Company..." style="flex: 1; max-width: 300px" />
             </div>
 
-            <div class="market-table-container">
-              <table class="market-table">
-                <thead>
-                  <tr>
-                    <th class="sortable" data-sort="symbol">Symbol</th>
-                    <th class="sortable" data-sort="price">LTP</th>
-                    <th class="sortable" data-sort="ltq">LTQ</th>
-                    <th class="sortable" data-sort="changePercent">%Change</th>
-                    <th class="sortable" data-sort="open">OPEN</th>
-                    <th class="sortable" data-sort="high">High</th>
-                    <th class="sortable" data-sort="low">LOW</th>
-                    <th class="sortable" data-sort="volume">TTQ</th>
-                    <th class="sortable" data-sort="previousClose">
-                      PrevClosing
-                    </th>
-                  </tr>
-                </thead>
-                <tbody id="marketBody">
-                  <!-- Data injected here -->
-                </tbody>
-              </table>
+            <div style="display: flex; gap: 1rem; align-items: center">
+              <div id="marketSummary" style="font-size: 0.9rem; color: var(--text-secondary)">
+                Showing <span id="filteredCount">0</span> of
+                <span id="totalCount">0</span> stocks
+              </div>
+              <div style="position: relative">
+                <button id="columnSettingsBtn" class="btn btn-secondary btn-sm" title="Customize Columns">
+                  <i class="fas fa-columns"></i>
+                </button>
+                <div id="columnSettingsPopup" class="column-settings">
+                  <h4 style="margin-bottom: 0.8rem; font-size: 0.9rem">
+                    Show Columns
+                  </h4>
+                  <label class="column-option"><input type="checkbox" data-col="symbol" checked disabled />
+                    Symbol</label>
+                  <label class="column-option"><input type="checkbox" data-col="price" checked />
+                    LTP</label>
+                  <label class="column-option"><input type="checkbox" data-col="ltq" checked />
+                    LTQ</label>
+                  <label class="column-option"><input type="checkbox" data-col="changePercent" checked />
+                    %Change</label>
+                  <label class="column-option"><input type="checkbox" data-col="open" checked />
+                    OPEN</label>
+                  <label class="column-option"><input type="checkbox" data-col="high" checked />
+                    High</label>
+                  <label class="column-option"><input type="checkbox" data-col="low" checked />
+                    LOW</label>
+                  <label class="column-option"><input type="checkbox" data-col="volume" checked />
+                    TTQ</label>
+                  <label class="column-option"><input type="checkbox" data-col="previousClose" checked />
+                    PrevClosing</label>
+                </div>
+              </div>
             </div>
           </div>
+
+          <div class="market-table-container">
+            <table class="market-table">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort="symbol">Symbol</th>
+                  <th class="sortable" data-sort="price">LTP</th>
+                  <th class="sortable" data-sort="ltq">LTQ</th>
+                  <th class="sortable" data-sort="changePercent">%Change</th>
+                  <th class="sortable" data-sort="open">OPEN</th>
+                  <th class="sortable" data-sort="high">High</th>
+                  <th class="sortable" data-sort="low">LOW</th>
+                  <th class="sortable" data-sort="volume">TTQ</th>
+                  <th class="sortable" data-sort="previousClose">
+                    PrevClosing
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="marketBody">
+                <!-- Data injected here -->
+              </tbody>
+            </table>
+          </div>
         </div>
-      </main>
-    </div>
-
-    <!-- Quick Action Side Panel -->
-    <div class="side-panel-overlay" id="panelOverlay"></div>
-    <div class="side-panel" id="quickPanel">
-      <div class="close-panel" id="closePanel">
-        <i class="fas fa-times"></i>
       </div>
-      <div id="panelContent">
-        <!-- Content injected dynamically -->
-      </div>
-    </div>
+    </main>
+  </div>
 
-    <script type="module" src="../../js/pages/market/stocks-today.js"></script>
-    <script src="../../js/security.js"></script>
-  </body>
+  <!-- Quick Action Side Panel -->
+  <div class="side-panel-overlay" id="panelOverlay"></div>
+  <div class="side-panel" id="quickPanel">
+    <div class="close-panel" id="closePanel">
+      <i class="fas fa-times"></i>
+    </div>
+    <div id="panelContent">
+      <!-- Content injected dynamically -->
+    </div>
+  </div>
+
+  <script type="module" src="../../js/pages/market/stocks-today.js"></script>
+  <script src="../../js/security.js"></script>
+</body>
+
 </html>
