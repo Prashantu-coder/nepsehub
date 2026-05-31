@@ -1,9 +1,48 @@
+.h-full { height: 100%; }
+.h-12 {height: 12px;}
+
+.w-full { width: 100%; }
+.w-1 {width: 1px;}
+
 .sticky {position: sticky; top: 0; z-index: 1000; width: 100%;}
 
-.flex-row { display: flex; flex-direction: row; }
-.flex-col { display:flex; flex-direction: column; }
+.flex {display: flex;}
+.flex-row {display: flex; flex-direction: row;}
+.flex-col {display: flex; flex-direction: column;}
+.space-between {justify-content: space-between;}
+.justify-center {justify-content: center;}
+.items-center {align-items: center;}
 
-.font-1rem {font-size: 1rem;}
+.gap-5 {gap: 5px;}
+.gap-8 {gap: 8px;}
+.gap-24{gap: 24px;}
+
+.f-12 {font-size: 12px;}
+.f-13 {font-size: 13px;}
+.f-16 {font-size: 16px;}
+.font-weight-600 {font-weight: 600;}
+.font-weight-700 {font-weight: 700;}
 
 .text-secondary {color: var(--text-secondary);}
 .text-primary {color: var(--text-primary);}
+
+.bg-secondary {background: var(--background-secondary);}
+
+.px-12 {padding: 0 12px}
+.py-8 {padding: 8px 0;}
+.py-9 {padding: 9px 0;}
+.pr-16 {padding-right: 16px;}
+
+.mr-8 {margin-right: 8px;}
+.mb-8 {margin-bottom: 8px;}
+
+.rounded-10 {border-radius: 10px;}
+
+.cursor-pointer {cursor: pointer;}
+
+/* Default desktop view: hidden on mobile */
+@media (max-width: 768px) {
+  .mobile-hide {
+    display: none;
+  }
+}
