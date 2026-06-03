@@ -3,7 +3,7 @@ import StorageService from '../services/storageService.js';
 import DataService from '../services/dataService.js';
 import { Sidebar } from '../components/sidebar.js';
 import { Navbar } from '../components/navbar.js';
-import { AlertManager } from './alerts.js';
+// import { AlertManager } from './alerts.js';
 import NotificationService from '../services/notificationService.js';
 
 export const Layout = {
@@ -72,7 +72,7 @@ export const Layout = {
         this.bindEvents();
 
         // Initialize Background Alerts
-        AlertManager.init();
+        // AlertManager.init();
 
         // Load dynamic data
         try {
