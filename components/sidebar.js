@@ -31,11 +31,16 @@ export const Sidebar = () => {
             <ul class="nav-menu" style="padding-top: 0.5rem;">
                 ${menuItems.map(item => {
         if (item.children) {
+            const hasActiveChild = item.children.some(child => activePage === child.id);
+            const isExpanded = hasActiveChild ? 'expanded' : '';
             return `
-                            <li class="nav-item-wrapper">
-                                <div class="nav-item" style="cursor: default;">
-                                    <i class="fas ${item.icon} nav-icon"></i>
-                                    <span class="nav-text">${item.text}</span>
+                            <li class="nav-item-wrapper ${isExpanded}">
+                                <div class="nav-item sidebar-dropdown-toggle" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display: flex; align-items: center;">
+                                        <i class="fas ${item.icon} nav-icon"></i>
+                                        <span class="nav-text">${item.text}</span>
+                                    </div>
+                                    <i class="fas fa-chevron-down submenu-chevron" style="font-size: 0.75rem; transition: transform 0.2s; margin-right: 0.5rem;"></i>
                                 </div>
                                 <ul class="sidebar-submenu">
                                     ${item.children.map(child => `
