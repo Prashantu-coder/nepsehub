@@ -192,26 +192,12 @@ class State {
         }
     }
 
-    // Helper: update UI based on status string (must be 'market open' or 'market close')
-    // Returns true if market is open, false otherwise
+    // Helper: update UI based on status string
+    // Returns true if market is open or pre-open, false otherwise
     function updateMarketDisplay(statusStr, fetchTime) {
-        // normalise string: trim & lower case comparison but keep original for display
         const normalized = statusStr.trim().toLowerCase();
-        let displayText = '';
-        let isOpen = false;
-
-        if (normalized === 'market open') {
-            isOpen = true;
-            displayText = '🟢 MARKET OPEN';
-        }
-        else if (normalized === 'market close') {
-            isOpen = false;
-            displayText = '🔴 MARKET CLOSED';
-        }
-        else {
-            // unexpected response (neither exact match) - treat as unknown, dot grey with no blink? but we handle gracefully
-            console.warn('Unexpected status:', statusStr);
-        }
+        let isOpen = normalized === 'open' || normalized === 'market open';
+        let isPreOpen = normalized.includes('pre-open') || normalized.includes('special');
 
         // apply proper blinking class & colors
         resetDotAnimations();
@@ -219,12 +205,15 @@ class State {
         if (isOpen) {
             if (dotElement) dotElement.classList.add('dot-open');
             if (statusMessageSpan) statusMessageSpan.innerHTML = '🟢';
+        } else if (isPreOpen) {
+            if (dotElement) dotElement.classList.add('dot-pre-open');
+            if (statusMessageSpan) statusMessageSpan.innerHTML = '🟡';
         } else {
             if (dotElement) dotElement.classList.add('dot-closed');
             if (statusMessageSpan) statusMessageSpan.innerHTML = '🔴';
         }
 
-        return isOpen;
+        return isOpen || isPreOpen;
     }
 
     // Helper: handle fetch errors gracefully

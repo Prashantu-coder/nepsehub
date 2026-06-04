@@ -688,21 +688,40 @@ export const Layout = {
             const el = document.getElementById('market-status');
             if (!el) return;
 
-            const isOpen = status.toLowerCase().includes('open');
+            let statusText = '';
+            if (status && typeof status === 'object') {
+                statusText = status.status || '';
+            } else if (typeof status === 'string') {
+                statusText = status;
+            }
+
+            const statusLower = statusText.toLowerCase();
+            const isOpen = statusLower === 'open' || statusLower === 'market open';
+            const isPreOpen = statusLower.includes('pre-open') || statusLower.includes('special');
+            
+            let dotClass = 'status-closed';
+            if (isOpen) {
+                dotClass = 'status-open';
+            } else if (isPreOpen) {
+                dotClass = 'status-pre-open';
+            }
+
+            const displayStatus = statusText.toUpperCase() || 'MARKET CLOSED';
+
             el.innerHTML = `
-                <span class="status-dot ${isOpen ? 'status-open' : 'status-closed'}"></span>
-                <span class="status-text">${isOpen ? 'MARKET OPEN' : 'MARKET CLOSED'}</span>
+                <span class="status-dot ${dotClass}"></span>
+                <span class="status-text">${displayStatus}</span>
             `;
-            return isOpen;
+            return isOpen || isPreOpen;
         };
 
         // 1. Initial Fetch (REST)
         fetch('https://marketstatus.onrender.com/market-status')
             .then(res => res.json())
             .then(data => {
-                const isOpen = updateUI(data.status);
+                const isOpen = updateUI(data);
 
-                // 2. Only connect WebSocket for live updates if market is open
+                // 2. Only connect WebSocket for live updates if market is open or pre-open
                 if (isOpen) {
                     const connectWS = () => {
                         const ws = new WebSocket('wss://marketstatus.onrender.com/ws/market-status');
