@@ -37,17 +37,23 @@ async function init() {
     initChartTabs();
     await refresh();
     
-    // Reload Market Turnover API every 1 second
+    // Reload Market Turnover API (every 2.5 seconds when open)
     setInterval(async () => {
+        const marketOpen = await DataService.checkMarketStatus();
+        if (!marketOpen) return;
         const summary = await DataService.getMarketSummary();
         if (summary) {
             marketSummary = summary;
             renderPulseCards();
         }
-    }, 1000);
+    }, 2500);
 
-    // Reload Homepage Data, Index Live, Subindex Live, Chart 1D API every 5 seconds
-    setInterval(refresh, 5000);
+    // Reload Homepage Data, Index Live, Subindex Live, Chart 1D API (every 5 seconds when open)
+    setInterval(async () => {
+        const marketOpen = await DataService.checkMarketStatus();
+        if (!marketOpen) return;
+        await refresh();
+    }, 5000);
 }
 
 function initChartTabs() {

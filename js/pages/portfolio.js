@@ -108,8 +108,45 @@ async function init() {
             chartsVisible = !chartsVisible;
             localStorage.setItem('portfolio_charts_visible', chartsVisible);
             updateVisibility();
-            if (chartsVisible) initCharts(); // Re-init if showing to ensure proper sizing
+            if (chartsVisible) initCharts(true); // Re-init if showing to ensure proper sizing
         };
+    }
+
+    // Wire pagination buttons
+    const prevBtn = document.getElementById('tx-prev-btn');
+    const nextBtn = document.getElementById('tx-next-btn');
+    if (prevBtn && nextBtn) {
+        prevBtn.onclick = () => {
+            if (txCurrentPage > 1) {
+                txCurrentPage--;
+                renderTransactions();
+            }
+        };
+        nextBtn.onclick = () => {
+            const totalPages = Math.ceil(allTransactions.length / txItemsPerPage) || 1;
+            if (txCurrentPage < totalPages) {
+                txCurrentPage++;
+                renderTransactions();
+            }
+        };
+    }
+
+    // Observer for lazy loading charts
+    if (chartsGrid) {
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    obs.unobserve(entry.target);
+                    setTimeout(() => {
+                        initCharts(true);
+                    }, 400);
+                }
+            });
+        }, {
+            rootMargin: '100px 0px',
+            threshold: 0.01
+        });
+        observer.observe(chartsGrid);
     }
 
     await refresh(true); // Pass true for initial load skeletons — fetches transactions + market data once
@@ -324,7 +361,12 @@ function updateSummaryCards() {
 // ─────────────────────────────────────────────
 // CHARTS
 // ─────────────────────────────────────────────
-function initCharts() {
+function initCharts(force = false) {
+    let chartsVisible = localStorage.getItem('portfolio_charts_visible') !== 'false';
+    if (!force && (!chartsInitialized || !chartsVisible)) {
+        return; // Deferred loading until scrolled near or explicitly forced (e.g. toggled on)
+    }
+    chartsInitialized = true;
     const perfCard = document.querySelector('.chart-card:nth-child(1)');
     const sectCard = document.querySelector('.chart-card:nth-child(2)');
     if (!perfCard || !sectCard) return;
@@ -450,12 +492,16 @@ function renderTransactions() {
     if (shimmer) shimmer.style.display = 'none';
     body.classList.remove('pf-loading');
 
+    const pagControls = document.querySelector('.pagination-controls');
+
     if (allTransactions.length === 0) {
         body.innerHTML = '';
         if (emptyCard) emptyCard.style.display = 'flex';
+        if (pagControls) pagControls.style.display = 'none';
         return;
     }
     if (emptyCard) emptyCard.style.display = 'none';
+    if (pagControls) pagControls.style.display = 'flex';
 
     const totalFees = allTransactions.reduce((s, t) => s + (t.broker_commission + t.sebon_fee + t.dp_charge), 0);
     const buyTotal = allTransactions.filter(t => t.type?.toUpperCase() === 'BUY').reduce((s, t) => s + t.total_amount, 0);
@@ -467,7 +513,29 @@ function renderTransactions() {
     if (buyBadge) buyBadge.innerText = `Buys: Rs. ${fmt(buyTotal)} (${allTransactions.filter(t => t.type?.toUpperCase() === 'BUY').length})`;
     if (sellBadge) sellBadge.innerText = `Sells: Rs. ${fmt(sellTotal)} (${allTransactions.filter(t => t.type?.toUpperCase() === 'SELL').length})`;
 
-    body.innerHTML = allTransactions.map(t => {
+    // Pagination slice
+    const totalPages = Math.ceil(allTransactions.length / txItemsPerPage) || 1;
+    if (txCurrentPage > totalPages) {
+        txCurrentPage = totalPages;
+    }
+
+    const startIndex = (txCurrentPage - 1) * txItemsPerPage;
+    const endIndex = startIndex + txItemsPerPage;
+    const pagedTransactions = allTransactions.slice(startIndex, endIndex);
+
+    // Update page info text
+    const pageInfo = document.getElementById('tx-page-info');
+    if (pageInfo) {
+        pageInfo.innerText = `Page ${txCurrentPage} of ${totalPages}`;
+    }
+
+    // Enable/disable navigation buttons
+    const prevBtn = document.getElementById('tx-prev-btn');
+    const nextBtn = document.getElementById('tx-next-btn');
+    if (prevBtn) prevBtn.disabled = txCurrentPage === 1;
+    if (nextBtn) nextBtn.disabled = txCurrentPage === totalPages;
+
+    body.innerHTML = pagedTransactions.map(t => {
         const fees = t.broker_commission + t.sebon_fee + t.dp_charge;
         const isBuy = t.type?.toUpperCase() === 'BUY';
         return `
@@ -612,6 +680,7 @@ async function handleSave() {
         document.getElementById('input-qty').value = '';
         document.getElementById('input-price').value = '';
         document.getElementById('input-stop-loss').value = '';
+        txCurrentPage = 1;
         await refresh();
     } else {
         alert('Save failed: ' + res.error);
@@ -652,6 +721,7 @@ async function handleSell() {
 
     if (res.success) {
         document.getElementById('sell-modal-overlay').style.display = 'none';
+        txCurrentPage = 1;
         await refresh();
     }
 }
