@@ -138,7 +138,7 @@ header {
 
 .blinking-dot {
   width: 20px;
-  height: 12px;
+  height: 16px;
   border-radius: 50%;
   background-color: #6c757d;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);

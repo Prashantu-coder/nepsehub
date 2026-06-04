@@ -251,6 +251,10 @@
   .navbar {
     padding: 0 1rem;
   }
+
+  .blinking-dot {
+    height: 12px;
+  }
 }
 
 @media (max-width: 480px) {
