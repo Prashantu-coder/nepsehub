@@ -1025,6 +1025,14 @@ export const Layout = {
             if (e.target.closest('#closeSidebar')) {
                 document.getElementById('sidebar')?.classList.remove('active');
             }
+
+            const sidebarToggle = e.target.closest('.sidebar-dropdown-toggle');
+            if (sidebarToggle) {
+                const wrapper = sidebarToggle.closest('.nav-item-wrapper');
+                if (wrapper) {
+                    wrapper.classList.toggle('expanded');
+                }
+            }
         });
 
         // Global Search
