@@ -143,6 +143,7 @@ const DataService = {
     _chartCache: {},
     _isMarketOpen: null,
     _marketStatusCheckedAt: 0,
+    _marketStatusPromise: null,
 
     async checkMarketStatus() {
         const now = Date.now();
@@ -150,27 +151,36 @@ const DataService = {
             return this._isMarketOpen;
         }
 
-        try {
-            const response = await fetch('https://marketstatus.onrender.com/market-status');
-            if (response.ok) {
-                const data = await response.json();
-                if (data && data.status) {
-                    this._isMarketOpen = data.status.toLowerCase().includes('open');
-                }
-            }
-        } catch (e) {
-            console.warn('[DataService] Failed to fetch market status:', e);
-            if (this._isMarketOpen === null) {
-                this._isMarketOpen = true; // Fallback to true so we don't block requests if status service fails
-            }
+        if (this._marketStatusPromise) {
+            return this._marketStatusPromise;
         }
-        
-        this._marketStatusCheckedAt = Date.now();
-        return this._isMarketOpen;
+
+        this._marketStatusPromise = (async () => {
+            try {
+                const response = await fetch('https://marketstatus.onrender.com/market-status');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.status) {
+                        this._isMarketOpen = data.status.toLowerCase().includes('open');
+                    }
+                }
+            } catch (e) {
+                console.warn('[DataService] Failed to fetch market status:', e);
+                if (this._isMarketOpen === null) {
+                    this._isMarketOpen = true; // Fallback to true so we don't block requests if status service fails
+                }
+            } finally {
+                this._marketStatusCheckedAt = Date.now();
+                this._marketStatusPromise = null;
+            }
+            return this._isMarketOpen;
+        })();
+
+        return this._marketStatusPromise;
     },
 
     // Professional Backend URL (Update this to your Render URL after deployment)
-    API_BASE: 'https://nepse-hub-backend.onrender.com',
+    API_BASE: 'https://nepsehub-backend.vercel.app',
 
     async getLiveMarket() {
         const now = Date.now();
@@ -432,7 +442,7 @@ const DataService = {
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
-            
+
             this._chartCache = this._chartCache || {};
             this._chartCache[cacheKey] = data;
             return data;
