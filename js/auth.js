@@ -64,12 +64,13 @@ class AuthManager {
   // Fetch transactions & watchlist once on page load
   async _fetchInitialData() {
     try {
+      const isPortfolioPage = window.location.pathname.includes('portfolio');
       const [transRes, watchRes] = await Promise.allSettled([
-        this.apiCall('/api/transactions'),
+        isPortfolioPage ? this.apiCall('/api/transactions') : Promise.resolve(null),
         this.apiCall('/api/watchlist')
       ]);
 
-      if (transRes.status === 'fulfilled' && transRes.value.ok) {
+      if (transRes.status === 'fulfilled' && transRes.value && transRes.value.ok) {
         this._cachedTransactions = await transRes.value.json();
         this._transactionsLoaded = true;
       }
@@ -83,9 +84,12 @@ class AuthManager {
     }
   }
 
-  // Get cached transactions (no new API call)
+  // Get cached transactions (no new API call unless not loaded yet)
   async getCachedTransactions() {
     if (this._initDataPromise) await this._initDataPromise;
+    if (!this._transactionsLoaded) {
+      await this.refreshTransactions();
+    }
     return this._cachedTransactions || { success: false, data: [] };
   }
 

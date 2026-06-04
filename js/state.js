@@ -294,7 +294,7 @@ class State {
     });
 
     // small console info
-    console.log('Market Status Monitor started · blinking dot will adapt to "market open" (green blink) or "market close" (red blink)');
+    // console.log('Market Status Monitor started · blinking dot will adapt to "market open" (green blink) or "market close" (red blink)');
 })();
 
 // Singleton instance
