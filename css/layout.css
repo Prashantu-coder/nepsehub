@@ -34,6 +34,8 @@
   flex-direction: column;
   z-index: 1100;
   transition: left var(--transition-slow);
+  overflow-y: scroll;
+  scrollbar-width: thin;
 }
 
 .sidebar.active {
@@ -219,6 +221,10 @@
   .pc-only {
     display: none !important;
   }
+
+  #navbar-container {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -230,6 +236,14 @@
 @media (max-width: 480px) {
   .main-content {
     padding: 1rem;
+  }
+
+  #index-value .flex-col span {
+    font-size: small;
+  }
+
+  .nepse{
+    font-size: 0.8rem; 
   }
 }
 

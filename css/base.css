@@ -12,6 +12,7 @@
   --warning: #f59e0b;
   /* Amber */
   --background: #0d1117;
+  --background-secondary: rgba(255, 255, 255, 0.15);
   /* GitHub Dark Style */
   --surface-solid: #161b22;
   --surface: rgba(22, 27, 34, 0.925);
@@ -137,7 +138,7 @@ header {
 
 .blinking-dot {
   width: 20px;
-  height: 15px;
+  height: 12px;
   border-radius: 50%;
   background-color: #6c757d;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
