@@ -59,12 +59,23 @@ class State {
         const summary = this.state.marketSummary;
 
         if (nepse) {
-            const isUp = nepse.difference >= 0;
+            let indexValue = nepse.indexValue;
+            let difference = nepse.difference;
+            let percentChange = nepse.percentChange;
+
+            // If on the dashboard/index page and we have chart-calculated values for NEPSE, use them!
+            if (this.state.activePage === 'index' && this.chartLastPrice !== undefined && this.chartLastPrice !== null) {
+                indexValue = this.chartLastPrice;
+                difference = this.chartLastDiff;
+                percentChange = this.chartLastPct;
+            }
+
+            const isUp = difference >= 0;
             const prefix = isUp ? '+' : '';
 
             const headerVal = document.getElementById('header-nepse-val');
             if (headerVal) {
-                const newVal = nepse.indexValue.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                const newVal = indexValue.toLocaleString('en-IN', { minimumFractionDigits: 2 });
                 if (headerVal.innerText !== newVal) {
                     headerVal.innerText = newVal;
                 }
@@ -72,7 +83,7 @@ class State {
 
             const headerChange = document.getElementById('header-nepse-change');
             if (headerChange) {
-                const newChangeText = `${prefix}${nepse.difference.toFixed(2)} (${prefix}${nepse.percentChange.toFixed(2)}%)`;
+                const newChangeText = `${prefix}${difference.toFixed(2)} (${prefix}${percentChange.toFixed(2)}%)`;
                 if (headerChange.innerText !== newChangeText) {
                     headerChange.innerText = newChangeText;
                 }
