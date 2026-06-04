@@ -1026,6 +1026,14 @@ export const Layout = {
                 document.getElementById('sidebar')?.classList.remove('active');
             }
 
+            // Close sidebar when tapping outside
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && sidebar.classList.contains('active')) {
+                if (!sidebar.contains(e.target) && !e.target.closest('#burgerMenu')) {
+                    sidebar.classList.remove('active');
+                }
+            }
+
             const sidebarToggle = e.target.closest('.sidebar-dropdown-toggle');
             if (sidebarToggle) {
                 const wrapper = sidebarToggle.closest('.nav-item-wrapper');
