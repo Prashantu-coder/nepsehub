@@ -132,23 +132,43 @@ function populateSubindexDropdown() {
     }).join('');
 }
 
-function updateChartHeader() {
-    let currentVal = 0;
+function updateChartHeader(chartLastPrice = null) {
+    if (chartLastPrice === null) return;
+
+    let currentVal = chartLastPrice;
     let diff = 0;
     let pct = 0;
     let dateStr = '';
 
     const dataObj = findIndexData(activeChartSymbol);
     if (dataObj) {
-        currentVal = dataObj.indexValue;
-        diff = dataObj.difference;
-        pct = dataObj.percentChange;
+        // Calculate point change and percent change using previous day close from API
+        const prevClose = dataObj.previousClose;
+        if (prevClose && prevClose !== 0) {
+            diff = currentVal - prevClose;
+            pct = (diff / prevClose) * 100;
+        } else {
+            diff = dataObj.difference;
+            pct = dataObj.percentChange;
+        }
+        
         dateStr = dataObj.asOfDateString || '';
     }
 
     const isUp = diff >= 0;
     const arrow = isUp ? '↑' : '↓';
     const color = isUp ? '#10b981' : '#ef4444';
+
+    if (activeChartSymbol === 'NEPSE') {
+        globalState.chartLastPrice = currentVal;
+        globalState.chartLastDiff = diff;
+        globalState.chartLastPct = pct;
+    } else {
+        globalState.chartLastPrice = null;
+        globalState.chartLastDiff = null;
+        globalState.chartLastPct = null;
+    }
+    globalState.updateHeaderDOM();
 
     const priceValEl = document.getElementById('chart-price-val');
     if (priceValEl) {
@@ -698,8 +718,12 @@ async function renderMainChart() {
 
         let isPositive = true;
         const dataObj = findIndexData(activeChartSymbol);
+        const chartLastPrice = prices.length > 0 ? prices[prices.length - 1] : null;
         if (dataObj) {
-            isPositive = dataObj.difference >= 0;
+            const lastVal = chartLastPrice !== null ? chartLastPrice : dataObj.indexValue;
+            const prevClose = dataObj.previousClose;
+            const calculatedDiff = (prevClose && prevClose !== 0) ? (lastVal - prevClose) : dataObj.difference;
+            isPositive = calculatedDiff >= 0;
         }
         const color = isPositive ? '#10b981' : '#ef4444';
 
@@ -787,7 +811,7 @@ async function renderMainChart() {
     }
 
         // Trigger header update once chart is fully drawn
-        updateChartHeader();
+        updateChartHeader(chartLastPrice);
     } catch (err) {
         console.error('Error rendering NEPSE line chart:', err);
     }
@@ -818,6 +842,7 @@ function normalizeIndexData(rawArray) {
         const indexValue = parseFloat(item.indexValue || item.currentValue || 0);
         const difference = parseFloat(item.difference !== undefined ? item.difference : (item.change !== undefined ? item.change : 0));
         const percentChange = parseFloat(item.percentChange !== undefined ? item.percentChange : (item.changePercent !== undefined ? item.changePercent : 0));
+        const previousClose = parseFloat(item.previousClose || item.prevClose || item.previousCloseValue || item.previousClosePrice || (indexValue - difference));
         
         return {
             ...item,
@@ -825,6 +850,7 @@ function normalizeIndexData(rawArray) {
             indexValue: indexValue,
             difference: difference,
             percentChange: percentChange,
+            previousClose: previousClose,
             name: indexName,
             currentValue: indexValue,
             change: difference,
