@@ -20,6 +20,7 @@
   --surface-border: rgba(255, 255, 255, 0.1);
   --text-primary: #f0f6fc;
   --text-secondary: #8b949e;
+  --text-black: rgb(0, 0, 0);
   --sidebar-bg: #0d1117;
   --card-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5);
   --glass-blur: 16px;
