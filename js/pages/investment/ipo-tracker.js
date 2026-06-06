@@ -1,8 +1,7 @@
 import globalState from '../../state.js';
 import { Layout } from '../../layout.js';
 import DataService from '../../../services/dataService.js';
-
-const AVAILABLE_LOGOS = new Set(["ACLBSL","ADBL","AHL","AHPC","AKJCL","AKPL","ALBSL","ALICL","ANLB","API","Appolo Hydropower Limited","AVYAN","BANDIPUR","BARUN","BBC","BEDC","BFC","BGWT","BHCL","BHDC","BHL","BHNC","BHPL","BJHL","BNHC","BNL","BNT","BPCL","BUNGAL","CBBL","CBLD88","CFCL","CGH","CHCL","CHDC","CHL","CIT","CITY","CKHL","CLI","CORBL","CREST","CYCL","CZBIL","DDBL","DHEL","DHPL","DLBS","DOLTI","DORDI","EBL","EBLD85","EBLD86","EBLD91","EBLEB89","EDBL","EHPL","ENL","FMDBL","FOWAD","GBBD85","GBBL","GBIME","GBLBS","GCIL","GFCL","GHL","GILB","GLBSL","GLH","GMFBS","GMFIL","GMLI","GRDBL","GUFL","GVL","HATHY","HBL","HBLD83","HBLD86","HDHPC","HDL","HEI","HEIP","HFIN","HHL","HIDCL","HIDCLP","HIMSTAR","HLBSL","HLI","HPPL","HRL","HURJA","ICFC","ICFCD88","ICFCD89","IGI","IHL","ILBS","ILI","JBBL","JBLB","JFL","JHAPA","JOSHI","JSLBB","JSLBBP","Kalanga Hydro Limited","Kalinchock Hydropower Limited","KBL","KBLD90","KBSH","KDL","KHPL","KKHC","KMCDB","KPCL","KSBBL","KSBBLD87","LBBL","LBLD86","LBLD88","LEC","LICN","LLBS","LSL","MABEL","MAKAR","MANDU","MATRI","MBJC","MBL","MBLD2085","MCHL","MDB","MEHL","MEL","MEN","MERO","MFIL","MFLD85","MHCL","MHL","MHNL","MKCL","MKHC","MKHL","MKJC","MLBBL","MLBL","MLBS","MLBSL","MMKJL","MNBBL","MPFL","MSHL","MSLB","NABBC","NABIL","NABILD2089","NADEP","NBL","NBLD82","NBLD85","NCCD86","NESDO","NFS","NGPL","NHDL","NHPC","NIBD84","NICA","NICAD2091","NICD88","NICL","NICLBSL","NIFRA","NIFRAGED","NIL","NIMB","NIMBD90","NIMBPO","NLG","NLIC","NLICL","NMB","NMBD2085","NMBMF","NMFBS","NMIC","NMLBBL","NRIC","NRM","NRN","NTC","NUBL","NWCL","NYADI","OHL","OMPL","PBD88","PBLD86","PCBL","PCIL","PFL","PHCL","PMHPL","PMLI","PPCL","PPL","PRIN","PROFL","PRVU","PURE","RADHI","RAWA","RBBD2088","RBBD83","RBCL","RBCLPO","RFPL","RHGCL","RHPL","RIDI","RLEL","RLFL","RNLI","RSDC","RSML","RURU","SABBL","SADBL","SAGAR","SAGF","SAHAS","SAIL","SALICO","SAND2085","Sanigad Hydro Limited","SANIMA","SANVI","SAPDBL","SARBTM","SBD87","SBI","SBID83","SBL","SBLD2091","SBLD89","SCB","SCBD","SDBD87","SFCL","SFEF","SGHC","SGIC","SHEL","Shikhar Power Development Limited","SHINE","SHIVM","SHL","SHLB","SHPC","SICL","SIFC","SIKLES","SINDU","SIPD","SJCL","SJLIC","SKBBL","SKHEL","SKHL","SLBBL","SLBSL","SLCF","SMATA","SMB","SMFBS","SMH","SMHL","SMJC","SMPDA","SNLI","Snow Rivers Limited","SOHL","SONA","SOPAN","SPC","SPDL","SPHL","SPIL","SPL","SRBLD83","SRLI","SSHL","STC","SWASTIK","SWBBL","SWMF","SYPNL","Taksar Pikhuwa Khola Hydropower Limited","TAMOR","TPC","TRH","TSHL","TTL","TVCL","UAIL","UHEWA","ULBSL","ULHC","UMHL","UMRH","UNHPL","UNL","UNLB","UPCL","UPPER","USHEC","USHL","USLB","VLBS","VLUCL","WNLB","Yambaling Hydropower Limited", "SARVOTTAM", "MEPDL", "BENI", "ECL"]);
+import { getStockImageUrl } from '../../stockImageProvider.js';
 
 
 let currentPage = 1;
@@ -135,13 +134,7 @@ function renderCards(items) {
         const manager = item.issueManager || item.manager || 'N/A';
         const sector = item.sector || item.category || 'N/A';
         
-        const symbolUpper = symbol.toUpperCase();
-        let logoUrl = '';
-        if (AVAILABLE_LOGOS.has(symbolUpper)) {
-            logoUrl = `../../images/stocks/${symbolUpper}.png`;
-        } else if (AVAILABLE_LOGOS.has(name)) {
-            logoUrl = `../../images/stocks/${name}.png`;
-        }
+        const logoUrl = getStockImageUrl(symbol.toUpperCase(), '../../', name);
 
         const openDateObj = item.openingDate ? new Date(item.openingDate) : null;
         const closeDateObj = item.closingDate ? new Date(item.closingDate) : null;
