@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Watchlist | NEPSE HUB</title>
+  <!-- Authentication Check -->
+  <script src="../js/session-validator-8f7b2c9d6e4a3b1c.js"></script>
   <meta name="description" content="Monitor your favourite NEPSE stocks with live prices, target alerts, and custom columns." />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="../css/base.css" />
@@ -12,136 +14,6 @@
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/pages/watchlist.css" />
   <link rel="stylesheet" href="../css/easy.css" />
-
-  <style>
-    /* ── Pulse animation for LIVE dot ── */
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-
-      50% {
-        opacity: 0.4;
-        transform: scale(0.85);
-      }
-    }
-
-    /* ── Shimmer rows in HTML ── */
-    .wl-shimmer-body tr td .sk {
-      display: inline-block;
-      border-radius: 5px;
-      height: 14px;
-    }
-
-    .sk-sym {
-      width: 70px;
-    }
-
-    .sk-med {
-      width: 55px;
-    }
-
-    .sk-sm {
-      width: 42px;
-    }
-
-    .sk-lg {
-      width: 90px;
-    }
-
-    .sk-act {
-      width: 56px;
-      height: 24px;
-      border-radius: 8px;
-    }
-
-    /* ── Hidden utility ── */
-    .wl-shimmer-body.loaded {
-      display: none;
-    }
-
-    .wl-data-body.loading {
-      display: none;
-    }
-
-    /* ── Market type row background ── */
-    .wl-type-broker {
-      background: rgba(99, 102, 241, 0.04);
-      border-left: 3px solid #6366f1;
-    }
-
-    .wl-type-flat {
-      border-left: 3px solid transparent;
-    }
-
-    /* ── Symbol clickable hover ── */
-    .sym-link {
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      text-decoration: none;
-    }
-
-    .sym-link:hover .sym-name {
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    .sym-avatar-wrap {
-      position: relative;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .sym-avatar-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 50%;
-    }
-
-    .sym-avatar-fallback {
-      display: none;
-      position: absolute;
-      inset: 0;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #fff;
-      background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-      border-radius: 50%;
-    }
-
-    .sym-name {
-      font-weight: 700;
-      color: var(--primary);
-      font-size: 0.9rem;
-    }
-
-    /* ── Notes cell truncation ── */
-    .notes-text {
-      max-width: 160px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      display: block;
-      color: var(--text-secondary);
-      font-size: 0.78rem;
-    }
-  </style>
 </head>
 
 <body>
@@ -297,14 +169,7 @@
     <main class="main-content">
       <div id="app">
         <!-- ══ Page Header ══ -->
-        <div style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 2rem;
-              flex-wrap: wrap;
-              gap: 1rem;
-            ">
+        <div class="flex space-between items-center flex-wrap mb-20 gap-16">
           <div>
             <h2 style="margin-bottom: 0.2rem">
               <i class="fas fa-eye" style="margin-right: 0.75rem"></i>My
@@ -314,40 +179,23 @@
               Track stocks with live prices &amp; custom target alerts
             </p>
           </div>
-          <div style="
-                display: flex;
-                gap: 0.75rem;
-                align-items: center;
+          <div class="flex gap-8 gap-small items-center" style="
                 flex-wrap: wrap;
               ">
             <!-- LIVE indicator -->
-            <span id="wl-live-dot" style="
-                  display: flex;
-                  align-items: center;
-                  gap: 0.4rem;
-                  font-size: 0.78rem;
-                  color: var(--text-secondary);
-                  margin-right: 0.5rem;
-                ">
-              <span style="
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 50%;
-                    background: #10b981;
-                    display: inline-block;
-                    animation: pulse 2s infinite;
-                  "></span>
-              LIVE
-            </span>
+            <!-- <span id="wl-live-dot" class="flex items-center f-13 f-small gap-5 text-secondary mr-8">
+              <span class="w-8 h-8 rounded-50per" style=" background: #10b981; display: inline-block; animation: pulse 2s infinite;"></span>
+              LIVE 
+            </span> -->
 
             <!-- CSV Export -->
-            <button class="btn btn-secondary" id="download-csv-btn" style="gap: 0.5rem; display: flex; align-items: center">
+            <button class="btn btn-secondary f-small" id="download-csv-btn" style="gap: 0.5rem; display: flex; align-items: center">
               <i class="fas fa-file-csv"></i> Export CSV
             </button>
 
             <!-- Columns toggle -->
             <div class="dropdown-wrapper" style="position: relative; display: inline-block">
-              <button class="btn btn-secondary" id="toggle-columns-btn" style="gap: 0.5rem; display: flex; align-items: center">
+              <button class="btn btn-secondary f-small" id="toggle-columns-btn" style="gap: 0.5rem; display: flex; align-items: center">
                 <i class="fas fa-columns"></i> Columns
               </button>
               <!-- dropdown starts HIDDEN — JS toggles it -->
@@ -486,24 +334,19 @@
             </div>
 
             <!-- Enable Alerts -->
-            <button class="btn btn-secondary" id="enable-notifications" style="gap: 0.5rem; display: flex; align-items: center">
+            <button class="btn btn-secondary f-small" id="enable-notifications" style="gap: 0.5rem; display: flex; align-items: center">
               <i class="fas fa-bell"></i> Enable Alerts
             </button>
 
             <!-- Add Stock -->
-            <button class="btn btn-primary" id="open-wl-modal">
+            <button class="btn btn-primary f-small" id="open-wl-modal">
               <i class="fas fa-plus"></i> Add Stock
             </button>
           </div>
         </div>
 
         <!-- ══ Summary bar ══ -->
-        <div style="
-              display: flex;
-              gap: 1rem;
-              margin-bottom: 1.5rem;
-              flex-wrap: wrap;
-            ">
+        <div class="flex gap-16 mb-24 flex-wrap hidden">
           <span id="wl-count-top" style="color: var(--text-secondary); font-size: 0.85rem"></span>
         </div>
 
@@ -511,18 +354,13 @@
         <div class="watchlist-table-wrap">
           <div class="wl-count-bar">
             <span id="wl-count"></span>
-            <span style="font-size: 0.78rem">Live prices updated every 30s</span>
+            <span class="f-12">Live prices updated every 30s</span>
           </div>
 
-          <div style="overflow-x: auto">
+          <div class="scrollbar-thin" style="overflow-x: auto">
             <table class="wl-table" id="watchlistTable">
               <thead>
-                <tr style="
-                      color: var(--text-secondary);
-                      font-size: 0.8rem;
-                      text-transform: uppercase;
-                      letter-spacing: 0.5px;
-                    ">
+                <tr class="text-secondary f-13 uppercase" style="letter-spacing: 0.5px;">
                   <th data-col="symbol">Symbol</th>
                   <th data-col="ltp">LTP</th>
                   <th data-col="change">Change</th>

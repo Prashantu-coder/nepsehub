@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Investment Portfolio | NEPSE HUB</title>
+  <!-- Authentication Check -->
+  <script src="../js/session-validator-8f7b2c9d6e4a3b1c.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="../css/base.css" />
   <link rel="stylesheet" href="../css/layout.css" />
@@ -610,88 +612,34 @@
                       color: var(--secondary);
                     ">0.00% CAGR</span>
               </h4>
-              <div class="growth-insights-grid" style="
-                    display: grid;
-                    grid-template-columns: 1.8fr 1fr;
-                    gap: 1.5rem;
-                    min-height: 250px;
-                  ">
+              <div class="growth-insights-grid">
                 <!-- Chart on Left -->
                 <div style="position: relative; height: 260px">
                   <canvas id="historicalGrowthChart"></canvas>
                 </div>
                 <!-- Performance Insights & Stats on Right -->
-                <div style="
-                      display: flex;
-                      flex-direction: column;
-                      justify-content: center;
-                      gap: 1rem;
-                      padding-left: 1rem;
-                      border-left: 1px solid rgba(255, 255, 255, 0.06);
-                    ">
-                  <div class="glass" style="
-                        padding: 0.75rem 1rem;
-                        border-radius: 12px;
-                        border: 1px solid rgba(255, 255, 255, 0.03);
-                      ">
-                    <div style="
-                          font-size: 0.7rem;
-                          color: var(--text-secondary);
-                          text-transform: uppercase;
-                          font-weight: 700;
-                        ">
+                <div class="flex-col justify-center gap-15 pl-15 bl-portfolio bl-none">
+                  <div class="glass pt-12 pb-12 px-16 rounded-12" style="border: 1px solid rgba(255, 255, 255, 0.03);">
+                    <div class="font-weight-700 text-secondary f-11 uppercase">
                       Total Invested Cashflow
                     </div>
-                    <div id="analytics-total-invested" style="
-                          font-weight: 800;
-                          font-size: 1.1rem;
-                          color: var(--text-primary);
-                          margin-top: 2px;
-                        ">
+                    <div id="analytics-total-invested" class="f-17 font-weight-800 text-primary mt-2">
                       Rs. 0.00
                     </div>
                   </div>
-                  <div class="glass" style="
-                        padding: 0.75rem 1rem;
-                        border-radius: 12px;
-                        border: 1px solid rgba(255, 255, 255, 0.03);
-                      ">
-                    <div style="
-                          font-size: 0.7rem;
-                          color: var(--text-secondary);
-                          text-transform: uppercase;
-                          font-weight: 700;
-                        ">
+                  <div class="glass pt-11 pb-11 px-16 rounded-12 border-portfolio">
+                    <div class="f-11 text-secondary uppercase font-weight-700">
                       CAGR Time Horizon
                     </div>
-                    <div id="analytics-time-horizon" style="
-                          font-weight: 800;
-                          font-size: 1.1rem;
-                          color: var(--text-primary);
-                          margin-top: 2px;
-                        ">
+                    <div id="analytics-time-horizon" class="f-17 font-weight-800 text-primary mt-2">
                       0.00 Years
                     </div>
                   </div>
-                  <div class="glass" style="
-                        padding: 0.75rem 1rem;
-                        border-radius: 12px;
-                        border: 1px solid rgba(255, 255, 255, 0.03);
-                      ">
-                    <div style="
-                          font-size: 0.7rem;
-                          color: var(--text-secondary);
-                          text-transform: uppercase;
-                          font-weight: 700;
-                        ">
+                  <div class="glass pt-11 pb-11 px-16 rounded-12 border-portfolio">
+                    <div class="f-11 text-secondary uppercase font-weight-700">
                       All-Time Net Performance
                     </div>
-                    <div id="analytics-alltime-perf" style="
-                          font-weight: 800;
-                          font-size: 1.1rem;
-                          color: var(--secondary);
-                          margin-top: 2px;
-                        ">
+                    <div id="analytics-alltime-perf" class="font-weight-800 f-16 secondary-text mt-2">
                       0.00%
                     </div>
                   </div>
@@ -726,20 +674,15 @@
                 </div>
               </div>
               <div>
-                <div style="
-                      font-size: 0.7rem;
-                      color: var(--text-secondary);
-                      text-transform: uppercase;
-                      font-weight: 700;
-                    ">
+                <div class="f-11 text-secondary uppercase font-weight-700">
                   Total Sales
                 </div>
-                <div id="tx-sell-total" style="font-weight: 800; color: var(--text-primary)">
+                <div id="tx-sell-total" class="font-weight-800 text-primary">
                   Rs. 0.00
                 </div>
               </div>
             </div>
-            <div style="font-size: 0.8rem; color: var(--text-secondary)">
+            <div class="f-13 text-secondary">
               <i class="fas fa-info-circle"></i> Showing full ledger
             </div>
           </div>
