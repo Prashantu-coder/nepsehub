@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stock Details | NEPSE HUB</title>
+  <script src="../../js/session-validator-8f7b2c9d6e4a3b1c.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="../../css/base.css" />
   <link rel="stylesheet" href="../../css/layout.css" />
@@ -167,7 +168,7 @@
     <main class="main-content">
       <div id="app">
         <!-- Sub-navbar for stock detail -->
-        <div class="sub-navbar">
+        <div class="sub-navbar scrollbar-none">
           <a href="#" class="tab-link active" id="tab-overview">Overview</a>
           <a href="#" class="tab-link" onclick="
                 alert(
@@ -191,7 +192,7 @@
                 --
               </div>
             </div>
-            <div>
+            <div class="text-left">
               <h1 id="detail-symbol" class="detail-symbol-title shimmer-bg">
                 SYMBOL
               </h1>
@@ -212,7 +213,7 @@
           </div>
 
           <!-- Right Part: Watchlist & Calculator stacked buttons -->
-          <div class="header-actions-container">
+          <div class="header-actions-container small-hidden">
             <button id="toggle-watchlist-btn" class="btn btn-outline btn-watchlist-custom">
               <i class="far fa-heart"></i> Add to Watchlist
             </button>
