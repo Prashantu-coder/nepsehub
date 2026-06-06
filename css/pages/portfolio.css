@@ -11,24 +11,6 @@
   margin-bottom: 2rem;
 }
 
-@media (max-width: 1200px) {
-  .portfolio-stats-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .portfolio-stats-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .portfolio-stats-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .chart-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--surface-border);
@@ -109,12 +91,6 @@
   grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
   margin-bottom: 2rem;
-}
-
-@media (max-width: 900px) {
-  .portfolio-charts-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* ── Holdings Table container ── */
@@ -524,4 +500,83 @@
   border-style: solid;
   border-color: rgba(255, 255, 255, 0.06);
   background: rgba(255, 255, 255, 0.015);
+}
+
+.table-container{
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.growth-insights-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 1.5rem;
+  min-height: 250px;
+}
+
+@media (max-width: 1200px) {
+  .portfolio-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .portfolio-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .portfolio-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .portfolio-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .portfolio-charts-grid, .chart-card {
+    width: 662px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-nav {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .portfolio-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .summary-card-inner {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .summary-label {
+    font-size: 0.7rem;
+  }
+
+  .summary-value {
+    font-size: 0.9rem;
+  }
+
+  .summary-icon-box {
+    display: none;
+  }
+
+  .risk-stats-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .growth-insights-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .portfolio-charts-grid, .chart-card {
+    width: 384px;
+  }
 }

@@ -2,6 +2,133 @@
    WATCHLIST PAGE — Dedicated Styles
    Shared utilities live in: css/base.css
 ═══════════════════════════════════════════ */
+/* ── Pulse animation for LIVE dot ── */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: scale(0.85);
+    }
+}
+
+/* ── Shimmer rows in HTML ── */
+.wl-shimmer-body tr td .sk {
+    display: inline-block;
+    border-radius: 5px;
+    height: 14px;
+}
+
+.sk-sym {
+    width: 70px;
+}
+
+.sk-med {
+    width: 55px;
+}
+
+.sk-sm {
+    width: 42px;
+}
+
+.sk-lg {
+    width: 90px;
+}
+
+.sk-act {
+    width: 56px;
+    height: 24px;
+    border-radius: 8px;
+}
+
+/* ── Hidden utility ── */
+.wl-shimmer-body.loaded {
+    display: none;
+}
+
+.wl-data-body.loading {
+    display: none;
+}
+
+/* ── Market type row background ── */
+.wl-type-broker {
+    background: rgba(99, 102, 241, 0.04);
+    border-left: 3px solid #6366f1;
+}
+
+.wl-type-flat {
+    border-left: 3px solid transparent;
+}
+
+/* ── Symbol clickable hover ── */
+.sym-link {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+}
+
+.sym-link:hover .sym-name {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.sym-avatar-wrap {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sym-avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.sym-avatar-fallback {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    border-radius: 50%;
+}
+
+.sym-name {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+/* ── Notes cell truncation ── */
+.notes-text {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
 
 /* ── Main Table ── */
 .watchlist-table-wrap {
@@ -13,7 +140,12 @@
 }
 
 /* Watchlist table — left-align first col, right-align the rest */
-.wl-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.wl-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
 .wl-table th {
     color: var(--text-secondary);
     font-size: 0.72rem;
@@ -24,16 +156,23 @@
     border-bottom: 1px solid var(--surface-border);
     white-space: nowrap;
 }
+
 .wl-table td {
     padding: 1rem 1.25rem;
     text-align: right;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     white-space: nowrap;
     vertical-align: middle;
 }
+
 .wl-table th:first-child,
-.wl-table td:first-child { text-align: left; }
-.wl-table tbody tr:hover  { background: rgba(255,255,255,0.025); }
+.wl-table td:first-child {
+    text-align: left;
+}
+
+.wl-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.025);
+}
 
 /* ── Symbol cell highlight ── */
 .wl-symbol {
@@ -52,20 +191,62 @@
     font-size: 0.75rem;
     font-weight: 600;
 }
-.target-buy-badge  { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.25); }
-.target-sell-badge { background: rgba(244,63,94,0.12);  color: #f43f5e; border: 1px solid rgba(244,63,94,0.25); }
+
+.target-buy-badge {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.target-sell-badge {
+    background: rgba(244, 63, 94, 0.12);
+    color: #f43f5e;
+    border: 1px solid rgba(244, 63, 94, 0.25);
+}
 
 /* ── Target hit glow ── */
-.target-hit-buy  { box-shadow: 0 0 10px rgba(16,185,129,0.5); animation: glowBuy  1.5s infinite alternate; }
-.target-hit-sell { box-shadow: 0 0 10px rgba(244,63,94,0.5);  animation: glowSell 1.5s infinite alternate; }
+.target-hit-buy {
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    animation: glowBuy 1.5s infinite alternate;
+}
 
-@keyframes glowBuy  { from { box-shadow: 0 0 4px rgba(16,185,129,0.3);  } to { box-shadow: 0 0 14px rgba(16,185,129,0.7); } }
-@keyframes glowSell { from { box-shadow: 0 0 4px rgba(244,63,94,0.3);   } to { box-shadow: 0 0 14px rgba(244,63,94,0.7);  } }
+.target-hit-sell {
+    box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+    animation: glowSell 1.5s infinite alternate;
+}
+
+@keyframes glowBuy {
+    from {
+        box-shadow: 0 0 4px rgba(16, 185, 129, 0.3);
+    }
+
+    to {
+        box-shadow: 0 0 14px rgba(16, 185, 129, 0.7);
+    }
+}
+
+@keyframes glowSell {
+    from {
+        box-shadow: 0 0 4px rgba(244, 63, 94, 0.3);
+    }
+
+    to {
+        box-shadow: 0 0 14px rgba(244, 63, 94, 0.7);
+    }
+}
 
 /* ── Row highlight when either target is hit ── */
-.wl-row-buy-hit  { border-left: 3px solid #10b981 !important; }
-.wl-row-sell-hit { border-left: 3px solid #f43f5e !important; }
-.wl-row-normal   { border-left: 3px solid transparent; }
+.wl-row-buy-hit {
+    border-left: 3px solid #10b981 !important;
+}
+
+.wl-row-sell-hit {
+    border-left: 3px solid #f43f5e !important;
+}
+
+.wl-row-normal {
+    border-left: 3px solid transparent;
+}
 
 /* ── Notes cell ── */
 .wl-notes {
@@ -93,14 +274,17 @@
 .wl-modal-overlay {
     display: none;
     position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.88);
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.88);
     z-index: 99999;
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(6px);
 }
+
 .wl-modal-box {
     background: var(--surface-solid);
     border: 1px solid var(--surface-border);
@@ -108,12 +292,19 @@
     padding: 2rem;
     width: 90%;
     max-width: 480px;
-    box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
 }
 
 /* ── Target price input hint colors ── */
-.wl-buy-hint  { color: #10b981; font-size: 0.75rem; }
-.wl-sell-hint { color: #f43f5e; font-size: 0.75rem; }
+.wl-buy-hint {
+    color: #10b981;
+    font-size: 0.75rem;
+}
+
+.wl-sell-hint {
+    color: #f43f5e;
+    font-size: 0.75rem;
+}
 
 /* ── Empty state for watchlist ── */
 .wl-empty {
@@ -121,41 +312,79 @@
     padding: 5rem 2rem;
     text-align: center;
 }
-.wl-empty i { font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem; display: block; }
-.wl-empty h3 { margin-bottom: 0.5rem; }
-.wl-empty p  { color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem; }
+
+.wl-empty i {
+    font-size: 3rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.wl-empty h3 {
+    margin-bottom: 0.5rem;
+}
+
+.wl-empty p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
 
 /* ── Custom Styled Checkbox inside Columns Dropdown ── */
 .col-toggle-input {
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  width: 18px !important;
-  height: 18px !important;
-  border: 2px solid rgba(255, 255, 255, 0.25) !important;
-  border-radius: 4px !important;
-  outline: none !important;
-  background: transparent !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer;
-  padding: 0 !important;
-  margin: 0 !important;
-  transition: all 0.2s ease;
-  position: relative;
-  box-shadow: none !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 18px !important;
+    height: 18px !important;
+    border: 2px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 4px !important;
+    outline: none !important;
+    background: transparent !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer;
+    padding: 0 !important;
+    margin: 0 !important;
+    transition: all 0.2s ease;
+    position: relative;
+    box-shadow: none !important;
 }
 
 .col-toggle-input:checked {
-  background: var(--primary) !important;
-  border-color: var(--primary) !important;
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
 }
 
 .col-toggle-input:checked::after {
-  content: "\f00c" !important;
-  font-family: "Font Awesome 6 Free" !important;
-  font-weight: 900 !important;
-  font-size: 10px !important;
-  color: white !important;
-  position: absolute;
+    content: "\f00c" !important;
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+    font-size: 10px !important;
+    color: white !important;
+    position: absolute;
+}
+
+@media (max-width: 468px) {
+    .sym-avatar-wrap {
+        width: 25px;
+        height: 25px;
+    }
+
+    .sym-name {
+        font-size: 0.72rem;
+    }
+
+    .wl-table th {
+        padding: 0.6rem 0.85rem;
+    }
+
+    .wl-table td {
+        padding: 0.6rem 0.85rem;
+        font-size: 0.72rem;
+    }
+
+    .wl-modal-box {
+        padding: 1.25rem;
+    }
 }
