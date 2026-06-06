@@ -24,21 +24,7 @@
   <link rel="stylesheet" href="css/pages/dashboard.css" />
 
   <!-- Authentication Script (check auth before page loads) -->
-  <script>
-    // Check authentication on page load
-    document.addEventListener("DOMContentLoaded", () => {
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) {
-        // Redirect to login if not authenticated
-        window.location.href = "/pages/login.html";
-      }
-    });
-
-    // Also check immediately for faster redirect
-    if (!localStorage.getItem("accessToken")) {
-      window.location.href = "/pages/login.html";
-    }
-  </script>
+  <script src="./js/session-validator-8f7b2c9d6e4a3b1c.js"></script>
 </head>
 
 <body>
@@ -53,9 +39,9 @@
   </div>
 
   <header class="sticky">
-    <div class="flex-row space-between w-full">
+    <div class="flex-row space-between w-full px-5">
       <!-- logo -->
-      <div class="flex items-center gap-24">
+      <div class="flex items-center gap-15">
         <div id="burgerMenu" class="burger-menu">
           <i class="fas fa-bars"></i>
         </div>
@@ -88,7 +74,7 @@
       </div>
 
       <!-- clock and notification -->
-      <div class="flex gap-5 py-8 pr-16">
+      <div class="flex gap-5 py-8 pr-10">
         <!-- Combined Market Status & Clock Pill -->
         <div class="market-status-pill pc-only">
           <div id="navbar-clock" class="navbar-clock-sub"></div>
