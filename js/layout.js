@@ -5,6 +5,7 @@ import { Sidebar } from '../components/sidebar.js';
 import { Navbar } from '../components/navbar.js';
 // import { AlertManager } from './alerts.js';
 import NotificationService from '../services/notificationService.js';
+import { getStockImageUrl } from './stockImageProvider.js';
 
 export const Layout = {
     async init() {
@@ -627,7 +628,7 @@ export const Layout = {
                              style="display: flex; align-items: center; gap: 0.75rem; padding: 10px 16px; cursor: pointer; transition: all 0.2s; border-bottom: 1px solid rgba(255,255,255,0.02);">
                             
                             <div class="symbol-logo-wrapper" style="position: relative; width: 28px; height: 28px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <img src="${prefix}images/stocks/${s.symbol.toUpperCase()}.png" 
+                                <img src="${getStockImageUrl(s.symbol, prefix, s.name)}" 
                                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
                                      alt="${s.symbol}" 
                                      style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
@@ -988,7 +989,7 @@ export const Layout = {
                 const imgEl = document.getElementById('qv-logo-img');
                 const avatarEl = document.getElementById('qv-logo-avatar');
                 if (imgEl && avatarEl) {
-                    imgEl.src = `${prefix}images/stocks/${stock.symbol.toUpperCase()}.png`;
+                    imgEl.src = getStockImageUrl(stock.symbol, prefix, stock.name);
                     imgEl.style.display = 'block'; // reset in case previously hidden
                     avatarEl.style.display = 'none';
                     avatarEl.innerText = stock.symbol.substring(0, 2);
