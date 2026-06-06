@@ -4,6 +4,7 @@ import DataService from '../../services/dataService.js';
 import StorageService from '../../services/storageService.js';
 import NotificationService from '../../services/notificationService.js';
 import { SymbolSearch } from '../components/symbolSearch.js';
+import { getStockImageUrl } from '../stockImageProvider.js';
 
 let wlSymbolSearch;   // SymbolSearch instance for modal
 
@@ -288,7 +289,7 @@ function render() {
                 onclick="window.location.href='./market/stock-details.html?symbol=${encodeURIComponent(w.symbol)}'">
                 <div class="sym-link">
                     <div class="sym-avatar-wrap">
-                        <img src="../images/stocks/${w.symbol}.png"
+                        <img src="${getStockImageUrl(w.symbol, '../', stock?.name || '')}"
                              alt="${w.symbol}"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="sym-avatar-fallback">${initials}</div>

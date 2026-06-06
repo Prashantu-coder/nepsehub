@@ -5,6 +5,7 @@ import StorageService from '../../services/storageService.js';
 import FeeService from '../../services/feeService.js';
 import PortfolioService from '../../services/portfolioService.js';
 import { SymbolSearch } from '../components/symbolSearch.js';
+import { getStockImageUrl } from '../stockImageProvider.js';
 
 let symbolSearch; // Portfolio modal symbol search instance
 
@@ -268,7 +269,7 @@ function renderHoldings() {
             <td>
                 <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
                   <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="../images/stocks/${h.symbol.toUpperCase()}.png" 
+                    <img src="${getStockImageUrl(h.symbol, '../', stock?.name || '')}" 
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
                          alt="${h.symbol}" 
                          style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
@@ -551,7 +552,7 @@ function renderTransactions() {
             <td style="cursor:pointer;" onclick="showSymbolDetails('${t.symbol}')">
                 <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
                   <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="../images/stocks/${t.symbol.toUpperCase()}.png" 
+                    <img src="${getStockImageUrl(t.symbol, '../', (marketData.find(s => s.symbol === t.symbol)?.name || ''))}" 
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
                          alt="${t.symbol}" 
                          style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
@@ -755,7 +756,7 @@ function renderTaxReport() {
             <td style="cursor:pointer;" onclick="showSymbolDetails('${row.symbol}')">
                 <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
                   <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="../images/stocks/${row.symbol.toUpperCase()}.png" 
+                    <img src="${getStockImageUrl(row.symbol, '../', (marketData.find(s => s.symbol === row.symbol)?.name || ''))}" 
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
                          alt="${row.symbol}" 
                          style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
