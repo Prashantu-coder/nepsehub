@@ -2,6 +2,7 @@ import globalState from "../../state.js";
 import { Layout } from "../../layout.js";
 import DataService from "../../../services/dataService.js";
 import StorageService from "../../../services/storageService.js";
+import { getStockImageUrl } from "../../stockImageProvider.js";
 
 let marketData = [];
 let prevMarketPrices = {}; // Cache to track previous prices for row flashing
@@ -307,7 +308,7 @@ window.renderTable = function () {
               <td class="symbol-cell" title="${stock.name}">
                 <div class="symbol-cell-content" style="display: flex; align-items: center; gap: 0.75rem;">
                   <div class="symbol-logo-wrapper" style="position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="../../images/stocks/${stock.symbol}.png" 
+                    <img src="${getStockImageUrl(stock.symbol, '../../', stock.name)}" 
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
                          alt="${stock.symbol}" 
                          style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
@@ -351,7 +352,7 @@ window.openQuickPanel = async function (symbol) {
     <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
       <div style="display: flex; align-items: center; gap: 1rem;">
         <div class="symbol-logo-wrapper" style="position: relative; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <img src="../../images/stocks/${stock.symbol.toUpperCase()}.png" 
+          <img src="${getStockImageUrl(stock.symbol, '../../', stock.name)}" 
                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
                alt="${stock.symbol}" 
                style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />

@@ -2,6 +2,7 @@ import globalState from '../../state.js';
 import { Layout } from '../../layout.js';
 import DataService from '../../../services/dataService.js';
 import StorageService from '../../../services/storageService.js';
+import { getStockImageUrl } from '../../stockImageProvider.js';
 
 let activeSymbol = null;
 let activeTimeframe = '1D';
@@ -158,7 +159,7 @@ async function renderStockDetails() {
         const imgEl = document.getElementById('detail-logo-img');
         const avatarEl = document.getElementById('detail-logo-avatar');
         if (imgEl && avatarEl) {
-            imgEl.src = `../../images/stocks/${stock.symbol.toUpperCase()}.png`;
+            imgEl.src = getStockImageUrl(stock.symbol, '../../', stock.name || '');
             imgEl.style.display = 'block';
             avatarEl.style.display = 'none';
             avatarEl.innerText = stock.symbol.substring(0, 2);
