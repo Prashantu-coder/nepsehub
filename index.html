@@ -1,28 +1,23 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NEPSE HUB | Dashboard</title>
-
   <!-- SEO Meta Tags -->
   <meta name="description" content="Premium NEPSE Stock Dashboard for real-time market analysis, portfolio tracking, and latest market news." />
   <meta name="keywords" content="NEPSE, Nepal Stock Exchange, Stock Dashboard, Portfolio Tracker, Nepal Finance" />
-
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <!-- Custom CSS -->
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/easy.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages/dashboard.css" />
-
   <!-- Authentication Script (check auth before page loads) -->
   <script src="./js/session-validator-8f7b2c9d6e4a3b1c.js"></script>
 </head>
@@ -83,62 +78,35 @@
 
         <!-- Notification Bell -->
         <div class="nav-notification-wrapper">
-          <button
-            id="notification-bell"
-            class="btn-icon"
-          >
+          <button id="notification-bell" class="btn-icon">
             <i class="far fa-bell"></i>
-            <span
-              id="notif-badge"
-              class="notif-badge hidden"
-            >0</span>
+            <span id="notif-badge" class="notif-badge hidden">0</span>
           </button>
-          <div
-            id="notif-dropdown"
-            class="notif-dropdown glass hidden"
-          >
+          <div id="notif-dropdown" class="notif-dropdown glass hidden">
             <div class="notif-header">
               <h5>Notifications</h5>
               <div class="flex items-center gap-8">
-                <button
-                  id="sound-toggle-btn"
-                  class="sound-toggle"
-                  title="Toggle alert sound"
-                >
+                <button id="sound-toggle-btn" class="sound-toggle" title="Toggle alert sound">
                   <i class="fas fa-volume-up"></i>
                 </button>
                 <button id="mark-read-btn">Mark all as read</button>
               </div>
             </div>
             <div class="notif-filters">
-              <button
-                class="notif-filter-btn active"
-                data-filter="all"
-              >
+              <button class="notif-filter-btn active" data-filter="all">
                 All
               </button>
-              <button
-                class="notif-filter-btn"
-                data-filter="buy"
-              >
+              <button class="notif-filter-btn" data-filter="buy">
                 Buy Signals
               </button>
-              <button
-                class="notif-filter-btn"
-                data-filter="sell"
-              >
+              <button class="notif-filter-btn" data-filter="sell">
                 Sell Signals
               </button>
-              <button
-                class="notif-filter-btn"
-                data-filter="stoploss"
-              >
+              <button class="notif-filter-btn" data-filter="stoploss">
                 Stop Loss
               </button>
             </div>
-            <div
-              id="notif-list"
-              class="notif-list">
+            <div id="notif-list" class="notif-list">
               <div class="notif-empty">
                 No notifications in the last 7 days
               </div>
@@ -658,11 +626,19 @@
       </div>
     </main>
   </div>
+  
+  <div class="ticker-wrapper">
+    <div class="ticker-track" id="tickerTrack">
+      <div class="loading-placeholder">⏳ Fetching watchlist & live prices... ticker will appear soon</div>
+    </div>
+  </div>
 
   <!-- Initialization Script -->
   <script src="./js/auth.js"></script>
   <script src="./js/security.js"></script>
   <script type="module" src="./js/pages/index.js"></script>
+  <script src="./js/7f9c2d4a8b1e5c3d9f0a7b6c2e1d4f8a5c9e7b3d1a6f4c8e2b9d0f7a3c5e1d6.js"></script>
+  <script type="module" src="./components/9a7f3c1e5d8b4a2f6c0e9d7b1a3f5c8e2d6b4a9f1c7e3d5b8a0f2c6e4d9b1a7.js"></script>
 </body>
 
 </html>
