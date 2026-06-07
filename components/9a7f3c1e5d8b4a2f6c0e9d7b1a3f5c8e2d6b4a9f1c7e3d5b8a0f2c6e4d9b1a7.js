@@ -141,14 +141,19 @@ function injectTickerCSS() {
     style.id = 'ticker-inserted-styles';
     style.textContent = `
         .ticker-wrapper {
-            width: 100%;
+            height: var(--ticker-height, 46px);
+            left: 48px;
+            right: 0;
             bottom: 0;
             overflow-x: hidden;
             position: fixed;
             background: var(--surface-hover);
-            padding: 0.2rem 0;
             border-top: 1px solid rgba(56, 189, 248, 0.25);
             border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 0;
+            z-index: 999;
+            display: flex;
+            align-items: center;
         }
         .ticker-track {
             display: flex;
@@ -156,6 +161,7 @@ function injectTickerCSS() {
             will-change: transform;
             animation: scrollTicker 10s linear infinite;
             width: max-content;
+            min-height: 40px !important;
         }
         .ticker-wrapper:hover .ticker-track {
             animation-play-state: paused !important;
@@ -210,9 +216,10 @@ function injectTickerCSS() {
         }
         .ticker-placeholder {
             text-align: center;
-            padding: 1rem;
+            padding: 0.5rem;
             color: #8ba0c0;
             width: 100%;
+            min-height: 45px !important;
         }
         @keyframes scrollTicker {
             0% { transform: translateX(0%); }
