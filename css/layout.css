@@ -17,7 +17,23 @@
   /* subtract navbar height */
   width: 100%;
   /* background-color: var(--background); */
-  background: linear-gradient(150deg, #0D1B2A 0%, #163352 100%) !important;
+  background: linear-gradient(150deg, var(--app-gradient-start) 0%, var(--app-gradient-end) 100%) !important;
+}
+
+.app-container {
+  transition: background 0.3s ease;
+}
+
+.app-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 25% 50%, rgba(255, 255, 255, 0.10) 0%, transparent 50%);
+  z-index: 0;
 }
 
 /* Sidebar Layout - Hidden by default on PC, Off-canvas on Mobile */
@@ -266,8 +282,8 @@
     font-size: small;
   }
 
-  .nepse{
-    font-size: 0.8rem; 
+  .nepse {
+    font-size: 0.8rem;
   }
 }
 
