@@ -1,226 +1,211 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NEPSE HUB | Login</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="../css/base.css" />
-    <link rel="stylesheet" href="../css/easy.css" />
-    <link rel="stylesheet" href="../css/layout.css" />
-    <link rel="stylesheet" href="../css/components.css" />
-    <style>
-      .auth-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        background: linear-gradient(
-          135deg,
-          var(--bg-dark) 0%,
-          var(--bg-darker) 100%
-        );
-      }
+<html lang="en">
 
-      .auth-box {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 3rem;
-        width: 100%;
-        max-width: 400px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      }
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>NEPSE HUB | Login</title>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+ <link rel="stylesheet" href="../css/base.css" />
+ <link rel="stylesheet" href="../css/easy.css" />
+ <link rel="stylesheet" href="../css/layout.css" />
+ <link rel="stylesheet" href="../css/components.css" />
+ <style>
+  .auth-container {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   min-height: 100vh;
+   background: linear-gradient(135deg,
+     var(--bg-dark) 0%,
+     var(--bg-darker) 100%);
+  }
 
-      .auth-header {
-        text-align: center;
-        margin-bottom: 2rem;
-      }
+  .auth-box {
+   background: var(--surface);
+   border: 1px solid var(--border);
+   border-radius: 12px;
+   padding: 3rem;
+   width: 100%;
+   max-width: 400px;
+   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
 
-      .auth-logo {
-        font-size: 2.5rem;
-        color: var(--primary);
-        margin-bottom: 0.5rem;
-      }
+  .auth-header {
+   text-align: center;
+   margin-bottom: 2rem;
+  }
 
-      .auth-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--text);
-        margin-bottom: 0.5rem;
-      }
+  .auth-logo {
+   font-size: 2.5rem;
+   color: var(--primary);
+   margin-bottom: 0.5rem;
+  }
 
-      .auth-subtitle {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-      }
+  .auth-title {
+   font-size: 1.5rem;
+   font-weight: 600;
+   color: var(--text);
+   margin-bottom: 0.5rem;
+  }
 
-      .form-group {
-        margin-bottom: 1.5rem;
-      }
+  .auth-subtitle {
+   font-size: 0.875rem;
+   color: var(--text-secondary);
+  }
 
-      .form-label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--text);
-        margin-bottom: 0.5rem;
-      }
+  .form-group {
+   margin-bottom: 1.5rem;
+  }
 
-      .form-input {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        background: var(--input-bg);
-        color: var(--text);
-        font-size: 1rem;
-        transition: all 0.3s ease;
-      }
+  .form-label {
+   display: block;
+   font-size: 0.875rem;
+   font-weight: 600;
+   color: var(--text);
+   margin-bottom: 0.5rem;
+  }
 
-      .form-input:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-      }
+  .form-input {
+   width: 100%;
+   padding: 0.75rem;
+   border: 1px solid var(--border);
+   border-radius: 6px;
+   background: var(--input-bg);
+   color: var(--text);
+   font-size: 1rem;
+   transition: all 0.3s ease;
+  }
 
-      .submit-btn {
-        width: 100%;
-        padding: 0.75rem;
-        background: var(--primary);
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 1rem;
-      }
+  .form-input:focus {
+   outline: none;
+   border-color: var(--primary);
+   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
 
-      .submit-btn:hover {
-        background: var(--primary-dark);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
-      }
+  .submit-btn {
+   width: 100%;
+   padding: 0.75rem;
+   background: var(--primary);
+   color: white;
+   border: none;
+   border-radius: 6px;
+   font-size: 1rem;
+   font-weight: 600;
+   cursor: pointer;
+   transition: all 0.3s ease;
+   margin-top: 1rem;
+  }
 
-      .error-message {
-        color: #ef4444;
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
-        display: none;
-      }
+  .submit-btn:hover {
+   background: var(--primary-dark);
+   transform: translateY(-2px);
+   box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+  }
 
-      .success-message {
-        color: #10b981;
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
-        display: none;
-      }
+  .error-message {
+   color: #ef4444;
+   font-size: 0.875rem;
+   margin-top: 0.5rem;
+   display: none;
+  }
 
-      .form-footer {
-        text-align: center;
-        margin-top: 1.5rem;
-        border-top: 1px solid var(--border);
-        padding-top: 1.5rem;
-      }
+  .success-message {
+   color: #10b981;
+   font-size: 0.875rem;
+   margin-top: 0.5rem;
+   display: none;
+  }
 
-      .form-footer-text {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-      }
+  .form-footer {
+   text-align: center;
+   margin-top: 1.5rem;
+   border-top: 1px solid var(--border);
+   padding-top: 1.5rem;
+  }
 
-      .form-footer-link {
-        color: var(--primary);
-        text-decoration: none;
-        font-weight: 600;
-        margin-left: 0.5rem;
-      }
+  .form-footer-text {
+   font-size: 0.875rem;
+   color: var(--text-secondary);
+  }
 
-      .form-footer-link:hover {
-        text-decoration: underline;
-      }
+  .form-footer-link {
+   color: var(--primary);
+   text-decoration: none;
+   font-weight: 600;
+   margin-left: 0.5rem;
+  }
 
-      .loading {
-        display: none;
-      }
+  .form-footer-link:hover {
+   text-decoration: underline;
+  }
 
-      .loading.active {
-        display: inline-block;
-        margin-right: 0.5rem;
-      }
+  .loading {
+   display: none;
+  }
 
-      @media (max-width: 600px) {
-        .auth-box {
-          padding: 2rem;
-        }
+  .loading.active {
+   display: inline-block;
+   margin-right: 0.5rem;
+  }
 
-        .auth-title {
-          font-size: 1.25rem;
-        }
-      }
-    </style>
-  </head>
+  @media (max-width: 600px) {
+   .auth-box {
+    padding: 2rem;
+   }
 
-  <body>
-    <div class="auth-container">
-      <div class="auth-box">
-        <div class="auth-header">
-          <div class="auth-logo">
-            <i class="fas fa-chart-line"></i>
-          </div>
-          <h1 class="auth-title">NEPSE HUB</h1>
-          <p class="auth-subtitle">Login to your account</p>
-        </div>
+   .auth-title {
+    font-size: 1.25rem;
+   }
+  }
+ </style>
+</head>
 
-        <form id="loginForm">
-          <div class="form-group">
-            <label class="form-label">User Code</label>
-            <input
-              type="text"
-              id="code"
-              class="form-input"
-              placeholder="e.g., 20260524001"
-              required
-            />
-            <div class="error-message" id="codeError"></div>
-          </div>
+<body>
+ <div class="auth-container">
+  <div class="auth-box">
+   <div class="auth-header">
+    <div class="auth-logo">
+     <i class="fas fa-chart-line"></i>
+    </div>
+    <h1 class="auth-title">NEPSE HUB</h1>
+    <p class="auth-subtitle">Login to your account</p>
+   </div>
 
-          <div class="form-group">
-            <label class="form-label">Password</label>
-            <input
-              type="password"
-              id="password"
-              class="form-input"
-              placeholder="Your password"
-              required
-            />
-            <div class="error-message" id="passwordError"></div>
-          </div>
-
-          <div id="generalError" class="error-message"></div>
-
-          <button type="submit" class="submit-btn">
-            <span class="loading" id="loading">
-              <i class="fas fa-spinner fa-spin"></i>
-            </span>
-            <span id="buttonText">Login</span>
-          </button>
-        </form>
-
-        <div class="form-footer">
-          <p class="form-footer-text">
-            Don't have an account?
-            <a href="register.html" class="form-footer-link">Register here</a>
-          </p>
-        </div>
-      </div>
+   <form id="loginForm">
+    <div class="form-group">
+     <label class="form-label">User Code</label>
+     <input type="text" id="code" class="form-input" placeholder="e.g., 20260524001" required />
+     <div class="error-message" id="codeError"></div>
     </div>
 
-    <script src="../js/auth.js"></script>
-    <script src="../js/pages/login.js"></script>
-  </body>
+    <div class="form-group">
+     <label class="form-label">Password</label>
+     <input type="password" id="password" class="form-input" placeholder="Your password" required />
+     <div class="error-message" id="passwordError"></div>
+    </div>
+
+    <div id="generalError" class="error-message"></div>
+
+    <button type="submit" class="submit-btn">
+     <span class="loading" id="loading">
+      <i class="fas fa-spinner fa-spin"></i>
+     </span>
+     <span id="buttonText">Login</span>
+    </button>
+   </form>
+
+   <div class="form-footer">
+    <p class="form-footer-text">
+     Don't have an account?
+     <a href="register.html" class="form-footer-link">Register here</a>
+    </p>
+   </div>
+  </div>
+ </div>
+
+ <script src="../js/auth.js"></script>
+ <script src="../js/pages/login.js"></script>
+</body>
+
 </html>
