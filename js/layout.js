@@ -60,13 +60,14 @@ export const Layout = {
             StorageService.load('nepse_watchlist').then(d => d || [])
         ]);
 
+        const savedTheme = localStorage.getItem('theme') || 'classic-dark';
         globalState.setState({
-            theme: 'dark',
+            theme: savedTheme,
             portfolio: savedPortfolio,
             watchlist: savedWatchlist
         });
 
-        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.setAttribute('data-theme', savedTheme);
 
         // Render Components
         this.renderComponents();
