@@ -1327,7 +1327,7 @@ th.sortable {
 /* Premium Tab Sub-Nav */
 .sub-nav-tabs {
   display: flex;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--background-secondary);
   padding: 0.4rem;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -1381,7 +1381,7 @@ th.sortable {
 }
 
 .premium-select {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--surface);
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 0.8rem 1.25rem;
   border-radius: 14px;
@@ -1408,7 +1408,7 @@ th.sortable {
 }
 
 .premium-search {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--surface);
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 0.8rem 1.25rem 0.8rem 2.75rem;
   border-radius: 14px;
@@ -1445,7 +1445,7 @@ th.sortable {
   overflow-x: auto;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(15, 23, 42, 0.3);
+  background: var(--surface-gradient);
   backdrop-filter: blur(20px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
@@ -1460,8 +1460,8 @@ th.sortable {
   font-size: 0.9rem;
 
   th {
-    background: rgba(15, 23, 42, 0.6);
-    color: var(--text-secondary);
+    background: var(--surface);
+    color: var(--text-primary);
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.75rem;
