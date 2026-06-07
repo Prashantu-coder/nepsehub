@@ -451,7 +451,7 @@
   padding: 0.6rem 1rem;
   border-radius: 12px;
   margin-top: 0.5rem;
-  background: rgba(18, 18, 24, 0.6) !important;
+  background: var(--surface) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
@@ -463,9 +463,9 @@
 }
 
 .filter-dropdown {
-  background: rgba(30, 30, 40, 0.6) !important;
+  background: var(--background-secondary) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: #ffffff !important;
+  color: var(--text-primary) !important;
   padding: 0 0.8rem;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -477,7 +477,7 @@
 }
 
 .filter-search {
-  background: rgba(30, 30, 40, 0.6) !important;
+  background: var(--background-secondary) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   color: #ffffff !important;
   padding: 0 0.8rem;
@@ -510,8 +510,8 @@
 }
 
 .btn-clear {
-  background: rgba(255, 255, 255, 0.05) !important;
-  color: #ffffff !important;
+  background: var(--background-secondary) !important;
+  color: var(--text-primary) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   padding: 0 1rem;
   border-radius: 8px;

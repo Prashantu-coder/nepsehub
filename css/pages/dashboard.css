@@ -74,7 +74,7 @@
 }
 
 .wl-pill {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--background-primary);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 20px;
     padding: 0.35rem 0.75rem;
@@ -776,6 +776,32 @@
 @media (max-width: 480px) {
     .summary-pulse-grid {
         grid-template-columns: 1fr;
+    }
+
+    .main-chart-container {
+        width: 320px;
+        height: 190px;
+        position: relative;
+    }
+
+    .dropdown-trigger, 
+    .chart-selector-arrow,
+    .chart-header-price,
+    .chart-header-pct-badge {
+        font-size: 15px;
+    }
+
+    .chart-header-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .chart-header-left {
+        flex-direction: row;
+    }
+
+    .chart-header-right {
+        align-items: flex-start;
     }
 }
 
