@@ -25,6 +25,7 @@
   --transition-slow: 0.35s ease;
   --app-gradient-start: #0D1B2A;
   --app-gradient-end: #163352;
+  --ticker-height: 46px;
 }
 
 /* 1. Pitch Black/OLED Theme */
@@ -227,7 +228,8 @@ header {
   border: 1px solid var(--surface-border);
   border-radius: 15%;
   width: 48px;
-  height: 45px;
+  height: 48Wpx;
+  padding: 0.2rem 0;
   cursor: pointer;
   font-size: 24px;
   display: flex;
