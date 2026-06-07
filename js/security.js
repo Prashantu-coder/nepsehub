@@ -1,4 +1,4 @@
-Block DevTools shortcuts(F12, Ctrl + Shift + I, Ctrl + Shift + J, Ctrl + Shift + C, Ctrl + U)
+// Block DevTools shortcuts (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U)
 document.addEventListener('keydown', function (e) {
     // F12
     if (e.keyCode === 123) {
