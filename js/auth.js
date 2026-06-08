@@ -187,6 +187,19 @@ class AuthManager {
     };
   }
 
+  // Check if the access token is expired or about to expire
+  isTokenExpired() {
+    if (!this.accessToken) return true;
+    try {
+      const decoded = this.parseJwt(this.accessToken);
+      if (!decoded || !decoded.exp) return true;
+      // Expired if current time is within 30 seconds of expiry
+      return Date.now() >= (decoded.exp * 1000) - 30000;
+    } catch (e) {
+      return true;
+    }
+  }
+
   // API call helper with auth
   async apiCall(endpoint, options = {}) {
     const url = endpoint.startsWith('http') ? endpoint : `${this.API_BASE}${endpoint}`;
@@ -198,6 +211,18 @@ class AuthManager {
     // Add auth token if available and not a public endpoint
     const publicAuthEndpoints = ['/api/auth/login', '/api/auth/register', '/api/auth/refresh'];
     const isPublicAuth = publicAuthEndpoints.some(ep => url.includes(ep));
+
+    // Proactively refresh the token if it's expired before making the request
+    if (this.accessToken && !isPublicAuth && this.isTokenExpired() && this.refreshToken) {
+      const refreshed = await this.refreshAccessToken();
+      if (!refreshed) {
+        this.clearTokens();
+        sessionStorage.setItem('login_toast_message', 'Session expired. Please log in again.');
+        window.location.href = '/pages/login.html';
+        return new Response(null, { status: 401 });
+      }
+    }
+
     if (this.accessToken && !isPublicAuth) {
       headers.Authorization = `Bearer ${this.accessToken}`;
     }
