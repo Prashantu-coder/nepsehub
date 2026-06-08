@@ -124,7 +124,7 @@
   justify-content: center;
   gap: 3px;
   padding: 0.35rem 0.95rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--background-pill);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   min-width: 195px;
@@ -300,9 +300,9 @@
 
 #notification-bell {
   position: relative;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--background-pill);
   width: 42px;
-  height: 42px;
+  height: 45px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   cursor: pointer;
@@ -749,9 +749,9 @@
 }
 
 #user-profile-btn {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--background-pill);
   width: 42px;
-  height: 42px;
+  height: 45px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   cursor: pointer;
