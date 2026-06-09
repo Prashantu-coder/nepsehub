@@ -9,6 +9,7 @@
   --background: #0d1117;
   --background-secondary: rgba(255, 255, 255, 0.15);
   --background-primary: rgba(34, 30, 30, 0.945);
+  --background-pill: rgba(146, 146, 146, 0.25);
   --surface-solid: #161b22;
   --surface: rgba(22, 27, 34, 0.925);
   --surface-hover: #21262d;
@@ -38,6 +39,7 @@
   --background: #000000;
   --background-secondary: rgba(255, 255, 255, 0.08);
   --background-primary: rgba(22, 22, 22, 0.945);
+  --background-pill: rgba(146, 146, 146, 0.25);
   --surface-solid: #0a0a0a;
   --surface: rgba(10, 10, 10, 0.95);
   --surface-hover: #141414;
@@ -64,6 +66,7 @@
   --background: #1e293b;
   --background-secondary: rgba(255, 255, 255, 0.12);
   --background-primary: rgba(58, 75, 100, 0.945);
+  --background-pill: rgba(146, 146, 146, 0.25);
   --surface-solid: #334155;
   --surface: rgba(51, 65, 85, 0.925);
   --surface-hover: #475569;
@@ -90,6 +93,7 @@
   --background: #0f172a;
   --background-secondary: rgba(255, 255, 255, 0.1);
   --background-primary: rgba(53, 72, 82, 0.719);
+  --background-pill: rgba(146, 146, 146, 0.25);
   --surface-solid: #1e293b;
   --surface: rgba(30, 41, 59, 0.925);
   --surface-hover: #334155;
@@ -116,6 +120,7 @@
   --background: #ffffff;
   --background-secondary: rgba(0, 0, 0, 0.05);
   --background-primary: rgba(192, 192, 192, 0.411);
+  --background-pill: rgba(37, 32, 32, 0.25);
   --surface-solid: #f3f4f6;
   --surface: rgba(243, 244, 246, 0.925);
   --surface-hover: #e5e7eb;
