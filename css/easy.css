@@ -40,6 +40,9 @@
 .f-17 {font-size: 17px;}
 .f-19 {font-size: 19px;}
 
+.font-roboto {font-family: "Roboto", sans-serif; font-style: normal;}
+.font-poppins {font-family: "Poppins", sans-serif;}
+
 .text-xs {font-size: 12px; line-height: 16px;}
 .text-sm {font-size: 14px; line-height: 20px;}
 .text-2xl {font-size: 24px; line-height: 32px;}
