@@ -6,12 +6,12 @@ import DataService from '../services/dataService.js';
 
 // Configuration
 const REFRESH_INTERVAL_MS = 8000;   // 8 seconds (from HTML footer)
-const SCROLL_SPEED_SEC = 40;        // seconds for one full scroll (lower = faster)
 
 let tickerTrack = null;
 let currentSymbols = [];
 let currentMarketData = [];
 let refreshTimer = null;
+let lastSymbolsJson = null;
 
 // Helper: format price (2 decimals)
 function formatPrice(val) {
@@ -34,15 +34,14 @@ function createTickerItem(symbol, stock) {
     const ltp = stock?.price ? parseFloat(stock.price) : null;
     const change = stock?.changePercent ? parseFloat(stock.changePercent) : null;
 
-    const priceClass = (change !== null && change >= 0) ? 'positive' : (change !== null && change < 0 ? 'negative' : 'neutral');
-    const changeClass = (change !== null && change >= 0) ? 'positive' : (change !== null && change < 0 ? 'negative' : 'neutral');
+    const trendClass = (change !== null && change >= 0) ? 'positive' : (change !== null && change < 0 ? 'negative' : 'neutral');
     const borderColor = (change !== null && change >= 0) ? '#4ade80' : (change !== null && change < 0 ? '#f87171' : '#6b7280');
 
     return `
         <div class="ticker-item" style="border-left-color: ${borderColor};">
             <span class="symbol">${escapeHtml(symbol)}</span>
-            <span class="price ${priceClass}">${ltp ? formatPrice(ltp) : '—'}</span>
-            <span class="change ${changeClass}">${change ? formatChange(change) : '—'}</span>
+            <span class="price ${trendClass}">${ltp ? formatPrice(ltp) : '—'}</span>
+            <span class="change ${trendClass}">${change ? formatChange(change) : '—'}</span>
             <span class="separator"></span>
         </div>
     `;
@@ -65,15 +64,50 @@ function renderTicker() {
     if (!currentSymbols.length) {
         tickerTrack.innerHTML = '<div class="ticker-placeholder">✨ Add stocks to watchlist to display here ✨</div>';
         tickerTrack.style.animation = 'none';
+        lastSymbolsJson = null;
         return;
     }
 
-    // Build single set of items
-    let repeatCount = 1;
-    if (currentSymbols.length > 0) {
-        // We want at least 15 items to ensure seamless marquee scrolling across all screen widths
-        repeatCount = Math.ceil(15 / currentSymbols.length);
+    // We want at least 15 items to ensure seamless marquee scrolling across all screen widths
+    const repeatCount = Math.ceil(15 / currentSymbols.length);
+    const totalItems = currentSymbols.length * repeatCount;
+    const duration = totalItems * 3.5;
+
+    // Check if the symbol list has changed
+    const currentSymbolsJson = JSON.stringify(currentSymbols);
+    if (lastSymbolsJson === currentSymbolsJson) {
+        const items = tickerTrack.querySelectorAll('.ticker-item');
+        if (items.length === totalItems * 2) {
+            items.forEach((item, index) => {
+                const sym = currentSymbols[index % currentSymbols.length];
+                const stock = currentMarketData.find(s => s.symbol.toUpperCase() === sym.toUpperCase());
+                
+                const ltp = stock?.price ? parseFloat(stock.price) : null;
+                const change = stock?.changePercent ? parseFloat(stock.changePercent) : null;
+
+                const trendClass = (change !== null && change >= 0) ? 'positive' : (change !== null && change < 0 ? 'negative' : 'neutral');
+                const borderColor = (change !== null && change >= 0) ? '#4ade80' : (change !== null && change < 0 ? '#f87171' : '#6b7280');
+
+                item.style.borderLeftColor = borderColor;
+
+                const priceEl = item.querySelector('.price');
+                if (priceEl) {
+                    priceEl.className = `price ${trendClass}`;
+                    priceEl.textContent = ltp ? formatPrice(ltp) : '—';
+                }
+
+                const changeEl = item.querySelector('.change');
+                if (changeEl) {
+                    changeEl.className = `change ${trendClass}`;
+                    changeEl.textContent = change ? formatChange(change) : '—';
+                }
+            });
+            return; // In-place update complete, no DOM rebuild or animation reset!
+        }
     }
+
+    // If symbols list changed or DOM structure is different, rebuild
+    lastSymbolsJson = currentSymbolsJson;
 
     let singleSetHtml = '';
     for (let r = 0; r < repeatCount; r++) {
@@ -86,14 +120,11 @@ function renderTicker() {
     // Duplicate for infinite scroll effect
     tickerTrack.innerHTML = singleSetHtml + singleSetHtml;
 
-    // Calculate animation duration dynamically to maintain a constant, readable speed (3.5 seconds per item)
-    const totalItems = currentSymbols.length * repeatCount;
-    const duration = totalItems * 3.5;
-
-    // Reset animation to avoid glitch
-    tickerTrack.style.animation = 'none';
-    tickerTrack.offsetHeight; // force reflow
-    tickerTrack.style.animation = `scrollTicker ${duration}s linear infinite`;
+    // Update animation directly without resetting to 'none' to keep moving smoothly
+    const expectedAnimation = `scrollTicker ${duration}s linear infinite`;
+    if (tickerTrack.style.animation !== expectedAnimation) {
+        tickerTrack.style.animation = expectedAnimation;
+    }
 }
 
 // Update live status badge and timestamp info
@@ -241,6 +272,14 @@ export function initTicker() {
     refreshTicker();
     if (refreshTimer) clearInterval(refreshTimer);
     refreshTimer = setInterval(refreshTicker, REFRESH_INTERVAL_MS);
+
+    // Register event listener for watchlist modifications
+    if (!window._tickerListenerAdded) {
+        window.addEventListener('watchlistUpdated', () => {
+            refreshTicker();
+        });
+        window._tickerListenerAdded = true;
+    }
 }
 
 // Optional: stop ticker (e.g., on page unload)
