@@ -23,6 +23,7 @@ const StorageService = {
             if (!response.ok) throw new Error('Failed to add to watchlist');
             const data = await response.json();
             await window.auth.refreshWatchlist();
+            window.dispatchEvent(new CustomEvent('watchlistUpdated'));
             return data.success;
         } catch (err) {
             console.error('AddToWatchlist Error:', err.message);
@@ -39,6 +40,7 @@ const StorageService = {
             if (!response.ok) throw new Error('Failed to update watchlist item');
             const data = await response.json();
             await window.auth.refreshWatchlist();
+            window.dispatchEvent(new CustomEvent('watchlistUpdated'));
             return data.success;
         } catch (err) {
             console.error('UpdateWatchlistItem Error:', err.message);
@@ -54,6 +56,7 @@ const StorageService = {
             if (!response.ok) throw new Error('Failed to remove from watchlist');
             const data = await response.json();
             await window.auth.refreshWatchlist();
+            window.dispatchEvent(new CustomEvent('watchlistUpdated'));
             return data.success;
         } catch (err) {
             console.error('RemoveFromWatchlist Error:', err.message);
