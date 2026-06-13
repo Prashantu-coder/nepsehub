@@ -177,6 +177,7 @@
               ">Technical</a>
           <a href="#" class="tab-link" id="tab-financials">Financials</a>
           <a href="#" class="tab-link" id="tab-broker">Broker Analytics</a>
+          <a href="#" class="tab-link" id="tab-price-history">Price History</a>
         </div>
 
         <!-- Stock Details Header Card (Matches wireframe layout) -->
@@ -504,6 +505,70 @@
               <i class="fas fa-folder-open empty-icon"></i>
               <p>
                 No quarterly financial data available for the selected symbol.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price History Tab Content Container -->
+        <div id="price-history-tab-content" style="display: none">
+          <div class="glass broker-analytics-card">
+            <div class="card-header-flex">
+              <div class="card-title-text">
+                <i class="fas fa-history" style="color: var(--primary); margin-right: 0.5rem"></i>
+                PRICE HISTORY
+              </div>
+            </div>
+
+            <div class="broker-stats-intro">
+              Historical price records for <span class="highlight-symbol" id="price-history-symbol-label">SYMBOL</span>.
+            </div>
+
+            <div class="broker-loading-overlay" id="price-history-loader" style="display: none">
+              <div class="spinner-loader"></div>
+              <div class="loader-text">
+                Loading price history...
+              </div>
+            </div>
+
+            <div class="financials-table-wrapper" id="price-history-table-container" style="overflow-x: auto; margin-top: 1.5rem">
+              <table class="financials-table glass-table" style="width: 100%; border-collapse: collapse; text-align: left; min-width: 600px;">
+                <thead>
+                  <tr>
+                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color);">Date</th>
+                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">Open (Rs.)</th>
+                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">High (Rs.)</th>
+                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">Low (Rs.)</th>
+                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">Close (Rs.)</th>
+                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">Change</th>
+                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">Volume</th>
+                  </tr>
+                </thead>
+                <tbody id="price-history-tbody">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination UI -->
+            <div id="price-history-pagination" class="flex justify-between items-center mt-20 gap-10" style="padding: 10px 0;">
+              <div id="price-history-page-info" style="color: var(--text-secondary); font-size: 0.9rem;">
+                Showing 0-0 of 0 entries
+              </div>
+              <div class="flex gap-10">
+                <button id="price-history-prev-btn" class="timeframe-btn" style="padding: 6px 12px; cursor: pointer;">
+                  <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <button id="price-history-next-btn" class="timeframe-btn" style="padding: 6px 12px; cursor: pointer;">
+                  Next <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="broker-empty-state" id="price-history-empty" style="display: none">
+              <i class="fas fa-folder-open empty-icon"></i>
+              <p>
+                No price history available for the selected symbol.
               </p>
             </div>
           </div>
