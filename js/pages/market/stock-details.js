@@ -9,6 +9,9 @@ let activeTimeframe = '1D';
 let detailsChartInstance = null;
 let financialsData = [];
 let visibleQuartersCount = 2;
+let priceHistoryData = [];
+let currentHistoryPage = 1;
+const historyItemsPerPage = 30;
 
 async function init() {
     // 1. Initialize global layout structure (renders navbar, sidebar, clock, etc.)
@@ -50,15 +53,18 @@ async function init() {
     const tabOverview = document.getElementById('tab-overview');
     const tabBroker = document.getElementById('tab-broker');
     const tabFinancials = document.getElementById('tab-financials');
+    const tabPriceHistory = document.getElementById('tab-price-history');
     
     const overviewContent = document.getElementById('overview-tab-content');
     const brokerContent = document.getElementById('broker-tab-content');
     const financialsContent = document.getElementById('financials-tab-content');
+    const priceHistoryContent = document.getElementById('price-history-tab-content');
 
     const tabs = [
         { btn: tabOverview, content: overviewContent },
         { btn: tabBroker, content: brokerContent, onActive: async () => await loadBrokerAnalytics(1) },
-        { btn: tabFinancials, content: financialsContent, onActive: async () => await loadFinancialsAnalytics() }
+        { btn: tabFinancials, content: financialsContent, onActive: async () => await loadFinancialsAnalytics() },
+        { btn: tabPriceHistory, content: priceHistoryContent, onActive: async () => await loadPriceHistory() }
     ];
 
     tabs.forEach(tab => {
@@ -77,6 +83,29 @@ async function init() {
             };
         }
     });
+
+    // Setup Price History Pagination Buttons
+    const prevHistoryBtn = document.getElementById('price-history-prev-btn');
+    const nextHistoryBtn = document.getElementById('price-history-next-btn');
+    if (prevHistoryBtn) {
+        prevHistoryBtn.onclick = (e) => {
+            e.preventDefault();
+            if (currentHistoryPage > 1) {
+                currentHistoryPage--;
+                renderPriceHistoryTable();
+            }
+        };
+    }
+    if (nextHistoryBtn) {
+        nextHistoryBtn.onclick = (e) => {
+            e.preventDefault();
+            const totalPages = Math.ceil(priceHistoryData.length / historyItemsPerPage);
+            if (currentHistoryPage < totalPages) {
+                currentHistoryPage++;
+                renderPriceHistoryTable();
+            }
+        };
+    }
 
     // 8. Setup broker timeframe buttons event listeners
     const brokerTimeframeButtons = document.querySelectorAll('#broker-timeframes .timeframe-btn');
@@ -1029,6 +1058,140 @@ function renderFinancialsTable() {
     });
 
     tbody.innerHTML = bodyHtml;
+}
+
+async function loadPriceHistory() {
+    const loader = document.getElementById('price-history-loader');
+    const emptyState = document.getElementById('price-history-empty');
+    const tableContainer = document.getElementById('price-history-table-container');
+    const paginationEl = document.getElementById('price-history-pagination');
+    const symbolLabel = document.getElementById('price-history-symbol-label');
+
+    if (symbolLabel) {
+        symbolLabel.innerText = activeSymbol;
+    }
+
+    if (loader) loader.style.display = 'flex';
+    if (emptyState) emptyState.style.display = 'none';
+    if (tableContainer) tableContainer.style.display = 'none';
+    if (paginationEl) paginationEl.style.display = 'none';
+
+    try {
+        console.log(`📡 Fetching price history for ${activeSymbol}`);
+        const result = await DataService.getSymbolData(activeSymbol);
+        
+        if (result && result.success && Array.isArray(result.data)) {
+            priceHistoryData = result.data;
+            currentHistoryPage = 1;
+            if (tableContainer) tableContainer.style.display = 'block';
+            if (paginationEl) paginationEl.style.display = 'flex';
+            renderPriceHistoryTable();
+        } else {
+            priceHistoryData = [];
+            if (emptyState) emptyState.style.display = 'block';
+        }
+    } catch (err) {
+        console.error("Failed to load price history:", err);
+        priceHistoryData = [];
+        if (emptyState) emptyState.style.display = 'block';
+    } finally {
+        if (loader) loader.style.display = 'none';
+    }
+}
+
+function renderPriceHistoryTable() {
+    const tbody = document.getElementById('price-history-tbody');
+    const pageInfo = document.getElementById('price-history-page-info');
+    const prevBtn = document.getElementById('price-history-prev-btn');
+    const nextBtn = document.getElementById('price-history-next-btn');
+
+    if (!tbody) return;
+
+    if (!priceHistoryData || priceHistoryData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--text-secondary);">No data available</td></tr>`;
+        if (pageInfo) pageInfo.innerText = 'Showing 0-0 of 0 entries';
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
+        return;
+    }
+
+    const totalRecords = priceHistoryData.length;
+    const totalPages = Math.ceil(totalRecords / historyItemsPerPage);
+
+    // Bounds check
+    if (currentHistoryPage < 1) currentHistoryPage = 1;
+    if (currentHistoryPage > totalPages) currentHistoryPage = totalPages;
+
+    const startIndex = (currentHistoryPage - 1) * historyItemsPerPage;
+    const endIndex = Math.min(startIndex + historyItemsPerPage, totalRecords);
+
+    const pageData = priceHistoryData.slice(startIndex, endIndex);
+
+    let rowsHtml = '';
+    pageData.forEach((item, index) => {
+        const absoluteIndex = startIndex + index;
+        const open = parseFloat(item.Open) || 0;
+        const high = parseFloat(item.High) || 0;
+        const low = parseFloat(item.Low) || 0;
+        const close = parseFloat(item.Close) || 0;
+        const volume = parseFloat(item.Volume) || 0;
+
+        let changeVal = 0;
+        let changePct = 0;
+        if (absoluteIndex + 1 < totalRecords) {
+            const prevClose = parseFloat(priceHistoryData[absoluteIndex + 1].Close) || 0;
+            if (prevClose > 0) {
+                changeVal = close - prevClose;
+                changePct = (changeVal / prevClose) * 100;
+            }
+        } else {
+            if (open > 0) {
+                changeVal = close - open;
+                changePct = (changeVal / open) * 100;
+            }
+        }
+
+        const isPositive = changeVal > 0;
+        const isNegative = changeVal < 0;
+        let changeClass = '';
+        let changePrefix = '';
+        if (isPositive) {
+            changeClass = 'class="financials-val-positive"';
+            changePrefix = '+';
+        } else if (isNegative) {
+            changeClass = 'class="financials-val-negative"';
+        }
+
+        const changeText = `${changePrefix}${changeVal.toFixed(2)} (${changePrefix}${changePct.toFixed(2)}%)`;
+
+        rowsHtml += `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <td style="padding: 10px; color: #e2e8f0; font-weight: 500;">${item.Date}</td>
+                <td style="padding: 10px; text-align: right; color: #cbd5e1;">Rs. ${open.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                <td style="padding: 10px; text-align: right; color: #10b981;">Rs. ${high.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                <td style="padding: 10px; text-align: right; color: #ef4444;">Rs. ${low.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                <td style="padding: 10px; text-align: right; color: #e2e8f0; font-weight: 600;">Rs. ${close.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                <td style="padding: 10px; text-align: right; font-weight: 600;" ${changeClass}>${changeText}</td>
+                <td style="padding: 10px; text-align: right; color: #cbd5e1;">${volume.toLocaleString('en-IN')}</td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = rowsHtml;
+
+    if (pageInfo) {
+        pageInfo.innerText = `Showing ${startIndex + 1} to ${endIndex} of ${totalRecords} entries`;
+    }
+
+    if (prevBtn) {
+        prevBtn.disabled = currentHistoryPage === 1;
+        prevBtn.classList.toggle('disabled', currentHistoryPage === 1);
+    }
+
+    if (nextBtn) {
+        nextBtn.disabled = currentHistoryPage === totalPages;
+        nextBtn.classList.toggle('disabled', currentHistoryPage === totalPages);
+    }
 }
 
 // Start
