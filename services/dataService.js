@@ -56,6 +56,19 @@ const DataService = {
         }
     },
 
+    async getSymbolData(symbol) {
+        try {
+            const endpoint = `https://nepse-hub-backend-7uwu.onrender.com/api/symbol-data?symbol=${symbol.toUpperCase()}`;
+            console.log(`📡 Fetching symbol data from: ${endpoint}`);
+            const response = await fetch(endpoint);
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Symbol Data Fetch Error:', error);
+            return null;
+        }
+    },
+
     async getStocks() {
         // Check if we have modified stocks in storage first (Admin panel changes)
         const localStocks = await StorageService.load('nepse_stocks');
@@ -401,7 +414,7 @@ const DataService = {
     async getIPOs(type = 'ipo/general') {
         try {
             const endpoint = `${this.API_BASE}/market-info/${type}`;
-            console.log(`📡 Fetching IPOs (${type}) from: ${endpoint}`);
+            // console.log(`📡 Fetching IPOs (${type}) from: ${endpoint}`);
             const response = await fetch(endpoint);
             if (!response.ok) return [];
             const result = await response.json();
