@@ -230,7 +230,7 @@
           <div class="middle-row-grid">
             <!-- Column 1: Stock Chart -->
             <div class="glass chart-card" style="height: 100%">
-              <div class="card-header-flex">
+              <div class="card-header-flex mb-16">
                 <div class="card-title-text">
                   <i class="fas fa-chart-area" style="color: var(--primary); margin-right: 0.5rem"></i>
                   STOCK CHART
@@ -413,7 +413,7 @@
         <!-- Broker Analytics Tab Content Container -->
         <div id="broker-tab-content" style="display: none">
           <div class="glass broker-analytics-card">
-            <div class="card-header-flex">
+            <div class="card-header-flex mb-16">
               <div class="card-title-text">
                 <i class="fas fa-handshake" style="color: var(--primary); margin-right: 0.5rem"></i>
                 BROKER TOP HOLDINGS
@@ -455,7 +455,7 @@
         <!-- Financials Tab Content Container -->
         <div id="financials-tab-content" style="display: none">
           <div class="glass broker-analytics-card">
-            <div class="card-header-flex">
+            <div class="card-header-flex mb-16">
               <div class="card-title-text">
                 <i class="fas fa-file-invoice-dollar" style="color: var(--primary); margin-right: 0.5rem"></i>
                 QUARTERLY FINANCIAL REPORT
@@ -485,13 +485,8 @@
               </div>
             </div>
 
-            <div class="financials-table-wrapper" id="financials-table-container" style="overflow-x: auto; margin-top: 1.5rem">
-              <table class="financials-table glass-table" style="
-                    width: 100%;
-                    border-collapse: collapse;
-                    text-align: left;
-                    min-width: 600px;
-                  ">
+            <div class="financials-table-wrapper mt-12" id="financials-table-container" style="overflow-x: auto;">
+              <table class="financials-table glass-table">
                 <thead id="financials-thead">
                   <!-- Rendered dynamically -->
                 </thead>
@@ -513,7 +508,7 @@
         <!-- Price History Tab Content Container -->
         <div id="price-history-tab-content" style="display: none">
           <div class="glass broker-analytics-card">
-            <div class="card-header-flex">
+            <div class="card-header-flex mb-16">
               <div class="card-title-text">
                 <i class="fas fa-history" style="color: var(--primary); margin-right: 0.5rem"></i>
                 PRICE HISTORY
@@ -531,17 +526,17 @@
               </div>
             </div>
 
-            <div class="financials-table-wrapper" id="price-history-table-container" style="overflow-x: auto; margin-top: 1.5rem">
-              <table class="financials-table glass-table" style="width: 100%; border-collapse: collapse; text-align: left; min-width: 600px;">
+            <div class="financials-table-wrapper mt-12" id="price-history-table-container" style="overflow-x: auto;">
+              <table class="financials-table glass-table">
                 <thead>
                   <tr>
-                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color);">Date</th>
-                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">Open (Rs.)</th>
-                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">High (Rs.)</th>
-                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">Low (Rs.)</th>
-                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">Close (Rs.)</th>
-                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">Change</th>
-                    <th style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right;">Volume</th>
+                    <th class="p-10 sm-p-5" style="border-bottom: 1px solid var(--border-color);">Date</th>
+                    <th class="p-10" style="border-bottom: 1px solid var(--border-color); text-align: right;">Open (Rs.)</th>
+                    <th class="p-10" style="border-bottom: 1px solid var(--border-color); text-align: right;">High (Rs.)</th>
+                    <th class="p-10" style="border-bottom: 1px solid var(--border-color); text-align: right;">Low (Rs.)</th>
+                    <th class="p-10 sm-p-5" style="border-bottom: 1px solid var(--border-color); text-align: right;">Close (Rs.)</th>
+                    <th class="p-10 sm-p-5" style="border-bottom: 1px solid var(--border-color); text-align: right;">Change</th>
+                    <th class="p-10 sm-p-5" style="border-bottom: 1px solid var(--border-color); text-align: right;">Volume</th>
                   </tr>
                 </thead>
                 <tbody id="price-history-tbody">
@@ -551,8 +546,8 @@
             </div>
 
             <!-- Pagination UI -->
-            <div id="price-history-pagination" class="flex justify-between items-center mt-20 gap-10" style="padding: 10px 0;">
-              <div id="price-history-page-info" style="color: var(--text-secondary); font-size: 0.9rem;">
+            <div id="price-history-pagination" class="flex space-between items-center mt-20 gap-10" style="padding: 10px 0;">
+              <div id="price-history-page-info" style="color: var(--text-secondary); font-size: 0.7rem;">
                 Showing 0-0 of 0 entries
               </div>
               <div class="flex gap-10">
