@@ -226,7 +226,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
 }
 
 .card-title-text {
@@ -674,7 +673,7 @@ h2.shimmer-bg {
 .broker-stats-intro {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    margin: 1rem 0 2rem 0;
+    margin: 0.8rem 0 0.8rem 0;
     line-height: 1.5;
 }
 
@@ -798,6 +797,8 @@ h2.shimmer-bg {
 .financials-table {
     border-collapse: collapse;
     width: 100%;
+    text-align: left;
+    min-width: 600px;
 }
 
 .financials-table th {
@@ -807,7 +808,6 @@ h2.shimmer-bg {
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    padding: 12px 16px;
     border-bottom: 2px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -948,10 +948,14 @@ MOBILE & TABLET RESPONSIVENESS OVERRIDES
         padding: 1.25rem;
     }
 
+    .financials-table {
+        min-width: unset;
+    }
+
     .financials-table th,
     .financials-table td {
-        padding: 8px 10px;
         font-size: 0.78rem;
+        padding: 8px 6px !important;
     }
 
     .header-left {
@@ -962,5 +966,14 @@ MOBILE & TABLET RESPONSIVENESS OVERRIDES
     .symbol-logo-container {
         width: 45px;
         height: 45px;
+    }
+
+    #price-history-table-container .financials-table thead tr > *:nth-child(2),
+    #price-history-table-container .financials-table thead tr > *:nth-child(3),
+    #price-history-table-container .financials-table thead tr > *:nth-child(4),
+    #price-history-table-container .financials-table tbody tr > *:nth-child(2),
+    #price-history-table-container .financials-table tbody tr > *:nth-child(3),
+    #price-history-table-container .financials-table tbody tr > *:nth-child(4) {
+        display: none;
     }
 }
