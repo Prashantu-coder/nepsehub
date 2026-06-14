@@ -166,204 +166,13 @@
     <div id="sidebar-container"></div>
     <main class="main-content">
       <div id="app">
+        <div id="under-construction-overlay" ></div>
         <!-- Page Header -->
         <div class="header">
           <div>
             <h2>
               <i class="fas fa-crosshairs" style="color: var(--primary); margin-right: 0.5rem"></i>Technical <span class="gradient-text">Screener</span>
             </h2>
-            <p style="color: #26c5f5; margin-top: 6px">Screener for you🫵</p>
-          </div>
-          <div class="badge"><i class="fas fa-robot"></i> AI POWERED</div>
-        </div>
-
-        <!-- Stats Summary Row -->
-        <div class="screener-stats-row" id="screener-stats">
-          <div class="glass screener-stat-card">
-            <div class="screener-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981">
-              <i class="fas fa-arrow-trend-up"></i>
-            </div>
-            <div class="screener-stat-info">
-              <span class="screener-stat-label">Bullish</span>
-              <span class="screener-stat-value" id="stat-bullish">—</span>
-            </div>
-          </div>
-          <div class="glass screener-stat-card">
-            <div class="screener-stat-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444">
-              <i class="fas fa-arrow-trend-down"></i>
-            </div>
-            <div class="screener-stat-info">
-              <span class="screener-stat-label">Bearish</span>
-              <span class="screener-stat-value" id="stat-bearish">—</span>
-            </div>
-          </div>
-          <div class="glass screener-stat-card">
-            <div class="screener-stat-icon" style="background: rgba(99, 102, 241, 0.1); color: #818cf8">
-              <i class="fas fa-chart-line"></i>
-            </div>
-            <div class="screener-stat-info">
-              <span class="screener-stat-label">Oversold (RSI≤30)</span>
-              <span class="screener-stat-value" id="stat-oversold">—</span>
-            </div>
-          </div>
-          <div class="glass screener-stat-card">
-            <div class="screener-stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b">
-              <i class="fas fa-fire"></i>
-            </div>
-            <div class="screener-stat-info">
-              <span class="screener-stat-label">Overbought (RSI≥70)</span>
-              <span class="screener-stat-value" id="stat-overbought">—</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Controls: Search + Filters -->
-        <div class="screener-controls">
-          <div class="screener-search-box">
-            <i class="fas fa-search"></i>
-            <input type="text" id="screener-search" placeholder="Search symbol..." autocomplete="off" />
-          </div>
-
-          <!-- Analysis Dropdown -->
-          <div class="custom-dropdown" id="analysis-dropdown-container">
-            <button class="dropdown-trigger-btn" id="analysis-dropdown-trigger">
-              <i class="fas fa-chart-pie" style="color: var(--primary)"></i>
-              <span>Analysis</span>
-              <i class="fas fa-chevron-down dropdown-chevron"></i>
-            </button>
-            <div class="dropdown-menu-list" id="analysis-dropdown-menu">
-              <div class="dropdown-group-label">Overall Trend</div>
-              <div class="dropdown-item active" data-filter="all">
-                All Symbols
-              </div>
-              <div class="dropdown-item" data-filter="bullish">
-                Bullish Trend
-              </div>
-              <div class="dropdown-item" data-filter="bearish">
-                Bearish Trend
-              </div>
-
-              <div class="dropdown-group-label">RSI Indicators</div>
-              <div class="dropdown-item" data-filter="oversold">
-                Oversold (RSI ≤ 30)
-              </div>
-              <div class="dropdown-item" data-filter="overbought">
-                Overbought (RSI ≥ 70)
-              </div>
-
-              <div class="dropdown-group-label">Crossover Signals</div>
-              <div class="dropdown-item" data-filter="golden_cross">
-                Golden Cross (50/200 SMA)
-              </div>
-              <div class="dropdown-item" data-filter="death_cross">
-                Death Cross (50/200 SMA)
-              </div>
-
-              <div class="dropdown-group-label">Short-Term (5/20 SMA)</div>
-              <div class="dropdown-item" data-filter="short_bullish">
-                Short-Term Bullish
-              </div>
-              <div class="dropdown-item" data-filter="short_bearish">
-                Short-Term Bearish
-              </div>
-
-              <div class="dropdown-group-label">Swing (10/50 SMA)</div>
-              <div class="dropdown-item" data-filter="swing_bullish">
-                Swing Bullish
-              </div>
-              <div class="dropdown-item" data-filter="swing_bearish">
-                Swing Bearish
-              </div>
-
-              <div class="dropdown-group-label">Medium-Term (20/50 SMA)</div>
-              <div class="dropdown-item" data-filter="medium_bullish">
-                Medium-Term Bullish
-              </div>
-              <div class="dropdown-item" data-filter="medium_bearish">
-                Medium-Term Bearish
-              </div>
-            </div>
-          </div>
-
-          <div class="screener-filter-chips" id="filter-chips">
-            <div class="filter-chip active" data-filter="all">
-              All <span class="chip-count" id="chip-all">0</span>
-            </div>
-            <div class="filter-chip" data-filter="bullish">
-              <i class="fas fa-arrow-up" style="margin-right: 3px; font-size: 0.65rem"></i>Bullish <span class="chip-count" id="chip-bullish">0</span>
-            </div>
-            <div class="filter-chip" data-filter="bearish">
-              <i class="fas fa-arrow-down" style="margin-right: 3px; font-size: 0.65rem"></i>Bearish <span class="chip-count" id="chip-bearish">0</span>
-            </div>
-            <div class="filter-chip" data-filter="oversold">
-              <i class="fas fa-chart-line" style="margin-right: 3px; font-size: 0.65rem"></i>Oversold <span class="chip-count" id="chip-oversold">0</span>
-            </div>
-            <div class="filter-chip" data-filter="overbought">
-              <i class="fas fa-fire" style="margin-right: 3px; font-size: 0.65rem"></i>Overbought
-              <span class="chip-count" id="chip-overbought">0</span>
-            </div>
-            <div class="filter-chip" data-filter="golden_cross">
-              <i class="fas fa-star" style="margin-right: 3px; font-size: 0.65rem; color: #f59e0b"></i>Golden Cross
-            </div>
-            <div class="filter-chip" data-filter="death_cross">
-              <i class="fas fa-skull" style="margin-right: 3px; font-size: 0.65rem"></i>Death Cross
-            </div>
-          </div>
-        </div>
-
-        <!-- Table -->
-        <div class="glass screener-table-wrapper">
-          <div class="screener-table-scroll">
-            <table class="screener-table" id="screener-table">
-              <thead>
-                <tr>
-                  <th data-sort="symbol">
-                    Symbol <i class="fas fa-sort sort-icon"></i>
-                  </th>
-                  <th data-sort="close">
-                    Close <i class="fas fa-sort sort-icon"></i>
-                  </th>
-                  <th data-sort="rsi">
-                    RSI (14) <i class="fas fa-sort sort-icon"></i>
-                  </th>
-                  <th>MACD</th>
-                  <th data-sort="histogram">
-                    Histogram <i class="fas fa-sort sort-icon"></i>
-                  </th>
-                  <th data-sort="atr">
-                    ATR <i class="fas fa-sort sort-icon"></i>
-                  </th>
-                  <th>MA Cross</th>
-                  <th>Trend</th>
-                </tr>
-              </thead>
-              <tbody id="screener-body">
-                <!-- Rows loaded via JS -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="screener-pagination" id="screener-pagination">
-          <div class="pagination-info" id="pagination-info">Loading...</div>
-          <div style="
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-                flex-wrap: wrap;
-              ">
-            <div class="per-page-select">
-              <span>Show</span>
-              <select id="per-page-select">
-                <option value="20" selected>20</option>
-                <option value="50">50</option>
-              </select>
-              <span>per page</span>
-            </div>
-            <div class="pagination-controls" id="pagination-controls">
-              <!-- Pagination buttons rendered via JS -->
-            </div>
           </div>
         </div>
       </div>
@@ -380,6 +189,7 @@
   <script src="../../js/security.js"></script>
   <script src="../../js/7f9c2d4a8b1e5c3d9f0a7b6c2e1d4f8a5c9e7b3d1a6f4c8e2b9d0f7a3c5e1d6.js"></script>
   <script type="module" src="../../components/9a7f3c1e5d8b4a2f6c0e9d7b1a3f5c8e2d6b4a9f1c7e3d5b8a0f2c6e4d9b1a7.js"></script>
+  <script type="module" src="../../js/e8b4c7d19f2a6e5c0d3b8a1f7c4e9d2b6f1a5c8e3d7b0f4a9c2e6d1b8f3a7c5.js"></script>
 </body>
 
 </html>
