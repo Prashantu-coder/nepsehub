@@ -1,5 +1,6 @@
 import globalState from '../../state.js';
 import { Layout } from '../../layout.js';
+import DataService from '../../../services/dataService.js';
 
 const SCREENER_API = 'https://technical-nepse.vercel.app/api/screener/all';
 
@@ -36,6 +37,7 @@ async function loadAllPages() {
         while (hasMore) {
             const url = `${SCREENER_API}?page=${page}&limit=50`;
             const response = await fetch(url);
+
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const json = await response.json();
 
@@ -58,6 +60,7 @@ async function loadAllPages() {
         }
     } catch (err) {
         console.error('Screener fetch error:', err);
+
         if (allData.length === 0) {
             showEmpty('Failed to load screener data. Please try again.');
             isLoading = false;

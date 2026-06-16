@@ -354,7 +354,10 @@ function setupSorting() {
 async function fetchVolumeData() {
     try {
         tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 3rem;"><i class="fas fa-spinner fa-pulse"></i> Establishing connection to NEPSE technical API ...</td></tr>`;
-        const response = await fetch('https://technical-nepse.vercel.app/api/volume/all');
+
+        const url = 'https://technical-nepse.vercel.app/api/volume/all';
+        const response = await fetch(url);
+
         if (!response.ok) throw new Error(`HTTP error ${response.status}`);
         const json = await response.json();
         if (!json.symbols || !Array.isArray(json.symbols)) throw new Error('Invalid API structure');
