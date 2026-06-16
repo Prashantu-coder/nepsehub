@@ -465,6 +465,7 @@ const DataService = {
         }
     },
 
+    TECHNICAL_API_SOURCE: 'vercel',
     _screenerCache: null,
     _screenerCacheTime: 0,
 
@@ -481,7 +482,8 @@ const DataService = {
             let hasMore = true;
 
             while (hasMore) {
-                const response = await fetch(`https://technical-nepse.vercel.app/api/screener/all?page=${page}&limit=50`);
+                const url = `https://technical-nepse.vercel.app/api/screener/all?page=${page}&limit=50`;
+                const response = await fetch(url);
                 if (!response.ok) break;
                 const data = await response.json();
 
@@ -502,6 +504,7 @@ const DataService = {
             return allResults.find(item => item.symbol.toUpperCase() === symbol.toUpperCase()) || null;
         } catch (e) {
             console.error('❌ Screener API Fetch Error:', e);
+
             // Return from stale cache if available
             if (this._screenerCache) {
                 return this._screenerCache.find(item => item.symbol.toUpperCase() === symbol.toUpperCase()) || null;

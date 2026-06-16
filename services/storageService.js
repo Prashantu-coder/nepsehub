@@ -193,6 +193,34 @@ const StorageService = {
         }
     },
 
+    async markNotificationAsRead(id) {
+        try {
+            const response = await window.auth.apiCall(`/api/notifications/${id}/mark-read`, {
+                method: 'PUT'
+            });
+            if (!response.ok) throw new Error('Failed to mark notification as read');
+            const data = await response.json();
+            return data.success;
+        } catch (err) {
+            console.error('MarkNotificationAsRead Error:', err.message);
+            return false;
+        }
+    },
+
+    async deleteNotification(id) {
+        try {
+            const response = await window.auth.apiCall(`/api/notifications/${id}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) throw new Error('Failed to delete notification');
+            const data = await response.json();
+            return data.success;
+        } catch (err) {
+            console.error('DeleteNotification Error:', err.message);
+            return false;
+        }
+    },
+
     // --- Notification Settings (Express Backend) ---
     async getNotificationSettings() {
         try {
