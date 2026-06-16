@@ -186,6 +186,71 @@ function bindEvents() {
         currentPage = 1;
         applyFiltersAndRender();
     });
+
+    // ─── Crossover Tooltip Hover ─────────────────────
+    const tooltipEl = document.getElementById('crossover-tooltip');
+    const tableWrapper = document.getElementById('screener-table');
+
+    tableWrapper.addEventListener('mouseenter', (e) => {
+        const item = e.target.closest('.crossover-mini-item');
+        if (!item) return;
+        const info = JSON.parse(item.dataset.crossoverInfo || '{}');
+        if (!info.name) return;
+
+        const fast = parseFloat(info.fast_value) || 0;
+        const slow = parseFloat(info.slow_value) || 0;
+        const dist = slow !== 0 ? ((fast - slow) / slow * 100).toFixed(2) : '0.00';
+        const distSign = parseFloat(dist) >= 0 ? 'positive' : 'negative';
+        const distPrefix = parseFloat(dist) >= 0 ? '+' : '';
+
+        const signalHtml = info.signal && info.signal !== 'none'
+            ? `<span class="crossover-tooltip-signal-banner ${info.signal === 'golden_cross' ? 'bullish' : 'bearish'}">
+                 ${info.signal === 'golden_cross' ? '⚡ Golden Cross' : '💀 Death Cross'}
+               </span>`
+            : `<span style="font-size:0.68rem;color:var(--text-secondary);">No fresh signal</span>`;
+
+        tooltipEl.innerHTML = `
+            <div class="crossover-tooltip-title">${info.name}</div>
+            <div class="crossover-tooltip-subtitle">${info.ma_description || ''}</div>
+            <div class="crossover-tooltip-row">
+                <span class="crossover-tooltip-label">Fast MA</span>
+                <span class="crossover-tooltip-val">${fast.toFixed(2)}</span>
+            </div>
+            <div class="crossover-tooltip-row">
+                <span class="crossover-tooltip-label">Slow MA</span>
+                <span class="crossover-tooltip-val">${slow.toFixed(2)}</span>
+            </div>
+            <div class="crossover-tooltip-row">
+                <span class="crossover-tooltip-label">Distance</span>
+                <span class="crossover-tooltip-distance ${distSign}">${distPrefix}${dist}%</span>
+            </div>
+            <div class="crossover-tooltip-badge-container">
+                <span class="signal-badge badge-${info.status || 'neutral'}">${(info.status || 'neutral').charAt(0).toUpperCase() + (info.status || 'neutral').slice(1)}</span>
+                ${signalHtml}
+            </div>
+        `;
+        tooltipEl.classList.add('show');
+    }, true);
+
+    tableWrapper.addEventListener('mouseleave', (e) => {
+        const item = e.target.closest('.crossover-mini-item');
+        if (item || e.target.classList.contains('crossover-mini-item')) {
+            tooltipEl.classList.remove('show');
+        }
+    }, true);
+
+    tableWrapper.addEventListener('mousemove', (e) => {
+        if (!tooltipEl.classList.contains('show')) return;
+        const rect = document.getElementById('app').getBoundingClientRect();
+        let left = e.clientX - rect.left + 12;
+        let top = e.clientY - rect.top + 12;
+        // Keep tooltip within viewport
+        const ttRect = tooltipEl.getBoundingClientRect();
+        if (left + ttRect.width > rect.width) left = e.clientX - rect.left - ttRect.width - 12;
+        if (top + ttRect.height > rect.height) top = e.clientY - rect.top - ttRect.height - 12;
+        tooltipEl.style.left = left + 'px';
+        tooltipEl.style.top = top + 'px';
+    });
 }
 
 // ─── Filter + Sort + Paginate + Render ──────────────
@@ -206,17 +271,29 @@ function applyFiltersAndRender() {
         } else if (currentFilter === 'overbought') {
             return ind.rsi_14 >= 70;
         } else if (currentFilter === 'golden_cross') {
-            return hasSignal(ind, 'golden_cross');
+            return ind.moving_average_crossovers?.golden_cross_death_cross?.signal === 'golden_cross';
         } else if (currentFilter === 'death_cross') {
-            return hasSignal(ind, 'death_cross');
+            return ind.moving_average_crossovers?.golden_cross_death_cross?.signal === 'death_cross';
+        } else if (currentFilter === 'short_golden') {
+            return ind.moving_average_crossovers?.short_term_cross?.signal === 'golden_cross';
+        } else if (currentFilter === 'short_death') {
+            return ind.moving_average_crossovers?.short_term_cross?.signal === 'death_cross';
         } else if (currentFilter === 'short_bullish') {
             return ind.moving_average_crossovers?.short_term_cross?.status === 'bullish';
         } else if (currentFilter === 'short_bearish') {
             return ind.moving_average_crossovers?.short_term_cross?.status === 'bearish';
+        } else if (currentFilter === 'swing_golden') {
+            return ind.moving_average_crossovers?.swing_trading_cross?.signal === 'golden_cross';
+        } else if (currentFilter === 'swing_death') {
+            return ind.moving_average_crossovers?.swing_trading_cross?.signal === 'death_cross';
         } else if (currentFilter === 'swing_bullish') {
             return ind.moving_average_crossovers?.swing_trading_cross?.status === 'bullish';
         } else if (currentFilter === 'swing_bearish') {
             return ind.moving_average_crossovers?.swing_trading_cross?.status === 'bearish';
+        } else if (currentFilter === 'medium_golden') {
+            return ind.moving_average_crossovers?.medium_term_cross?.signal === 'golden_cross';
+        } else if (currentFilter === 'medium_death') {
+            return ind.moving_average_crossovers?.medium_term_cross?.signal === 'death_cross';
         } else if (currentFilter === 'medium_bullish') {
             return ind.moving_average_crossovers?.medium_term_cross?.status === 'bullish';
         } else if (currentFilter === 'medium_bearish') {
@@ -391,32 +468,60 @@ function renderTable(data) {
 
 function renderCrossDots(mac) {
     const crosses = [
-        { key: 'golden_cross_death_cross', label: 'Golden/Death Cross (50/200 SMA)' },
-        { key: 'short_term_cross', label: 'Short-term (5/20 SMA)' },
-        { key: 'swing_trading_cross', label: 'Swing (10/50 SMA)' },
-        { key: 'medium_term_cross', label: 'Medium-term (20/50 SMA)' }
+        { key: 'short_term_cross', letter: 'S', labelClass: 'crossover-label-short', name: 'Short-Term Cross', ma_description: 'EMA 9 vs EMA 21' },
+        { key: 'swing_trading_cross', letter: 'W', labelClass: 'crossover-label-swing', name: 'Swing Trading Cross', ma_description: 'EMA 20 vs EMA 50' },
+        { key: 'medium_term_cross', letter: 'M', labelClass: 'crossover-label-medium', name: 'Medium-Term Cross', ma_description: 'EMA 50 vs EMA 100' },
+        { key: 'golden_cross_death_cross', letter: 'L', labelClass: 'crossover-label-golden', name: 'Golden / Death Cross', ma_description: 'SMA 50 vs SMA 200' }
     ];
 
     return `<div class="crossover-mini">${crosses.map(c => {
         const data = mac[c.key];
-        if (!data) return '<span class="crossover-dot" style="background:var(--surface-border);"></span>';
-        const cls = data.status === 'bullish' ? 'bullish' : 'bearish';
-        const signalInfo = data.signal && data.signal !== 'none' ? ` — Signal: ${data.signal.replace('_', ' ')}` : '';
-        return `<span class="crossover-dot ${cls}" title="${c.label}: ${data.status}${signalInfo}"></span>`;
+        if (!data) {
+            return `<span class="crossover-mini-item" style="opacity:0.35;"><span class="${c.labelClass}">${c.letter}</span><span class="crossover-dot"></span></span>`;
+        }
+        const statusCls = data.status === 'bullish' ? 'bullish' : 'bearish';
+        let dotCls = statusCls;
+        if (data.signal && data.signal !== 'none') {
+            dotCls = data.signal === 'golden_cross' ? 'fresh-bullish' : 'fresh-bearish';
+        }
+        const info = JSON.stringify({
+            name: c.name,
+            ma_description: c.ma_description,
+            fast_value: data.fast_value,
+            slow_value: data.slow_value,
+            status: data.status,
+            signal: data.signal
+        }).replace(/"/g, '&quot;');
+        return `<span class="crossover-mini-item" data-crossover-info="${info}"><span class="${c.labelClass}">${c.letter}</span><span class="crossover-dot ${dotCls}"></span></span>`;
     }).join('')}</div>`;
 }
 
 // ─── Update Stats ───────────────────────────────────
+function countFreshSignals(signalType) {
+    return allData.filter(i => {
+        const mac = i.indicators.moving_average_crossovers;
+        if (!mac) return false;
+        return [
+            mac.golden_cross_death_cross,
+            mac.short_term_cross,
+            mac.swing_trading_cross,
+            mac.medium_term_cross
+        ].some(c => c?.signal === signalType);
+    }).length;
+}
+
 function updateStats() {
     const bullish = allData.filter(i => getOverallTrend(i.indicators) === 'bullish').length;
     const bearish = allData.filter(i => getOverallTrend(i.indicators) === 'bearish').length;
-    const oversold = allData.filter(i => i.indicators.rsi_14 <= 30).length;
-    const overbought = allData.filter(i => i.indicators.rsi_14 >= 70).length;
+    const goldenCrosses = countFreshSignals('golden_cross');
+    const deathCrosses = countFreshSignals('death_cross');
 
     document.getElementById('stat-bullish').textContent = bullish;
     document.getElementById('stat-bearish').textContent = bearish;
-    document.getElementById('stat-oversold').textContent = oversold;
-    document.getElementById('stat-overbought').textContent = overbought;
+    const gcEl = document.getElementById('stat-golden-crosses');
+    const dcEl = document.getElementById('stat-death-crosses');
+    if (gcEl) gcEl.textContent = goldenCrosses;
+    if (dcEl) dcEl.textContent = deathCrosses;
 }
 
 function updateChipCounts() {
