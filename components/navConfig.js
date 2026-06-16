@@ -32,7 +32,8 @@ export const NAV_MENU_ITEMS = [
             { id: 'heatmap', text: 'Market Heatmap', icon: 'fa-th', path: 'pages/analysis/heatmap.html' },
             { id: 'todays-top', text: "Today's Top", icon: 'fa-crown', path: 'pages/analysis/todays-top.html' },
             { id: 'circuit-level', text: 'Daily Circuit Level', icon: 'fa-bolt', path: 'pages/analysis/circuit-level.html' },
-            { id: 'volumepulse', text: 'Volume Pulse', icon: 'fa-chart-line', path: 'pages/analysis/volumepulse.html' }
+            { id: 'volumepulse', text: 'Volume Pulse', icon: 'fa-chart-line', path: 'pages/analysis/volumepulse.html' },
+            { id: 'compare', text: 'Stock Compare', icon: 'fa-balance-scale', path: 'pages/analysis/compare.html' }
         ]
     },
     {
@@ -53,6 +54,7 @@ export const NAV_MENU_ITEMS = [
             { id: 'average', text: 'Average Price (DCA)', icon: 'fa-layer-group', path: 'pages/calculator/average.html' },
             { id: 'breakeven', text: 'Break-even Calculator', icon: 'fa-balance-scale', path: 'pages/calculator/breakeven.html' },
             { id: 'dividend', text: 'Dividend Yield & Return', icon: 'fa-hand-holding-usd', path: 'pages/calculator/dividend.html' },
+            // { id: 'sip-planner', text: 'SIP Planner', icon: 'fa-calendar-check', path: 'pages/calculator/sip-planner.html' },
             { id: 'planner', text: 'Trade Planner', icon: 'fa-pen-nib', path: 'pages/calculator/planner.html' },
             { id: 'exit-strategy', text: 'Exit Strategy', icon: 'fa-sign-out-alt', path: 'pages/calculator/exit-strategy.html' }
         ]
