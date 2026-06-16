@@ -6,6 +6,7 @@ import { Navbar } from '../components/navbar.js';
 // import { AlertManager } from './alerts.js';
 import NotificationService from '../services/notificationService.js';
 import { getStockImageUrl } from './stockImageProvider.js';
+import FeeService from '../services/feeService.js';
 
 export const Layout = {
     async init() {
@@ -98,6 +99,9 @@ export const Layout = {
         // Add Quick View Panel to DOM if it doesn't exist
         this.initQuickView();
 
+        // Initialize Quick Calculator Drawer
+        this.initQuickCalc();
+
         // Initialize Notifications
         this.initNotifications();
 
@@ -141,6 +145,44 @@ export const Layout = {
             };
         }
 
+        // --- Helper: Get category ---
+        const getCategory = (n) => {
+            const type = n.type || 'info';
+            if (type === 'buy' || type === 'sell' || type === 'stoploss') return 'Price Alerts';
+            if (type === 'portfolio' || (n.title && n.title.toLowerCase().includes('portfolio')) || (n.message && n.message.toLowerCase().includes('portfolio'))) return 'Portfolio';
+            return 'System';
+        };
+
+        // --- Helper: Get relative time ---
+        const getRelativeTime = (dateInput) => {
+            const date = new Date(dateInput);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays === 1) return 'Yesterday';
+            return `${diffDays}d ago`;
+        };
+
+        // --- Helper: Extract Stock Symbol ---
+        const extractSymbol = (n) => {
+            if (n.symbol) return n.symbol;
+            const words = `${n.title} ${n.message}`.split(/[^a-zA-Z]/);
+            const stocks = globalState.getState().stocks || [];
+            const stockSymbols = new Set(stocks.map(s => s.symbol.toUpperCase()));
+            for (const w of words) {
+                if (stockSymbols.has(w.toUpperCase())) {
+                    return w.toUpperCase();
+                }
+            }
+            return null;
+        };
+
         // --- Render notifications with active filter ---
         const renderNotifs = () => {
             let filtered = allNotifs;
@@ -154,35 +196,112 @@ export const Layout = {
                     : `No ${activeFilter} alerts found`;
                 list.innerHTML = `<div class="notif-empty">${emptyMsg}</div>`;
             } else {
-                list.innerHTML = filtered.map(n => {
-                    const date = new Date(n.created_at);
-                    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                // Group by category
+                const groups = {
+                    'Price Alerts': [],
+                    'Portfolio': [],
+                    'System': []
+                };
 
-                    let icon = 'fa-info-circle';
-                    if (n.type === 'buy') icon = 'fa-shopping-cart';
-                    if (n.type === 'sell') icon = 'fa-hand-holding-usd';
-                    if (n.type === 'stoploss') icon = 'fa-exclamation-triangle';
+                filtered.forEach(n => {
+                    const cat = getCategory(n);
+                    groups[cat].push(n);
+                });
 
-                    return `
-                        <div class="notif-item ${n.is_read ? '' : 'unread'}">
-                            <div class="notif-icon ${n.type}">
-                                <i class="fas ${icon}"></i>
+                let html = '';
+                const prefix = globalState.getState().pathPrefix || '';
+
+                for (const [groupName, notifs] of Object.entries(groups)) {
+                    if (notifs.length === 0) continue;
+
+                    html += `<div class="notif-group-header">${groupName}</div>`;
+
+                    html += notifs.map(n => {
+                        let icon = 'fa-info-circle';
+                        if (n.type === 'buy') icon = 'fa-shopping-cart';
+                        if (n.type === 'sell') icon = 'fa-hand-holding-usd';
+                        if (n.type === 'stoploss') icon = 'fa-exclamation-triangle';
+
+                        const relTime = getRelativeTime(n.created_at);
+                        const symbol = extractSymbol(n);
+                        
+                        let url = '';
+                        if (symbol) {
+                            url = `${prefix}pages/market/stock-details.html?symbol=${symbol}`;
+                        } else if (n.type === 'portfolio' || n.title?.toLowerCase().includes('portfolio') || n.message?.toLowerCase().includes('portfolio')) {
+                            url = `${prefix}pages/portfolio.html`;
+                        } else if (n.type === 'watchlist' || n.title?.toLowerCase().includes('watchlist') || n.message?.toLowerCase().includes('watchlist')) {
+                            url = `${prefix}pages/watchlist.html`;
+                        }
+
+                        return `
+                            <div class="notif-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}" data-url="${url || ''}">
+                                <div class="notif-icon ${n.type}">
+                                    <i class="fas ${icon}"></i>
+                                </div>
+                                <div class="notif-body">
+                                    <div class="notif-title">${n.title}</div>
+                                    <div class="notif-msg">${n.message}</div>
+                                    <div class="notif-time">${relTime}</div>
+                                </div>
+                                <button class="notif-dismiss-btn" data-id="${n.id}" title="Dismiss alert">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                            <div class="notif-body">
-                                <div class="notif-title">${n.title}</div>
-                                <div class="notif-msg">${n.message}</div>
-                                <div class="notif-time">${dateStr} at ${timeStr}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
+                        `;
+                    }).join('');
+                }
+
+                list.innerHTML = html;
+
+                // Bind click events for notification items and dismiss buttons
+                list.querySelectorAll('.notif-item').forEach(item => {
+                    const id = item.dataset.id;
+                    const url = item.dataset.url;
+
+                    // Entire notification item click
+                    item.onclick = async (e) => {
+                        e.stopPropagation();
+                        // Mark as read
+                        await StorageService.markNotificationAsRead(id);
+                        await refreshNotifs();
+                        
+                        // Close dropdown
+                        dropdown.classList.add('hidden');
+
+                        // Navigate if url exists
+                        if (url) {
+                            window.location.href = url;
+                        }
+                    };
+
+                    // Dismiss button click
+                    const dismissBtn = item.querySelector('.notif-dismiss-btn');
+                    if (dismissBtn) {
+                        dismissBtn.onclick = async (e) => {
+                            e.stopPropagation();
+                            
+                            // Add fade/exit animation
+                            item.style.opacity = '0';
+                            item.style.transform = 'translateX(20px)';
+                            
+                            setTimeout(async () => {
+                                await StorageService.deleteNotification(id);
+                                await refreshNotifs();
+                            }, 300);
+                        };
+                    }
+                });
             }
         };
 
         // --- Fetch & refresh ---
         const refreshNotifs = async () => {
             allNotifs = await StorageService.getNotifications();
+            // Prune to max 50 notifications
+            if (allNotifs.length > 50) {
+                allNotifs = allNotifs.slice(0, 50);
+            }
             const unreadCount = allNotifs.filter(n => !n.is_read).length;
 
             if (unreadCount > 0) {
@@ -212,6 +331,8 @@ export const Layout = {
         // --- Bell toggle ---
         bell.onclick = (e) => {
             e.stopPropagation();
+            document.getElementById('profile-dropdown')?.classList.add('hidden');
+            document.getElementById('quick-calc-drawer')?.classList.remove('active');
             dropdown.classList.toggle('hidden');
             if (!dropdown.classList.contains('hidden')) {
                 refreshNotifs();
@@ -1024,6 +1145,285 @@ export const Layout = {
             if (qvChartInstance) {
                 qvChartInstance.destroy();
                 qvChartInstance = null;
+            }
+        };
+    },
+
+    initQuickCalc() {
+        if (document.getElementById('quick-calc-drawer')) return;
+
+        // Create elements
+        const trigger = document.createElement('button');
+        trigger.id = 'quick-calc-trigger';
+        trigger.className = 'quick-calc-trigger-btn';
+        trigger.title = 'Quick Calculator';
+        trigger.innerHTML = '<i class="fas fa-calculator"></i>';
+
+        const drawer = document.createElement('div');
+        drawer.id = 'quick-calc-drawer';
+        drawer.className = 'quick-calc-drawer glass';
+        
+        drawer.innerHTML = `
+            <div class="qc-header">
+                <div class="qc-title-row">
+                    <h3><i class="fas fa-calculator"></i> Quick Calc</h3>
+                    <button id="close-quick-calc" class="btn-icon"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="qc-mode-toggle">
+                    <button id="qc-btn-buy" class="qc-toggle-btn active" data-mode="buy">BUY</button>
+                    <button id="qc-btn-sell" class="qc-toggle-btn" data-mode="sell">SELL</button>
+                </div>
+            </div>
+            <div class="qc-content">
+                <div class="form-group qc-autocomplete-container">
+                    <label>Symbol</label>
+                    <input type="text" id="qc-symbol" placeholder="Search Symbol (e.g. NICA)" autocomplete="off" style="width: 100%;" />
+                    <div id="qc-autocomplete-list" class="qc-autocomplete-list qc-hidden"></div>
+                </div>
+                <div class="form-group">
+                    <label>Price (Rs.)</label>
+                    <input type="number" id="qc-price" placeholder="e.g. 500" style="width: 100%;" />
+                </div>
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" id="qc-qty" placeholder="e.g. 100" style="width: 100%;" />
+                </div>
+                <div id="qc-wacc-group" class="form-group qc-hidden">
+                    <label>WACC / Cost Price (Rs.)</label>
+                    <input type="number" id="qc-wacc" placeholder="e.g. 480" style="width: 100%;" />
+                </div>
+                <div id="qc-results" class="qc-results-panel">
+                    <div style="color: var(--text-secondary); text-align: center; padding-top: 1rem; font-size: 0.85rem;">Enter price and quantity to calculate</div>
+                </div>
+            </div>
+            <div class="qc-footer">
+                <a id="qc-full-calc-link" href="#" target="_blank">Open Full Calculator <i class="fas fa-external-link-alt"></i></a>
+            </div>
+        `;
+
+        document.body.appendChild(trigger);
+        document.body.appendChild(drawer);
+
+        let activeMode = 'buy';
+
+        // Dom query helpers
+        const symbolInput = document.getElementById('qc-symbol');
+        const listEl = document.getElementById('qc-autocomplete-list');
+        const priceInput = document.getElementById('qc-price');
+        const qtyInput = document.getElementById('qc-qty');
+        const waccGroup = document.getElementById('qc-wacc-group');
+        const waccInput = document.getElementById('qc-wacc');
+        const resultsEl = document.getElementById('qc-results');
+        const buyBtn = document.getElementById('qc-btn-buy');
+        const sellBtn = document.getElementById('qc-btn-sell');
+        const closeBtn = document.getElementById('close-quick-calc');
+        const fullCalcLink = document.getElementById('qc-full-calc-link');
+
+        // Toggle Drawer
+        trigger.onclick = (e) => {
+            e.stopPropagation();
+            drawer.classList.toggle('active');
+            // Hide other panels
+            document.getElementById('quick-view-panel')?.classList.remove('active');
+            document.getElementById('notif-dropdown')?.classList.add('hidden');
+            document.getElementById('profile-dropdown')?.classList.add('hidden');
+        };
+
+        closeBtn.onclick = () => {
+            drawer.classList.remove('active');
+        };
+
+        // Close on escape or clicking outside
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') drawer.classList.remove('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!drawer.contains(e.target) && !trigger.contains(e.target)) {
+                drawer.classList.remove('active');
+            }
+            if (listEl && !symbolInput.contains(e.target) && !listEl.contains(e.target)) {
+                listEl.classList.add('qc-hidden');
+            }
+        });
+
+        // Autocomplete
+        symbolInput.oninput = async () => {
+            const query = symbolInput.value.toUpperCase().trim();
+            if (!query) {
+                listEl.classList.add('qc-hidden');
+                listEl.innerHTML = '';
+                return;
+            }
+
+            try {
+                let stocks = globalState.getState().stocks;
+                if (!stocks || !Array.isArray(stocks) || stocks.length === 0) {
+                    stocks = await DataService.getStocks();
+                }
+                const matches = stocks.filter(s => 
+                    s.symbol.toUpperCase().includes(query) || 
+                    (s.name && s.name.toUpperCase().includes(query))
+                ).slice(0, 5);
+
+                if (matches.length === 0) {
+                    listEl.innerHTML = '<div style="padding: 10px; color: var(--text-secondary); text-align: center; font-size: 0.8rem;">No match</div>';
+                    listEl.classList.remove('qc-hidden');
+                    return;
+                }
+
+                listEl.innerHTML = matches.map(s => `
+                    <div class="qc-autocomplete-item" data-symbol="${s.symbol}" data-price="${s.price || 0}">
+                        <div style="display: flex; flex-direction: column;">
+                            <span class="qc-item-symbol">${s.symbol}</span>
+                            <span class="qc-item-name">${s.name || ''}</span>
+                        </div>
+                        <span class="qc-item-price">Rs. ${(s.price || 0).toLocaleString()}</span>
+                    </div>
+                `).join('');
+                listEl.classList.remove('qc-hidden');
+
+                // Bind click events on items
+                listEl.querySelectorAll('.qc-autocomplete-item').forEach(item => {
+                    item.onclick = () => {
+                        const sym = item.dataset.symbol;
+                        const prc = parseFloat(item.dataset.price) || 0;
+                        symbolInput.value = sym;
+                        priceInput.value = prc;
+                        
+                        // Prefill WACC if in sell mode and symbol in portfolio
+                        if (activeMode === 'sell') {
+                            const portfolio = globalState.getState().portfolio || [];
+                            const holding = portfolio.find(p => p.symbol.toUpperCase() === sym.toUpperCase());
+                            if (holding && holding.wacc) {
+                                waccInput.value = parseFloat(holding.wacc).toFixed(4);
+                            } else {
+                                waccInput.value = '';
+                            }
+                        }
+
+                        listEl.classList.add('qc-hidden');
+                        calculate();
+                    };
+                });
+
+            } catch (err) {
+                console.error("Quick calc search failed:", err);
+            }
+        };
+
+        // Mode Toggles
+        buyBtn.onclick = () => {
+            activeMode = 'buy';
+            buyBtn.classList.add('active');
+            sellBtn.classList.remove('active');
+            waccGroup.classList.add('qc-hidden');
+            calculate();
+        };
+
+        sellBtn.onclick = () => {
+            activeMode = 'sell';
+            sellBtn.classList.add('active');
+            buyBtn.classList.remove('active');
+            waccGroup.classList.remove('qc-hidden');
+            
+            // Try pre-filling WACC if a symbol is already selected
+            const sym = symbolInput.value.toUpperCase().trim();
+            if (sym) {
+                const portfolio = globalState.getState().portfolio || [];
+                const holding = portfolio.find(p => p.symbol.toUpperCase() === sym.toUpperCase());
+                if (holding && holding.wacc) {
+                    waccInput.value = parseFloat(holding.wacc).toFixed(4);
+                }
+            }
+            calculate();
+        };
+
+        // Inputs change triggers
+        [priceInput, qtyInput, waccInput].forEach(inp => {
+            inp.oninput = () => calculate();
+        });
+
+        // Calculation Function
+        const calculate = () => {
+            const price = parseFloat(priceInput.value) || 0;
+            const qty = parseFloat(qtyInput.value) || 0;
+
+            // Update Full Calculator Link
+            const prefix = globalState.getState().pathPrefix || '';
+            const sym = symbolInput.value.toUpperCase().trim();
+            fullCalcLink.href = `${prefix}pages/calculator/buy-sell.html?symbol=${sym}&price=${price}&qty=${qty}`;
+
+            if (price <= 0 || qty <= 0) {
+                resultsEl.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding-top: 1rem; font-size: 0.85rem;">Enter price and quantity to calculate</div>';
+                return;
+            }
+
+            if (activeMode === 'buy') {
+                const res = FeeService.calculateBuy(price, qty);
+                resultsEl.innerHTML = `
+                    <div class="qc-result-row">
+                        <span>Share Amount:</span>
+                        <span>Rs. ${res.purchaseAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="qc-result-row">
+                        <span>Broker Commission:</span>
+                        <span>Rs. ${res.brokerCommission.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="qc-result-row">
+                        <span>SEBON Fee:</span>
+                        <span>Rs. ${res.sebonFee.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="qc-result-row">
+                        <span>DP Charge:</span>
+                        <span>Rs. ${res.dpCharge.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="qc-result-row total-row">
+                        <span>Total Cost:</span>
+                        <span class="negative">Rs. ${res.totalCost.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem; text-align: right;">
+                        Effective WACC: Rs. ${res.wacc.toFixed(2)}
+                    </div>
+                `;
+            } else {
+                const wacc = parseFloat(waccInput.value) || price; // fallback to price if WACC empty
+                const res = FeeService.calculateSell(price, qty, wacc);
+                const profitColor = res.totalProfit >= 0 ? 'positive' : 'negative';
+                const profitClass = res.totalProfit >= 0 ? 'profit-positive' : 'profit-negative';
+                
+                resultsEl.innerHTML = `
+                    <div class="qc-result-row">
+                        <span>Share Amount:</span>
+                        <span>Rs. ${res.salesAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="qc-result-row">
+                        <span>Broker Commission:</span>
+                        <span>Rs. ${res.brokerCommission.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="qc-result-row">
+                        <span>SEBON Fee:</span>
+                        <span>Rs. ${res.sebonFee.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="qc-result-row">
+                        <span>DP Charge:</span>
+                        <span>Rs. ${res.dpCharge.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="qc-result-row">
+                        <span>Capital Gain Tax (7.5%):</span>
+                        <span>Rs. ${res.cgt.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="qc-result-row total-row">
+                        <span>Receivable:</span>
+                        <span class="positive">Rs. ${res.netReceivable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="qc-result-row profit-row ${profitClass}">
+                        <span style="font-size: 0.75rem; color: var(--text-secondary);">Net Profit / Loss</span>
+                        <span style="font-size: 1.1rem; font-weight: 800;" class="${profitColor}">
+                            Rs. ${res.totalProfit.toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                        </span>
+                    </div>
+                `;
             }
         };
     },
