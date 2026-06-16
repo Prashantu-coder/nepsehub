@@ -163,6 +163,36 @@ async function init() {
   globalState.setState({ activePage: "calculator" });
   await Layout.init();
 
+  const params = new URLSearchParams(window.location.search);
+  const symbol = params.get("symbol");
+  const price = params.get("price");
+  const qty = params.get("qty");
+
+  if (symbol) {
+    const headers = document.querySelectorAll(".tools-grid h3");
+    headers.forEach(h => {
+      if (h.textContent.includes("Buy Calculator")) {
+        h.innerHTML = `Buy Calculator <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; margin-left: 0.5rem;">(${symbol.toUpperCase()})</span>`;
+      } else if (h.textContent.includes("Sell Calculator")) {
+        h.innerHTML = `Sell Calculator <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; margin-left: 0.5rem;">(${symbol.toUpperCase()})</span>`;
+      }
+    });
+  }
+
+  if (qty) {
+    const buyQty = document.getElementById("buyQty");
+    const sellQty = document.getElementById("sellQty");
+    if (buyQty) buyQty.value = qty;
+    if (sellQty) sellQty.value = qty;
+  }
+
+  if (price) {
+    const buyPrice = document.getElementById("buyPrice");
+    const sellPrice = document.getElementById("sellPrice");
+    if (buyPrice) buyPrice.value = price;
+    if (sellPrice) sellPrice.value = price;
+  }
+
   const inputs = [
     "buyQty",
     "buyPrice",
