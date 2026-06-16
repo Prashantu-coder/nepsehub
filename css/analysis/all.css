@@ -1020,30 +1020,190 @@ th.sortable {
 /* ── Crossover Cell ── */
 .crossover-mini {
   display: flex;
-  gap: 3px;
+  gap: 5px;
+  align-items: center;
 }
+
+.crossover-mini-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: help;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.crossover-mini-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.15);
+}
+
+.crossover-label-short { color: #a5b4fc; }
+.crossover-label-swing { color: #34d399; }
+.crossover-label-medium { color: #fb923c; }
+.crossover-label-golden { color: #f59e0b; }
 
 .crossover-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
   display: inline-block;
-  position: relative;
+}
 
-  &[title] {
-    cursor: help;
+.crossover-dot.bullish {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.crossover-dot.bearish {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+}
+
+.crossover-dot.fresh-bullish {
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+  animation: pulse-glow-green 1.5s infinite;
+}
+
+.crossover-dot.fresh-bearish {
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444;
+  animation: pulse-glow-red 1.5s infinite;
+}
+
+@keyframes pulse-glow-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
   }
-
-  &.bullish {
-    background: #10b981;
-    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+  70% {
+    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
   }
-
-  &.bearish {
-    background: #ef4444;
-    box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
   }
 }
+
+@keyframes pulse-glow-red {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+/* ── Custom Crossover Tooltip ── */
+.crossover-tooltip-container {
+  position: absolute;
+  z-index: 10000;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+  min-width: 265px;
+  pointer-events: none;
+  font-size: 0.78rem;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  transform: scale(0.95);
+  opacity: 0;
+  display: none;
+}
+
+.crossover-tooltip-container.show {
+  display: block;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.crossover-tooltip-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 0.25rem;
+}
+
+.crossover-tooltip-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.crossover-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 0.76rem;
+}
+
+.crossover-tooltip-label {
+  color: var(--text-secondary);
+}
+
+.crossover-tooltip-val {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.crossover-tooltip-badge-container {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.crossover-tooltip-signal-banner {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.crossover-tooltip-signal-banner.bullish {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.crossover-tooltip-signal-banner.bearish {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.crossover-tooltip-distance {
+  font-weight: 800;
+}
+
+.crossover-tooltip-distance.positive {
+  color: #10b981;
+}
+
+.crossover-tooltip-distance.negative {
+  color: #ef4444;
+}
+
 
 /* ── Pagination ── */
 .screener-pagination {
