@@ -135,6 +135,7 @@ function renderCards(items) {
         const sector = item.sector || item.category || 'N/A';
         
         const logoUrl = getStockImageUrl(symbol.toUpperCase(), '../../', name);
+        const symbolUpper = symbol.toUpperCase();
 
         const openDateObj = item.openingDate ? new Date(item.openingDate) : null;
         const closeDateObj = item.closingDate ? new Date(item.closingDate) : null;
