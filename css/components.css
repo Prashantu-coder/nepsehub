@@ -530,27 +530,27 @@
 /* Quick Calculator Trigger Button */
 .quick-calc-trigger-btn {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--theme-gradient, linear-gradient(135deg, #6366f1, #3b82f6));
-    color: white;
+    bottom: 0;
+    left: 2.97rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 15%;
+    background: var(--surface-solid);
+    color: var(--text-secondary);
     border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
     cursor: pointer;
-    box-shadow: 0 8px 32px 0 rgba(99, 102, 241, 0.4);
+    box-shadow: var(--card-shadow);
     z-index: 99999;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s;
 }
 
 .quick-calc-trigger-btn:hover {
     transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.6);
+    box-shadow: var(--card-shadow);
 }
 
 /* Quick Calculator Drawer */

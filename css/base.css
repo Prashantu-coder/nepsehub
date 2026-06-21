@@ -245,7 +245,7 @@ header {
 }
 
 .theme-toggle-btn:hover {
-  transform: scale(1.05);
+  transform: scale(1.1) rotate(5deg);
   background: var(--surface-hover);
 }
 
