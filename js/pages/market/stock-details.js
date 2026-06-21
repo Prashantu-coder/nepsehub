@@ -1166,13 +1166,13 @@ function renderPriceHistoryTable() {
 
         rowsHtml += `
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
-                <td style="padding: 10px; color: #e2e8f0; font-weight: 500;">${item.Date}</td>
-                <td style="padding: 10px; text-align: right; color: #cbd5e1;">Rs. ${open.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                <td style="padding: 10px; color: var(--text-primary); font-weight: 500;">${item.Date}</td>
+                <td style="padding: 10px; text-align: right; color: var(--text-primary);">Rs. ${open.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                 <td style="padding: 10px; text-align: right; color: #10b981;">Rs. ${high.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                 <td style="padding: 10px; text-align: right; color: #ef4444;">Rs. ${low.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                <td style="padding: 10px; text-align: right; color: #e2e8f0; font-weight: 600;">Rs. ${close.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                <td style="padding: 10px; text-align: right; color: var(--text-primary); font-weight: 600;">Rs. ${close.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                 <td style="padding: 10px; text-align: right; font-weight: 600;" ${changeClass}>${changeText}</td>
-                <td style="padding: 10px; text-align: right; color: #cbd5e1;">${volume.toLocaleString('en-IN')}</td>
+                <td style="padding: 10px; text-align: right; color: var(--text-primary);">${volume.toLocaleString('en-IN')}</td>
             </tr>
         `;
     });
