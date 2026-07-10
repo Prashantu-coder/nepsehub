@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Compare | NEPSE HUB</title>
+  <script src="../../js/session-validator-8f7b2c9d6e4a3b1c.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="../../css/base.css" />
+  <link rel="stylesheet" href="../../css/layout.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <link rel="stylesheet" href="../../css/analysis/compare.css" />
+  <link rel="stylesheet" href="../../css/easy.css" />
+</head>
+
+<body>
+  <header class="sticky">
+    <div class="flex-row space-between w-full px-5">
+      <!-- logo -->
+      <div class="flex items-center gap-15">
+        <div id="burgerMenu" class="burger-menu">
+          <i class="fas fa-bars"></i>
+        </div>
+
+        <div class="logo">
+          <i class="fas fa-chart-line"></i>
+          <span class="logo-text mobile-hide">NEPSE HUB</span>
+        </div>
+      </div>
+
+      <!-- nepse values -->
+      <div class="flex-row content-center items-center gap-5">
+        <div id="marketDot" class="blinking-dot"></div>
+        <div>
+          <h6 class="nepse">NEPSE</h6>
+        </div>
+        <div id="index-value">
+          <div class="flex-col">
+            <span id="header-nepse-val" class="font-weight-700 f-16 text-primary">—</span>
+            <span id="header-nepse-change" class="f-12 font-weight-600 mr-8">—</span>
+          </div>
+          <span class="pc-only bg-secondary w-1 h-12"></span>
+          <div class="flex-col">
+            <span class="pc-only f-16 text-secondary">Turnover:
+              <strong id="header-nepse-turnover" class="text-primary">—</strong></span>
+            <span class="pc-only f-16 text-secondary">Volume:
+              <strong id="header-nepse-volume" class="text-primary">—</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- clock and notification -->
+      <div class="flex items-center gap-5 py-8 pr-10">
+        <!-- Combined Market Status & Clock Pill -->
+        <div class="market-status-pill pc-only">
+          <div id="navbar-clock" class="navbar-clock-sub"></div>
+          <div id="market-status" class="market-status-sub"></div>
+        </div>
+
+        <!-- Notification Bell -->
+        <div class="nav-notification-wrapper">
+          <button id="notification-bell" class="btn-icon">
+            <i class="far fa-bell"></i>
+            <span id="notif-badge" class="notif-badge hidden">0</span>
+          </button>
+          <div id="notif-dropdown" class="notif-dropdown glass hidden"></div>
+        </div>
+
+        <div class="nav-profile-wrapper">
+          <button id="user-profile-btn" title="View Profile">
+            <span id="user-avatar-initial">U</span>
+          </button>
+          <div id="profile-dropdown" class="profile-dropdown glass hidden"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <div id="navbar-container"></div>
+  <div class="app-container">
+    <div id="sidebar-container"></div>
+    <main class="main-content">
+      <div id="app">
+        <!-- Page Header -->
+        <div class="header">
+          <div>
+            <h2>
+              <i class="fas fa-balance-scale" style="color: var(--primary); margin-right: 0.5rem"></i>Stock <span class="gradient-text">Compare</span>
+            </h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">Select up to 4 stocks to compare metrics, chart performance, and broker holdings side-by-side.</p>
+          </div>
+        </div>
+
+        <!-- Symbol Selector Container -->
+        <div class="glass compare-selector-card" style="padding: 1.5rem; border-radius: 20px; margin-bottom: 2rem;">
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <label style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary);">Add Stocks to Compare</label>
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+              <div class="compare-search-wrapper" style="position: relative; flex: 1; min-width: 250px;">
+                <i class="fas fa-search" style="position: absolute; left: 14px; top: 15px; color: var(--text-secondary);"></i>
+                <input type="text" id="compare-search" placeholder="Type symbol or name (e.g. NICA)..." autocomplete="off" style="width: 100%; padding: 0.8rem 1rem 0.8rem 2.8rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.2); color: white;" />
+                <div id="compare-search-results" class="compare-autocomplete-list glass hidden" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; max-height: 250px; overflow-y: auto; background: #1e293b; border-radius: 12px; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"></div>
+              </div>
+              <div id="selected-symbols-tags" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <!-- Symbol tags rendered here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparison Dashboard -->
+        <div id="compare-dashboard" class="hidden">
+          <!-- Multi-line performance Chart -->
+          <div class="glass" style="padding: 1.5rem; border-radius: 20px; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+              <h3 style="font-weight: 800; margin: 0; font-size: 1.2rem; color: white;"><i class="fas fa-chart-line" style="color: var(--primary); margin-right: 0.5rem;"></i> Normalized Performance (%)</h3>
+              <div class="chart-period-toggles" style="display: flex; background: rgba(255,255,255,0.05); padding: 3px; border-radius: 8px;">
+                <button class="period-btn" data-period="1W" style="background: none; border: none; color: var(--text-secondary); padding: 5px 12px; font-weight: 700; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">1W</button>
+                <button class="period-btn active" data-period="1M" style="background: none; border: none; color: var(--text-secondary); padding: 5px 12px; font-weight: 700; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">1M</button>
+                <button class="period-btn" data-period="3M" style="background: none; border: none; color: var(--text-secondary); padding: 5px 12px; font-weight: 700; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">3M</button>
+                <button class="period-btn" data-period="1Y" style="background: none; border: none; color: var(--text-secondary); padding: 5px 12px; font-weight: 700; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">1Y</button>
+              </div>
+            </div>
+            <div class="compare-chart-container" style="position: relative; height: 320px; width: 100%;">
+              <canvas id="compare-perf-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Comparison Table Grid -->
+          <div class="glass compare-grid-wrapper" style="border-radius: 20px; overflow: hidden; margin-bottom: 2rem;">
+            <div class="compare-grid-scroll" style="overflow-x: auto;">
+              <table class="compare-table" id="compare-matrix-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                <!-- Rendered dynamically side-by-side -->
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Initial Blank State -->
+        <div id="compare-empty-state" class="glass" style="padding: 4rem 2rem; border-radius: 20px; text-align: center;">
+          <i class="fas fa-balance-scale" style="font-size: 3.5rem; color: rgba(255,255,255,0.1); margin-bottom: 1.5rem; display: block;"></i>
+          <h3 style="font-weight: 800; color: white; margin-bottom: 0.5rem; font-size: 1.25rem;">No Stocks Selected</h3>
+          <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto 1.5rem auto; font-size: 0.9rem;">Type and select symbols from the search bar above to begin side-by-side comparative analysis.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="ticker-wrapper">
+    <div class="ticker-track" id="tickerTrack">
+      <div class="loading-placeholder">⏳ Fetching watchlist & live prices... ticker will appear soon</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="../../js/pages/analysis/compare.js"></script>
+  <script src="../../js/security.js"></script>
+  <script src="../../js/7f9c2d4a8b1e5c3d9f0a7b6c2e1d4f8a5c9e7b3d1a6f4c8e2b9d0f7a3c5e1d6.js"></script>
+  <script type="module" src="../../components/9a7f3c1e5d8b4a2f6c0e9d7b1a3f5c8e2d6b4a9f1c7e3d5b8a0f2c6e4d9b1a7.js"></script>
+</body>
+
+</html>
