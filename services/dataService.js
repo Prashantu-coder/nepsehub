@@ -56,6 +56,51 @@ const DataService = {
         }
     },
 
+    async getFloorsheet(symbol, page = 0, size = 50) {
+        try {
+            const endpoint = `${this.API_BASE}/api/stock-profile?route=floorsheet&symbol=${symbol.toUpperCase()}&page=${page}&size=${size}`;
+            console.log(`📡 Fetching floorsheet from: ${endpoint}`);
+            const response = await fetch(endpoint);
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Floorsheet Fetch Error:', error);
+            return null;
+        }
+    },
+
+    async getTopBuy(symbol, from_date = null, to_date = null) {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const from = from_date || today;
+            const to   = to_date   || today;
+            const endpoint = `${this.API_BASE}/api/stock-profile?route=top-buy&symbol=${symbol.toUpperCase()}&from_date=${from}&to_date=${to}`;
+            console.log(`📡 Fetching top-buy from: ${endpoint}`);
+            const response = await fetch(endpoint);
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Top Buy Fetch Error:', error);
+            return null;
+        }
+    },
+
+    async getTopSell(symbol, from_date = null, to_date = null) {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const from = from_date || today;
+            const to   = to_date   || today;
+            const endpoint = `${this.API_BASE}/api/stock-profile?route=top-sell&symbol=${symbol.toUpperCase()}&from_date=${from}&to_date=${to}`;
+            console.log(`📡 Fetching top-sell from: ${endpoint}`);
+            const response = await fetch(endpoint);
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Top Sell Fetch Error:', error);
+            return null;
+        }
+    },
+
     async getSymbolData(symbol) {
         try {
             const endpoint = `${this.API_BASE}/api/symbol-data?symbol=${symbol.toUpperCase()}`;
