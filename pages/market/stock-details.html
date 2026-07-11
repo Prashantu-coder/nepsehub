@@ -309,17 +309,69 @@
               </div>
             </div>
 
-            <!-- Column 3: Under Development Card -->
-            <div class="glass dev-card">
-              <div class="dev-card-icon-container">
-                <i class="fas fa-tools dev-card-icon"></i>
+            <!-- Column 3: Advanced Valuation Card -->
+            <div class="glass valuation-card" id="valuation-card">
+              <h3 class="stats-card-heading mb-16">
+                <i class="fas fa-chart-pie" style="color: var(--primary); margin-right: 0.5rem"></i>
+                Advanced Valuation
+              </h3>
+              
+              <!-- 1. Trend Signal -->
+              <div class="val-section mb-16">
+                <div class="val-label-flex">
+                  <span>Trend Signal</span>
+                  <span id="val-trend-badge" class="signal-badge badge-neutral">Loading...</span>
+                </div>
               </div>
-              <h4 class="dev-card-title">Advanced Valuation</h4>
-              <p class="dev-card-text">
-                This stats analysis card is currently under active
-                development. Upcoming releases will feature automated trend
-                metrics and peer comparisons.
-              </p>
+              
+              <!-- 2. 52-Week Range position -->
+              <div class="val-section mb-16">
+                <div class="val-label-flex mb-8">
+                  <span>52-Week Range Position</span>
+                  <span id="val-52w-position" style="font-weight: 600;">--</span>
+                </div>
+                <div class="range-bar-container">
+                  <div class="range-bar-track">
+                    <div id="range-bar-pin" class="range-bar-pin" style="left: 50%;"></div>
+                  </div>
+                  <div class="range-bar-labels">
+                    <span id="val-52w-low" class="trend-down">--</span>
+                    <span id="val-52w-high" class="trend-up">--</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Mini Sparkline -->
+              <div class="val-section mb-16">
+                <div class="val-label-flex mb-8">
+                  <span>30-Day Trend Sparkline</span>
+                </div>
+                <div class="sparkline-container" style="height: 45px; position: relative;">
+                  <canvas id="val-sparkline"></canvas>
+                </div>
+              </div>
+
+              <!-- 4. Peer Comparison -->
+              <div class="val-section mb-16">
+                <div class="val-label-flex mb-8">
+                  <span>Sector Peers (% Change)</span>
+                </div>
+                <div id="val-peers-container" class="val-peers-list">
+                  <div class="shimmer-bg" style="height: 20px; margin-bottom: 6px; border-radius: 4px;"></div>
+                  <div class="shimmer-bg" style="height: 20px; margin-bottom: 6px; border-radius: 4px;"></div>
+                  <div class="shimmer-bg" style="height: 20px; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <!-- 5. Action Links / CTAs -->
+              <div class="val-actions-grid">
+                <a id="val-cta-trade" href="#" class="btn btn-primary btn-val-cta">
+                  <i class="fas fa-calculator"></i> Trade Planner
+                </a>
+                <a id="val-cta-buysell" href="#" class="btn btn-outline btn-val-cta">
+                  <i class="fas fa-balance-scale"></i> Buy/Sell Calc
+                </a>
+              </div>
             </div>
           </div>
 
