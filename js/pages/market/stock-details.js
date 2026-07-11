@@ -680,6 +680,12 @@ async function updateChart() {
             prices = objectData.map(d => parseFloat(d.contractRate || d.price || d.y || d.value || 0));
         }
 
+        // For multi-day timeframes the API returns newest-first — reverse so chart goes left=old, right=new
+        if (activeTimeframe !== '1D') {
+            labels.reverse();
+            prices.reverse();
+        }
+
         const isPositive = prices[prices.length - 1] >= prices[0];
         const lineColor = isPositive ? '#10b981' : '#ef4444';
 
@@ -744,6 +750,7 @@ async function updateChart() {
                         }
                     },
                     y: {
+                        position: 'right',
                         grid: { color: 'rgba(255, 255, 255, 0.03)' },
                         ticks: {
                             color: '#8b949e',
