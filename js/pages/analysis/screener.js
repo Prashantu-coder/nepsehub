@@ -2,7 +2,7 @@ import globalState from '../../state.js';
 import { Layout } from '../../layout.js';
 import DataService from '../../../services/dataService.js';
 
-const SCREENER_API = 'https://technical-nepse.vercel.app/api/screener/all';
+const SCREENER_API = 'https://nepse-hub-backend.vercel.app/api/screener';
 
 // State
 let allData = [];           // All data loaded so far (all pages combined)
@@ -35,7 +35,7 @@ async function loadAllPages() {
 
     try {
         while (hasMore) {
-            const url = `${SCREENER_API}?page=${page}&limit=50`;
+            const url = `${SCREENER_API}?all=1&page=${page}&limit=50`;
             const response = await fetch(url);
 
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -433,7 +433,7 @@ function renderTable(data) {
         else trendBadge = '<span class="signal-badge badge-neutral">Neutral</span>';
 
         return `
-            <tr onclick="window.location.href='stock-details.html?symbol=${item.symbol}'">
+            <tr onclick="window.location.href='../market/stock-details.html?symbol=${item.symbol}'">
                 <td>
                     <div class="symbol-cell">
                         <div>

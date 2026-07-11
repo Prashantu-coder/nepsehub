@@ -355,7 +355,7 @@ async function fetchVolumeData() {
     try {
         tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 3rem;"><i class="fas fa-spinner fa-pulse"></i> Establishing connection to NEPSE technical API ...</td></tr>`;
 
-        const url = 'https://technical-nepse.vercel.app/api/volume/all';
+        const url = 'https://nepse-hub-backend.vercel.app/api/volume?all=1';
         const response = await fetch(url);
 
         if (!response.ok) throw new Error(`HTTP error ${response.status}`);
