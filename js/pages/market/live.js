@@ -79,7 +79,7 @@ async function updateMarketStatus() {
   };
 
   try {
-    const response = await fetch("https://marketstatus.onrender.com/market-status");
+    const response = await fetch("https://nepse-hub-backend.vercel.app/market-status");
     if (response.ok) {
       const statusData = await response.json();
       if (statusData && statusData.status) {

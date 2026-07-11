@@ -248,6 +248,30 @@ async function renderStockDetails() {
             return `Rs. ${num.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
         };
 
+        // Fetch historical OHLCV data to compute 52-week stats fallback
+        let histHigh = null;
+        let histLow = null;
+        try {
+            const histRes = await DataService.getSymbolData(activeSymbol);
+            if (histRes && histRes.success && Array.isArray(histRes.data)) {
+                priceHistoryData = histRes.data; // Cache for the tab
+                if (priceHistoryData.length > 0) {
+                    let maxVal = -Infinity;
+                    let minVal = Infinity;
+                    priceHistoryData.forEach(item => {
+                        const h = parseFloat(item.High) || 0;
+                        const l = parseFloat(item.Low) || 0;
+                        if (h > maxVal) maxVal = h;
+                        if (l < minVal) minVal = l;
+                    });
+                    if (maxVal > -Infinity) histHigh = maxVal;
+                    if (minVal < Infinity) histLow = minVal;
+                }
+            }
+        } catch (e) {
+            console.warn("Failed to load historical data for 52-week fallback:", e);
+        }
+
         // Set key statistics list data
         document.getElementById('sa-open').innerText = stock.open ? `Rs. ${(parseFloat(stock.open)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-';
         document.getElementById('sa-high').innerText = stock.high ? `Rs. ${(parseFloat(stock.high)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-';
@@ -257,6 +281,8 @@ async function renderStockDetails() {
         let turnoverVal = '-';
         if (profileData && profileData.todaysPriceData && profileData.todaysPriceData.turnover) {
             turnoverVal = formatLargeCurrency(parseFloat(profileData.todaysPriceData.turnover));
+        } else if (stock.turnover) {
+            turnoverVal = formatLargeCurrency(stock.turnover); // Fallback to live market turnover
         }
         document.getElementById('sa-turnover').innerText = turnoverVal;
         
@@ -300,11 +326,11 @@ async function renderStockDetails() {
             if (profileData.generalInfo) {
                 const info = profileData.generalInfo;
 
-                // Open-source Statistics values (52 Week High/Low and All time high/low)
-                document.getElementById('sa-52high').innerText = info.fiftyTwoWeekHigh ? `Rs. ${info.fiftyTwoWeekHigh.toLocaleString('en-IN')}` : '-';
-                document.getElementById('sa-52low').innerText = info.fiftyTwoWeekLow ? `Rs. ${info.fiftyTwoWeekLow.toLocaleString('en-IN')}` : '-';
-                document.getElementById('sa-ath').innerText = info.allTimeHigh ? `Rs. ${info.allTimeHigh.toLocaleString('en-IN')}` : '-';
-                document.getElementById('sa-atl').innerText = info.allTimeLow ? `Rs. ${info.allTimeLow.toLocaleString('en-IN')}` : '-';
+                // Open-source Statistics values (52 Week High/Low and All time high/low) with database calculation fallback
+                document.getElementById('sa-52high').innerText = info.fiftyTwoWeekHigh ? `Rs. ${info.fiftyTwoWeekHigh.toLocaleString('en-IN')}` : (histHigh ? `Rs. ${histHigh.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-');
+                document.getElementById('sa-52low').innerText = info.fiftyTwoWeekLow ? `Rs. ${info.fiftyTwoWeekLow.toLocaleString('en-IN')}` : (histLow ? `Rs. ${histLow.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-');
+                document.getElementById('sa-ath').innerText = info.allTimeHigh ? `Rs. ${info.allTimeHigh.toLocaleString('en-IN')}` : (histHigh ? `Rs. ${histHigh.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-');
+                document.getElementById('sa-atl').innerText = info.allTimeLow ? `Rs. ${info.allTimeLow.toLocaleString('en-IN')}` : (histLow ? `Rs. ${histLow.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-');
 
                 // Market Cap
                 const marketCapCard = document.getElementById('card-market-cap');
@@ -329,7 +355,19 @@ async function renderStockDetails() {
                     paidUpVal.innerText = formatLargeCurrency(Number(info.paidUpCapital));
                     paidUpCard.style.display = 'flex';
                 }
+            } else {
+                // Fallback database calculations when generalInfo is empty
+                document.getElementById('sa-52high').innerText = histHigh ? `Rs. ${histHigh.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-';
+                document.getElementById('sa-52low').innerText = histLow ? `Rs. ${histLow.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-';
+                document.getElementById('sa-ath').innerText = histHigh ? `Rs. ${histHigh.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-';
+                document.getElementById('sa-atl').innerText = histLow ? `Rs. ${histLow.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-';
             }
+        } else {
+            // Fallback database calculations when profileData is entirely missing
+            document.getElementById('sa-52high').innerText = histHigh ? `Rs. ${histHigh.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-';
+            document.getElementById('sa-52low').innerText = histLow ? `Rs. ${histLow.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-';
+            document.getElementById('sa-ath').innerText = histHigh ? `Rs. ${histHigh.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-';
+            document.getElementById('sa-atl').innerText = histLow ? `Rs. ${histLow.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-';
         }
 
         // Render technical indicators from the stock profile alpha-beta API
@@ -386,6 +424,9 @@ async function renderStockDetails() {
             descEl.innerText = `${stock.name || stock.symbol} is a listed security on the Nepal Stock Exchange (NEPSE) under the ${stock.sector || 'General'} sector.`;
         }
 
+        // Render advanced valuation card metrics
+        await renderAdvancedValuation(stock, profileData, data);
+
         // Clear all shimmer skeleton states in one pass once data renders
         document.querySelectorAll('.shimmer-bg').forEach(el => {
             el.classList.remove('shimmer-bg');
@@ -393,6 +434,152 @@ async function renderStockDetails() {
 
     } catch (err) {
         console.error("Failed to render stock profile details:", err);
+    }
+}
+
+async function renderAdvancedValuation(stock, profileData, liveMarketList) {
+    try {
+        // 1. CTA Links prefilled
+        const ctaTrade = document.getElementById('val-cta-trade');
+        const ctaBuySell = document.getElementById('val-cta-buysell');
+        if (ctaTrade) ctaTrade.href = `../calculator/planner.html?symbol=${activeSymbol}`;
+        if (ctaBuySell) ctaBuySell.href = `../calculator/buy-sell.html?symbol=${activeSymbol}`;
+
+        // 2. 52-Week Range position tracker
+        const info = profileData?.generalInfo;
+        const low52 = info?.fiftyTwoWeekLow || stock.low || stock.price * 0.8;
+        const high52 = info?.fiftyTwoWeekHigh || stock.high || stock.price * 1.2;
+        const ltp = stock.price;
+
+        const val52wLow = document.getElementById('val-52w-low');
+        const val52wHigh = document.getElementById('val-52w-high');
+        const val52wPos = document.getElementById('val-52w-position');
+        const barPin = document.getElementById('range-bar-pin');
+
+        if (val52wLow) val52wLow.innerText = `Rs. ${low52.toLocaleString('en-IN')}`;
+        if (val52wHigh) val52wHigh.innerText = `Rs. ${high52.toLocaleString('en-IN')}`;
+
+        if (ltp && low52 && high52) {
+            const range = high52 - low52;
+            const pct = range > 0 ? ((ltp - low52) / range) * 100 : 50;
+            if (barPin) barPin.style.left = `${Math.max(0, Math.min(100, pct))}%`;
+            
+            const pctFromLow = ((ltp - low52) / low52) * 100;
+            if (val52wPos) val52wPos.innerText = `${pctFromLow >= 0 ? '+' : ''}${pctFromLow.toFixed(1)}% from Low`;
+        }
+
+        // 3. Technical indicators trend signal
+        let trend = 'neutral';
+        try {
+            const techData = await DataService.getTechnicalIndicators(activeSymbol);
+            if (techData && techData.indicators) {
+                const ind = techData.indicators;
+                const mac = ind.moving_average_crossovers;
+                if (mac) {
+                    const statuses = [
+                        mac.golden_cross_death_cross?.status,
+                        mac.short_term_cross?.status,
+                        mac.swing_trading_cross?.status,
+                        mac.medium_term_cross?.status
+                    ].filter(Boolean);
+                    const bullish = statuses.filter(s => s === 'bullish').length;
+                    const bearish = statuses.filter(s => s === 'bearish').length;
+                    if (bullish > bearish) trend = 'bullish';
+                    else if (bearish > bullish) trend = 'bearish';
+                }
+            } else {
+                // Fallback to simple price movement comparison
+                const changePct = parseFloat(stock.changePercent) || 0;
+                if (changePct > 0.5) trend = 'bullish';
+                else if (changePct < -0.5) trend = 'bearish';
+            }
+        } catch (techErr) {
+            console.warn("Failed to load tech indicators for valuation card:", techErr);
+        }
+
+        const trendBadge = document.getElementById('val-trend-badge');
+        if (trendBadge) {
+            trendBadge.className = `signal-badge badge-${trend}`;
+            if (trend === 'bullish') {
+                trendBadge.innerHTML = `<i class="fas fa-arrow-trend-up"></i> Bullish`;
+            } else if (trend === 'bearish') {
+                trendBadge.innerHTML = `<i class="fas fa-arrow-trend-down"></i> Bearish`;
+            } else {
+                trendBadge.innerText = 'Neutral';
+            }
+        }
+
+        // 4. Sector Peers
+        const peersContainer = document.getElementById('val-peers-container');
+        if (peersContainer && Array.isArray(liveMarketList)) {
+            const peers = liveMarketList
+                .filter(s => s.sector === stock.sector && s.symbol !== stock.symbol)
+                .sort((a, b) => b.changePercent - a.changePercent)
+                .slice(0, 3);
+
+            if (peers.length > 0) {
+                peersContainer.innerHTML = peers.map(peer => {
+                    const isUp = peer.changePercent >= 0;
+                    const color = isUp ? '#10b981' : '#ef4444';
+                    return `
+                        <div class="val-peer-item" onclick="window.location.href='?symbol=${peer.symbol}'">
+                            <span class="val-peer-symbol">${peer.symbol}</span>
+                            <span class="val-peer-change" style="color: ${color};">
+                                ${isUp ? '+' : ''}${peer.changePercent.toFixed(2)}%
+                            </span>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                peersContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary); text-align: center;">No sector peers found</div>`;
+            }
+        }
+
+        // 5. Mini 30-Day Sparkline
+        const sparklineCanvas = document.getElementById('val-sparkline');
+        if (sparklineCanvas) {
+            const history = await DataService.getHistoricalCloses(activeSymbol, '1M');
+            if (history && history.length > 0) {
+                const prices = history.map(h => h.close);
+                const isPositive = prices[prices.length - 1] >= prices[0];
+                const color = isPositive ? '#10b981' : '#ef4444';
+                
+                const ctx = sparklineCanvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: prices.map((_, i) => i),
+                        datasets: [{
+                            data: prices,
+                            borderColor: color,
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                        scales: {
+                            x: { display: false },
+                            y: { display: false }
+                        }
+                    }
+                });
+            } else {
+                const ctx = sparklineCanvas.getContext('2d');
+                ctx.clearRect(0, 0, sparklineCanvas.width, sparklineCanvas.height);
+                ctx.fillStyle = 'var(--text-secondary)';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('No history data', sparklineCanvas.width / 2, sparklineCanvas.height / 2);
+            }
+        }
+
+    } catch (e) {
+        console.error("Failed to render advanced valuation details:", e);
     }
 }
 
@@ -765,86 +952,160 @@ async function loadBrokerAnalytics(days = 1) {
 
     if (symbolLabel) symbolLabel.innerText = activeSymbol;
     if (loader) loader.style.display = 'flex';
-    if (container) {
-        container.innerHTML = '';
-        container.style.display = 'none';
-    }
+    if (container) { container.innerHTML = ''; container.style.display = 'none'; }
     if (emptyState) emptyState.style.display = 'none';
 
+    const today = new Date().toISOString().split('T')[0];
+
     try {
-        const brokerData = await DataService.getBrokerTopHolding(activeSymbol, days);
-        const holdings = Array.isArray(brokerData) ? brokerData : ((brokerData && brokerData.value) ? brokerData.value : []);
+        // Fetch all three in parallel
+        const [brokerData, topBuyData, topSellData, floorData] = await Promise.allSettled([
+            DataService.getBrokerTopHolding(activeSymbol, days),
+            DataService.getTopBuy(activeSymbol, today, today),
+            DataService.getTopSell(activeSymbol, today, today),
+            DataService.getFloorsheet(activeSymbol, 0, 50)
+        ]);
 
         if (loader) loader.style.display = 'none';
 
-        if (holdings.length === 0) {
-            if (emptyState) emptyState.style.display = 'block';
-            return;
-        }
+        // ── Helper ────────────────────────────────────────────────────
+        const fmt = (num) => num ? `Rs. ${Number(num).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : 'Rs. 0.00';
+
+        // ── 1. BROKER TOP HOLDINGS ─────────────────────────────────────
+        const holdings = (() => {
+            const raw = brokerData.value;
+            if (Array.isArray(raw)) return raw;
+            if (raw && Array.isArray(raw.value)) return raw.value;
+            return [];
+        })();
 
         if (container) {
-            // Aggregate multiple transactions for the same broker
-            const brokerMap = {};
-            holdings.forEach(item => {
-                const brokerId = item.buyer;
-                const quantity = parseFloat(item.quantity) || 0;
-                const amount = parseFloat(item.amount) || (quantity * (parseFloat(item.rate) || 0));
-                
-                if (!brokerMap[brokerId]) {
-                    brokerMap[brokerId] = {
-                        buyer: brokerId,
-                        quantity: 0,
-                        amount: 0
-                    };
-                }
-                brokerMap[brokerId].quantity += quantity;
-                brokerMap[brokerId].amount += amount;
-            });
-
-            // Convert map to array and sort by quantity descending
-            const aggregatedHoldings = Object.values(brokerMap).sort((a, b) => b.quantity - a.quantity);
-
-            // Helper function to format full currency beautifully
-            const formatFullCurrency = (num) => {
-                if (!num) return 'Rs. 0.00';
-                return `Rs. ${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            };
-
-            aggregatedHoldings.forEach(item => {
-                const avgRate = item.quantity > 0 ? (item.amount / item.quantity) : 0;
-                const card = document.createElement('div');
-                card.className = 'broker-card';
-                card.innerHTML = `
-                    <div class="broker-image-container">
-                        <img class="broker-photo" 
-                             src="../../images/brokers/Broker no. ${item.buyer}.png" 
-                             onload="this.style.display='block'; document.getElementById('avatar-fallback-${item.buyer}').style.display='none';"
-                             onerror="this.onerror=null; this.src='../../images/brokers/Broker no. ${item.buyer}.jpg'; this.onerror=function(){ this.onerror=null; this.src='../../images/brokers/Broker no. ${item.buyer}.jpeg'; this.onerror=function(){ this.style.display='none'; document.getElementById('avatar-fallback-${item.buyer}').style.display='flex'; } }"
-                             alt="Broker ${item.buyer}"
-                             style="display: none;" />
-                        <div class="broker-avatar" id="avatar-fallback-${item.buyer}">B${item.buyer}</div>
-                    </div>
-                    <div class="broker-info">
-                        <div class="broker-name-title">Broker No. ${item.buyer}</div>
-                        <div class="broker-metric-row">
-                            <span>Shares Bought:</span>
-                            <span class="broker-metric-val highlight">${Number(item.quantity).toLocaleString('en-IN')}</span>
+            if (holdings.length === 0) {
+                container.innerHTML = `<div class="broker-empty-inline">No broker holding data for this timeframe.</div>`;
+            } else {
+                const brokerMap = {};
+                holdings.forEach(item => {
+                    const id = item.buyer;
+                    const qty  = parseFloat(item.quantity) || 0;
+                    const amt  = parseFloat(item.amount) || qty * (parseFloat(item.rate) || 0);
+                    if (!brokerMap[id]) brokerMap[id] = { buyer: id, quantity: 0, amount: 0 };
+                    brokerMap[id].quantity += qty;
+                    brokerMap[id].amount   += amt;
+                });
+                const sorted = Object.values(brokerMap).sort((a, b) => b.quantity - a.quantity);
+                container.innerHTML = sorted.map(item => {
+                    const avgRate = item.quantity > 0 ? (item.amount / item.quantity) : 0;
+                    return `
+                    <div class="broker-card">
+                        <div class="broker-image-container">
+                            <img class="broker-photo"
+                                 src="../../images/brokers/Broker no. ${item.buyer}.png"
+                                 onerror="this.onerror=null;this.style.display='none';document.getElementById('avf-${item.buyer}').style.display='flex';"
+                                 alt="Broker ${item.buyer}" style="display:none;"/>
+                            <div class="broker-avatar" id="avf-${item.buyer}">B${item.buyer}</div>
                         </div>
-                        <div class="broker-metric-row">
-                            <span>Avg Rate:</span>
-                            <span class="broker-metric-val">Rs. ${avgRate.toFixed(2)}</span>
+                        <div class="broker-info">
+                            <div class="broker-name-title">Broker No. ${item.buyer}</div>
+                            <div class="broker-metric-row"><span>Shares Bought:</span><span class="broker-metric-val highlight">${Number(item.quantity).toLocaleString('en-IN')}</span></div>
+                            <div class="broker-metric-row"><span>Avg Rate:</span><span class="broker-metric-val">Rs. ${avgRate.toFixed(2)}</span></div>
+                            <div class="broker-metric-row"><span>Total Outlay:</span><span class="broker-metric-val">${fmt(item.amount)}</span></div>
                         </div>
-                        <div class="broker-metric-row">
-                            <span>Total Outlay:</span>
-                            <span class="broker-metric-val">${formatFullCurrency(item.amount)}</span>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-
+                    </div>`;
+                }).join('');
+            }
             container.style.display = 'grid';
         }
+
+        // ── 2. TOP BUY / TOP SELL side-by-side ────────────────────────
+        const topBuy  = Array.isArray(topBuyData.value)  ? topBuyData.value  : [];
+        const topSell = Array.isArray(topSellData.value) ? topSellData.value : [];
+
+        let buySellEl = document.getElementById('broker-buysell-section');
+        if (!buySellEl) {
+            buySellEl = document.createElement('div');
+            buySellEl.id = 'broker-buysell-section';
+            buySellEl.style.cssText = 'margin-top:1.5rem;';
+            container.parentElement.appendChild(buySellEl);
+        }
+
+        const renderBrokerTable = (data, label, colorClass) => {
+            if (!data.length) return `<div class="broker-empty-inline">No ${label} data for today.</div>`;
+            return `
+            <table class="financials-table glass-table" style="font-size:0.82rem;">
+                <thead><tr>
+                    <th>Broker</th><th style="text-align:right">Shares</th><th style="text-align:right">Avg Rate</th><th style="text-align:right">Amount</th>
+                </tr></thead>
+                <tbody>
+                ${data.slice(0, 15).map(r => `
+                    <tr>
+                        <td>No. ${r.broker_number || r.buyer || '—'}</td>
+                        <td style="text-align:right" class="${colorClass}">${Number(r.quantity || 0).toLocaleString('en-IN')}</td>
+                        <td style="text-align:right">Rs. ${parseFloat(r.rate || r.avg_rate || 0).toFixed(2)}</td>
+                        <td style="text-align:right">${fmt(r.amount || 0)}</td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>`;
+        };
+
+        buySellEl.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+            <div class="glass" style="padding:1rem;border-radius:12px;">
+                <div class="card-title-text" style="margin-bottom:0.75rem;font-size:0.85rem;">
+                    <i class="fas fa-arrow-up" style="color:#10b981;margin-right:0.4rem;"></i>TOP BUYERS · ${today}
+                </div>
+                ${renderBrokerTable(topBuy, 'Top Buy', 'price-up')}
+            </div>
+            <div class="glass" style="padding:1rem;border-radius:12px;">
+                <div class="card-title-text" style="margin-bottom:0.75rem;font-size:0.85rem;">
+                    <i class="fas fa-arrow-down" style="color:#ef4444;margin-right:0.4rem;"></i>TOP SELLERS · ${today}
+                </div>
+                ${renderBrokerTable(topSell, 'Top Sell', 'price-down')}
+            </div>
+        </div>`;
+
+        // ── 3. FLOORSHEET ──────────────────────────────────────────────
+        const floorRaw  = floorData.value;
+        const floorRows = Array.isArray(floorRaw)
+            ? floorRaw
+            : (floorRaw && Array.isArray(floorRaw.data) ? floorRaw.data : []);
+
+        let floorEl = document.getElementById('broker-floorsheet-section');
+        if (!floorEl) {
+            floorEl = document.createElement('div');
+            floorEl.id = 'broker-floorsheet-section';
+            container.parentElement.appendChild(floorEl);
+        }
+
+        if (floorRows.length > 0) {
+            floorEl.innerHTML = `
+            <div class="card-title-text" style="margin-bottom:0.75rem;font-size:0.85rem;">
+                <i class="fas fa-list-alt" style="color:var(--primary);margin-right:0.4rem;"></i>FLOORSHEET · ${activeSymbol}
+            </div>
+            <div style="overflow-x:auto;">
+            <table class="financials-table glass-table" style="font-size:0.8rem;white-space:nowrap;">
+                <thead><tr>
+                    <th>#</th><th>Buyer</th><th>Seller</th>
+                    <th style="text-align:right">Qty</th>
+                    <th style="text-align:right">Rate</th>
+                    <th style="text-align:right">Amount</th>
+                </tr></thead>
+                <tbody>
+                ${floorRows.map((r, i) => `
+                    <tr>
+                        <td style="color:var(--text-secondary)">${i + 1}</td>
+                        <td class="price-up">${r.buyer || '—'}</td>
+                        <td class="price-down">${r.seller || '—'}</td>
+                        <td style="text-align:right">${Number(r.quantity || 0).toLocaleString('en-IN')}</td>
+                        <td style="text-align:right">Rs. ${parseFloat(r.rate || 0).toFixed(2)}</td>
+                        <td style="text-align:right">${fmt(r.amount || 0)}</td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>
+            </div>`;
+        } else {
+            floorEl.innerHTML = `<div class="broker-empty-inline">No floorsheet transactions found for today.</div>`;
+        }
+
     } catch (err) {
         console.error("Failed to render broker analytics:", err);
         if (loader) loader.style.display = 'none';
