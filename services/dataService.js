@@ -6,7 +6,7 @@ import StorageService from './storageService.js';
 const DataService = {
     async getStockProfile(symbol) {
         try {
-            const endpoint = `${this.API_BASE}/stock-profile?symbol=${symbol.toUpperCase()}`;
+            const endpoint = `${this.API_BASE}/api/stock-profile?route=profile&symbol=${symbol.toUpperCase()}`;
             console.log(`📡 Fetching stock profile from: ${endpoint}`);
             const response = await fetch(endpoint);
             if (!response.ok) return null;
@@ -19,7 +19,7 @@ const DataService = {
 
     async getStockReport(symbol) {
         try {
-            const endpoint = `${this.API_BASE}/stock-profile/report?symbol=${symbol.toUpperCase()}`;
+            const endpoint = `${this.API_BASE}/api/stock-profile?route=report&symbol=${symbol.toUpperCase()}`;
             console.log(`📡 Fetching stock report from: ${endpoint}`);
             const response = await fetch(endpoint);
             if (!response.ok) return null;
@@ -32,7 +32,7 @@ const DataService = {
 
     async getAlphaBeta(symbol) {
         try {
-            const endpoint = `${this.API_BASE}/stock-profile/alpha-beta?symbol=${symbol.toUpperCase()}`;
+            const endpoint = `${this.API_BASE}/api/stock-profile?route=alpha-beta&symbol=${symbol.toUpperCase()}`;
             console.log(`📡 Fetching alpha-beta ratios from: ${endpoint}`);
             const response = await fetch(endpoint);
             if (!response.ok) return null;
@@ -45,7 +45,7 @@ const DataService = {
 
     async getBrokerTopHolding(symbol, days = 1) {
         try {
-            const endpoint = `${this.API_BASE}/stock-profile/broker-top-holding?symbol=${symbol.toUpperCase()}&days=${days}`;
+            const endpoint = `${this.API_BASE}/api/stock-profile?route=broker-top-holding&symbol=${symbol.toUpperCase()}&days=${days}`;
             console.log(`📡 Fetching broker top holdings from: ${endpoint}`);
             const response = await fetch(endpoint);
             if (!response.ok) return null;
@@ -58,7 +58,7 @@ const DataService = {
 
     async getSymbolData(symbol) {
         try {
-            const endpoint = `https://nepse-hub-backend-7uwu.onrender.com/api/symbol-data?symbol=${symbol.toUpperCase()}`;
+            const endpoint = `${this.API_BASE}/api/symbol-data?symbol=${symbol.toUpperCase()}`;
             console.log(`📡 Fetching symbol data from: ${endpoint}`);
             const response = await fetch(endpoint);
             if (!response.ok) return null;
@@ -170,7 +170,7 @@ const DataService = {
 
         this._marketStatusPromise = (async () => {
             try {
-                const response = await fetch('https://marketstatus.onrender.com/market-status');
+                const response = await fetch(`${this.API_BASE}/market-status`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data && data.status) {
@@ -192,8 +192,8 @@ const DataService = {
         return this._marketStatusPromise;
     },
 
-    // Professional Backend URL (Update this to your Render URL after deployment)
-    API_BASE: 'https://nepsehub-backend.vercel.app',
+    // Unified Node.js Backend on Vercel
+    API_BASE: 'https://nepse-hub-backend.vercel.app',
 
     async getLiveMarket() {
         const now = Date.now();
@@ -212,7 +212,7 @@ const DataService = {
 
         this._liveMarketPromise = (async () => {
             try {
-                const endpoint = `${this.API_BASE}/core/live-nepse`;
+                const endpoint = `${this.API_BASE}/api/core?route=live-nepse`;
                 // console.log(`📡 Fetching market from: ${endpoint}`);
 
                 const response = await fetch(endpoint);
@@ -309,7 +309,7 @@ const DataService = {
 
         this._marketSummaryPromise = (async () => {
             try {
-                const endpoint = `${this.API_BASE}/core/market-turnover`;
+                const endpoint = `${this.API_BASE}/api/core?route=market-turnover`;
                 // console.log(`📡 Fetching summary from: ${endpoint}`);
 
                 const response = await fetch(endpoint);
@@ -350,7 +350,7 @@ const DataService = {
 
         this._indicesPromise = (async () => {
             try {
-                const response = await fetch(`${this.API_BASE}/core/index-live`);
+                const response = await fetch(`${this.API_BASE}/api/core?route=index-live`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
                 this._indicesCache = data;
@@ -382,7 +382,7 @@ const DataService = {
 
         this._subindicesPromise = (async () => {
             try {
-                const response = await fetch(`${this.API_BASE}/core/subindex-live`);
+                const response = await fetch(`${this.API_BASE}/api/core?route=subindex-live`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
                 this._subindicesCache = data;
@@ -401,7 +401,7 @@ const DataService = {
 
     async getFloorsheetSummary() {
         try {
-            const response = await fetch(`${this.API_BASE}/core/floorsheet/totals`);
+            const response = await fetch(`${this.API_BASE}/api/core?route=floorsheet-totals`);
             if (!response.ok) throw new Error('Network response was not ok');
             const result = await response.json();
             return result.success ? result.data : result;
@@ -412,8 +412,20 @@ const DataService = {
     },
 
     async getIPOs(type = 'ipo/general') {
+        // Map legacy path-type strings → new consolidated API params (type, for)
+        const typeMap = {
+            'ipo/general':            { type: 0, for: 2 },
+            'ipo/local':              { type: 0, for: 0 },
+            'ipo/foreign':            { type: 0, for: 1 },
+            'right-share':            { type: 2, for: 2 },
+            'fpo':                    { type: 1, for: 2 },
+            'mutual-fund-offering':   { type: 3, for: 2 },
+            'debenture-offering':     { type: 4, for: 2 },
+        };
+
+        const params = typeMap[type] || typeMap['ipo/general'];
         try {
-            const endpoint = `${this.API_BASE}/market-info/${type}`;
+            const endpoint = `${this.API_BASE}/api/market-info?route=offering&type=${params.type}&for=${params.for}`;
             // console.log(`📡 Fetching IPOs (${type}) from: ${endpoint}`);
             const response = await fetch(endpoint);
             if (!response.ok) return [];
@@ -447,10 +459,10 @@ const DataService = {
 
             let endpoint;
             if (isIndex && period === '1D') {
-                endpoint = `${this.API_BASE}/charts/stock-chart/index/1D/${encodeURIComponent(symbol)}?_t=${Date.now()}`;
+                endpoint = `${this.API_BASE}/api/charts?route=index-chart&symbol=${encodeURIComponent(symbol)}&_t=${Date.now()}`;
             } else {
                 const mappedPeriod = period === 'ALL' ? '5Y' : period;
-                endpoint = `${this.API_BASE}/charts/stock-chart/${encodeURIComponent(symbol)}?time=${mappedPeriod}&_t=${Date.now()}`;
+                endpoint = `${this.API_BASE}/api/charts?route=stock-chart&symbol=${encodeURIComponent(symbol)}&time=${mappedPeriod}&_t=${Date.now()}`;
             }
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error('Network response was not ok');
@@ -473,35 +485,28 @@ const DataService = {
         const now = Date.now();
         // Return from cache if fresh (5 minutes)
         if (this._screenerCache && (now - this._screenerCacheTime < 300000)) {
-            return this._screenerCache.find(item => item.symbol.toUpperCase() === symbol.toUpperCase()) || null;
+            const cached = this._screenerCache.find(item => item.symbol.toUpperCase() === symbol.toUpperCase());
+            if (cached) return cached;
         }
 
         try {
-            let allResults = [];
-            let page = 1;
-            let hasMore = true;
+            // Fetch directly for single symbol from consolidated Vercel backend
+            const url = `${this.API_BASE}/api/screener?symbol=${symbol.toUpperCase()}`;
+            const response = await fetch(url);
+            if (!response.ok) return null;
+            const data = await response.json();
 
-            while (hasMore) {
-                const url = `https://technical-nepse.vercel.app/api/screener/all?page=${page}&limit=50`;
-                const response = await fetch(url);
-                if (!response.ok) break;
-                const data = await response.json();
-
-                if (data.results && data.results.length > 0) {
-                    allResults = allResults.concat(data.results);
-                }
-
-                const totalPages = data.pagination?.total_pages || 1;
-                if (page >= totalPages) {
-                    hasMore = false;
-                } else {
-                    page++;
-                }
+            // Cache management
+            this._screenerCache = this._screenerCache || [];
+            const idx = this._screenerCache.findIndex(item => item.symbol.toUpperCase() === symbol.toUpperCase());
+            if (idx >= 0) {
+                this._screenerCache[idx] = data;
+            } else {
+                this._screenerCache.push(data);
             }
-
-            this._screenerCache = allResults;
             this._screenerCacheTime = Date.now();
-            return allResults.find(item => item.symbol.toUpperCase() === symbol.toUpperCase()) || null;
+
+            return data;
         } catch (e) {
             console.error('❌ Screener API Fetch Error:', e);
 
