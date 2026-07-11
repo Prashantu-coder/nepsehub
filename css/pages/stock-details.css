@@ -123,7 +123,7 @@
     margin: 0;
     font-size: 2rem;
     font-weight: 800;
-    color: #fff;
+    color: var(--text-primary);
     letter-spacing: -0.5px;
     line-height: 1.1;
 }
@@ -371,7 +371,7 @@
 .dev-card-title {
     margin: 0 0 0.5rem 0;
     font-size: 1.1rem;
-    color: #fff;
+    color: var(--text-primary);
     font-weight: 700;
 }
 
@@ -464,7 +464,7 @@
 
 .signals-name {
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     font-size: 0.88rem;
 }
 
@@ -753,7 +753,7 @@ h2.shimmer-bg {
 .broker-name-title {
     font-size: 1rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .broker-metric-row {
@@ -765,7 +765,7 @@ h2.shimmer-bg {
 
 .broker-metric-val {
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .broker-metric-val.highlight {
@@ -803,7 +803,7 @@ h2.shimmer-bg {
 
 .financials-table th {
     background: rgba(255, 255, 255, 0.03);
-    color: #fff;
+    color: var(--text-primary);
     font-weight: 700;
     font-size: 0.85rem;
     text-transform: uppercase;
@@ -815,7 +815,7 @@ h2.shimmer-bg {
     padding: 12px 16px;
     font-size: 0.88rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .financials-table tr:hover td {
@@ -825,7 +825,7 @@ h2.shimmer-bg {
 
 .financials-metric-name {
     font-weight: 600;
-    color: #fff !important;
+    color: var(--text-primary) !important;
 }
 
 .financials-table tr.total-row td {
@@ -976,4 +976,106 @@ MOBILE & TABLET RESPONSIVENESS OVERRIDES
     #price-history-table-container .financials-table tbody tr > *:nth-child(4) {
         display: none;
     }
+}
+
+/* Valuation Card Custom Styles */
+.valuation-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+}
+
+.val-section {
+    width: 100%;
+}
+
+.val-label-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.range-bar-container {
+    margin-top: 0.25rem;
+}
+
+.range-bar-track {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    position: relative;
+}
+
+.range-bar-pin {
+    width: 12px;
+    height: 12px;
+    background: var(--primary);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 6px var(--primary);
+    transition: left 0.3s ease;
+}
+
+.range-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    margin-top: 0.25rem;
+    font-weight: 600;
+}
+
+.val-peers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.val-peer-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.val-peer-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--primary);
+}
+
+.val-peer-symbol {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.val-peer-change {
+    font-weight: 600;
+}
+
+.val-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+.btn-val-cta {
+    font-size: 0.78rem !important;
+    padding: 0.6rem 0.5rem !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    border-radius: 8px !important;
 }
