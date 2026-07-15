@@ -535,25 +535,83 @@ const DataService = {
         }
 
         try {
-            // Fetch directly for single symbol from consolidated Vercel backend
-            const url = `${this.API_BASE}/api/screener?symbol=${symbol.toUpperCase()}`;
+            // Fetch directly for single symbol from the new indicators Vercel endpoint
+            const url = `${this.API_BASE}/api/indicators?symbol=${symbol.toUpperCase()}`;
             const response = await fetch(url);
             if (!response.ok) return null;
-            const data = await response.json();
+            const json = await response.json();
+            
+            if (!json.data || json.data.length === 0) return null;
+            const row = json.data[0];
+
+            // Normalize flat database row to nested schema expected by stock-details page
+            const normalizedData = {
+                symbol: row.symbol,
+                latest_traded_date: row.latest_traded_date,
+                indicators: {
+                    rsi_14: row.rsi_14,
+                    macd: {
+                        macd_line: row.macd_line,
+                        signal_line: row.macd_signal,
+                        histogram: row.macd_histogram
+                    },
+                    atr_14: row.atr_14,
+                    obv: row.obv,
+                    latest_close: row.latest_close,
+                    moving_average_crossovers: {
+                        golden_cross_death_cross: {
+                            name: "Golden Cross / Death Cross",
+                            fast_ma: "SMA 50",
+                            slow_ma: "SMA 200",
+                            fast_value: row.golden_cross_fast,
+                            slow_value: row.golden_cross_slow,
+                            status: row.golden_cross_status,
+                            signal: row.golden_cross_signal
+                        },
+                        short_term_cross: {
+                            name: "Short-term Cross",
+                            fast_ma: "EMA 9",
+                            slow_ma: "EMA 21",
+                            fast_value: row.short_cross_fast,
+                            slow_value: row.short_cross_slow,
+                            status: row.short_cross_status,
+                            signal: row.short_cross_signal
+                        },
+                        swing_trading_cross: {
+                            name: "Swing Trading Cross",
+                            fast_ma: "EMA 20",
+                            slow_ma: "EMA 50",
+                            fast_value: row.swing_cross_fast,
+                            slow_value: row.swing_cross_slow,
+                            status: row.swing_cross_status,
+                            signal: row.swing_cross_signal
+                        },
+                        medium_term_cross: {
+                            name: "Medium-term Cross",
+                            fast_ma: "EMA 50",
+                            slow_ma: "EMA 100",
+                            fast_value: row.medium_cross_fast,
+                            slow_value: row.medium_cross_slow,
+                            status: row.medium_cross_status,
+                            signal: row.medium_cross_signal
+                        }
+                    }
+                }
+            };
 
             // Cache management
             this._screenerCache = this._screenerCache || [];
             const idx = this._screenerCache.findIndex(item => item.symbol.toUpperCase() === symbol.toUpperCase());
             if (idx >= 0) {
-                this._screenerCache[idx] = data;
+                this._screenerCache[idx] = normalizedData;
             } else {
-                this._screenerCache.push(data);
+                this._screenerCache.push(normalizedData);
             }
             this._screenerCacheTime = Date.now();
 
-            return data;
+            return normalizedData;
         } catch (e) {
-            console.error('❌ Screener API Fetch Error:', e);
+            console.error('❌ Indicators API Fetch Error:', e);
 
             // Return from stale cache if available
             if (this._screenerCache) {
