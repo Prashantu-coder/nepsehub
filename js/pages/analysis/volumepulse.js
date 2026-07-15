@@ -350,22 +350,21 @@ function setupSorting() {
     updateSortIcons();
 }
 
-// fetch data from API
 async function fetchVolumeData() {
     try {
         tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 3rem;"><i class="fas fa-spinner fa-pulse"></i> Establishing connection to NEPSE technical API ...</td></tr>`;
 
-        const url = 'https://nepse-hub-backend.vercel.app/api/volume?all=1';
+        const url = 'https://nepse-hub-backend.vercel.app/api/indicators/volume?limit=500';
         const response = await fetch(url);
 
         if (!response.ok) throw new Error(`HTTP error ${response.status}`);
         const json = await response.json();
-        if (!json.symbols || !Array.isArray(json.symbols)) throw new Error('Invalid API structure');
+        if (!json.data || !Array.isArray(json.data)) throw new Error('Invalid API structure');
         
         // map raw data
-        originalData = json.symbols.map(item => ({
+        originalData = json.data.map(item => ({
             symbol: item.symbol,
-            average_volume_20d: Number(item.average_volume_20d) || 0
+            average_volume_20d: Number(item.avg_volume_20d) || 0
         })).filter(item => !isNaN(item.average_volume_20d));
         
         // remove zero? optional but keep all for transparency

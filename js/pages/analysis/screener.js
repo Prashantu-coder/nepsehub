@@ -30,34 +30,73 @@ async function init() {
 async function loadAllPages() {
     isLoading = true;
     allData = [];
-    let page = 1;
-    let hasMore = true;
 
     try {
-        while (hasMore) {
-            const url = `${SCREENER_API}?all=1&page=${page}&limit=50`;
-            const response = await fetch(url);
+        const url = 'https://nepse-hub-backend.vercel.app/api/indicators?limit=500';
+        const response = await fetch(url);
 
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const json = await response.json();
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const json = await response.json();
 
-            if (json.results && json.results.length > 0) {
-                allData = allData.concat(json.results);
-            }
-
-            totalSymbols = json.pagination?.total_symbols || allData.length;
-            const apiTotalPages = json.pagination?.total_pages || 1;
-
-            if (page >= apiTotalPages) {
-                hasMore = false;
-            } else {
-                page++;
-            }
-
-            // Update stats progressively
-            updateStats();
-            updateChipCounts();
+        if (json.data && json.data.length > 0) {
+            allData = json.data.map(row => ({
+                symbol: row.symbol,
+                latest_traded_date: row.latest_traded_date,
+                indicators: {
+                    rsi_14: row.rsi_14,
+                    macd: {
+                        macd_line: row.macd_line,
+                        signal_line: row.macd_signal,
+                        histogram: row.macd_histogram
+                    },
+                    atr_14: row.atr_14,
+                    obv: row.obv,
+                    latest_close: row.latest_close,
+                    moving_average_crossovers: {
+                        golden_cross_death_cross: {
+                            name: "Golden Cross / Death Cross",
+                            fast_ma: "SMA 50",
+                            slow_ma: "SMA 200",
+                            fast_value: row.golden_cross_fast,
+                            slow_value: row.golden_cross_slow,
+                            status: row.golden_cross_status,
+                            signal: row.golden_cross_signal
+                        },
+                        short_term_cross: {
+                            name: "Short-term Cross",
+                            fast_ma: "EMA 9",
+                            slow_ma: "EMA 21",
+                            fast_value: row.short_cross_fast,
+                            slow_value: row.short_cross_slow,
+                            status: row.short_cross_status,
+                            signal: row.short_cross_signal
+                        },
+                        swing_trading_cross: {
+                            name: "Swing Trading Cross",
+                            fast_ma: "EMA 20",
+                            slow_ma: "EMA 50",
+                            fast_value: row.swing_cross_fast,
+                            slow_value: row.swing_cross_slow,
+                            status: row.swing_cross_status,
+                            signal: row.swing_cross_signal
+                        },
+                        medium_term_cross: {
+                            name: "Medium-term Cross",
+                            fast_ma: "EMA 50",
+                            slow_ma: "EMA 100",
+                            fast_value: row.medium_cross_fast,
+                            slow_value: row.medium_cross_slow,
+                            status: row.medium_cross_status,
+                            signal: row.medium_cross_signal
+                        }
+                    }
+                }
+            }));
         }
+
+        totalSymbols = json.pagination?.total || allData.length;
+        updateStats();
+        updateChipCounts();
     } catch (err) {
         console.error('Screener fetch error:', err);
 
