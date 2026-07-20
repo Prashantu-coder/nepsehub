@@ -37,6 +37,14 @@ export const NAV_MENU_ITEMS = [
         ]
     },
     {
+        id: 'broker-analytics',
+        icon: 'fa-user-tie',
+        text: 'Broker Analytics',
+        children: [
+            { id: 'broker-holding', text: 'Broker Holdings', icon: 'fa-users', path: 'pages/analysis/broker-holding.html' }
+        ]
+    },
+    {
         id: 'tools',
         icon: 'fa-cubes',
         text: 'Investment',
@@ -54,6 +62,7 @@ export const NAV_MENU_ITEMS = [
             { id: 'average', text: 'Average Price (DCA)', icon: 'fa-layer-group', path: 'pages/calculator/average.html' },
             { id: 'breakeven', text: 'Break-even Calculator', icon: 'fa-balance-scale', path: 'pages/calculator/breakeven.html' },
             { id: 'dividend', text: 'Dividend Yield & Return', icon: 'fa-hand-holding-usd', path: 'pages/calculator/dividend.html' },
+            { id: 'debenture', text: 'Debenture Calculator', icon: 'fa-percentage', path: 'pages/calculator/debenture.html' },
             // { id: 'sip-planner', text: 'SIP Planner', icon: 'fa-calendar-check', path: 'pages/calculator/sip-planner.html' },
             { id: 'planner', text: 'Trade Planner', icon: 'fa-pen-nib', path: 'pages/calculator/planner.html' },
             { id: 'exit-strategy', text: 'Exit Strategy', icon: 'fa-sign-out-alt', path: 'pages/calculator/exit-strategy.html' }
