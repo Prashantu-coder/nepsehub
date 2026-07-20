@@ -114,6 +114,41 @@ const DataService = {
         }
     },
 
+    async getBrokerHolding(params = {}) {
+        try {
+            const queryParams = new URLSearchParams();
+            if (params.date) queryParams.append('date', params.date);
+            if (params.period) queryParams.append('period', params.period);
+            if (params.symbol) queryParams.append('symbol', params.symbol.toUpperCase());
+            if (params.memberId) queryParams.append('memberId', params.memberId);
+            if (params.type) queryParams.append('type', params.type);
+
+            const endpoint = `${this.API_BASE}/api/brokerHolding?${queryParams.toString()}`;
+            console.log(`📡 Fetching broker holding from: ${endpoint}`);
+            const response = await fetch(endpoint);
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Broker Holding Fetch Error:', error);
+            return null;
+        }
+    },
+
+    async getBrokers() {
+        try {
+            const endpoint = `${this.API_BASE}/api/brokerHolding?route=brokers`;
+            console.log(`📡 Fetching broker list from: ${endpoint}`);
+            const response = await fetch(endpoint);
+            if (!response.ok) return [];
+            const json = await response.json();
+            if (Array.isArray(json)) return json;
+            return json.brokers || [];
+        } catch (error) {
+            console.error('❌ Broker List Fetch Error:', error);
+            return [];
+        }
+    },
+
     async getStocks() {
         // Check if we have modified stocks in storage first (Admin panel changes)
         const localStocks = await StorageService.load('nepse_stocks');
