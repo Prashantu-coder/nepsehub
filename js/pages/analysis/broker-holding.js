@@ -15,6 +15,7 @@ let sortDir     = 'desc';
 let isLoading   = false;
 let groupByDate = false;  // Aggregate mode when memberId set
 let lastParams  = {};
+let currentDataType = 'holding';
 
 // ─── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
@@ -225,9 +226,8 @@ async function fetchHoldings() {
     const memberIdRaw = document.getElementById('broker-input').value.trim();
     const memberId   = memberIdRaw ? parseInt(memberIdRaw, 10) : null;
     const typeVal    = document.getElementById('type-select').value;
-    const type       = typeVal !== 'All' ? typeVal : null;
 
-    lastParams = { period, date, symbol, memberId, type };
+    lastParams = { period, date, symbol, memberId, type: typeVal !== 'All' ? typeVal : null };
 
     // Show group toggle only when memberId is present
     const groupWrap = document.getElementById('group-toggle-wrap');
@@ -243,13 +243,21 @@ async function fetchHoldings() {
     disableSearch(true);
 
     try {
-        // Build query params - fetch all rows via limit=1000 per request (API handles pagination)
+        // Build query params
         const params = new URLSearchParams();
+        
+        // Map dropdown to backend routes
+        if (typeVal === 'Buy') {
+            params.append('route', 'buy');
+        } else if (typeVal === 'Sell') {
+            params.append('route', 'sell');
+        }
+
         if (period)   params.append('period', period);
         if (date)     params.append('date', date);
         if (symbol)   params.append('symbol', symbol);
         if (memberId) params.append('memberId', memberId);
-        if (type)     params.append('type', type);
+        
         params.append('limit', '1000');
         params.append('page', '1');
 
@@ -268,6 +276,24 @@ async function fetchHoldings() {
 
         const pag = json.pagination || {};
         allRows = json.data || [];
+        
+        // Set dynamic state based on active route
+        currentDataType = json.filters.route || 'holding';
+
+        // Validate/adjust sortCol for the active dataType
+        if (currentDataType === 'buy') {
+            if (!['date', 'symbol', 'broker_id', 'buy_qty', 'buy_amount', 'avg_price'].includes(sortCol)) {
+                sortCol = 'buy_qty';
+            }
+        } else if (currentDataType === 'sell') {
+            if (!['date', 'symbol', 'broker_id', 'sell_qty', 'sell_amount', 'avg_price'].includes(sortCol)) {
+                sortCol = 'sell_qty';
+            }
+        } else {
+            if (!['date', 'symbol', 'broker_id', 'holding_qty', 'holding_amount', 'avg_price'].includes(sortCol)) {
+                sortCol = 'holding_qty';
+            }
+        }
 
         // If backend has multiple pages, fetch remaining
         if (pag.totalPages && pag.totalPages > 1) {
@@ -280,14 +306,12 @@ async function fetchHoldings() {
             }
         }
 
-        renderSummary(json.summary);
         currentPage = 1;
         sortAndRender();
 
     } catch (err) {
         console.error('Broker Holdings error:', err);
         renderEmpty(`Error: ${err.message}`);
-        hideSummary();
         document.getElementById('pagebar').style.display = 'none';
         document.getElementById('record-count').textContent = 'Error loading';
     } finally {
@@ -300,6 +324,20 @@ async function fetchHoldings() {
 function sortAndRender() {
     filteredRows = [...allRows].sort((a, b) => {
         let va = a[sortCol], vb = b[sortCol];
+        if (sortCol === 'avg_price') {
+            let aQty, aAmt, bQty, bAmt;
+            if (currentDataType === 'buy') {
+                aQty = Number(a.buy_qty || 0); aAmt = Number(a.buy_amount || 0);
+                bQty = Number(b.buy_qty || 0); bAmt = Number(b.buy_amount || 0);
+            } else if (currentDataType === 'sell') {
+                aQty = Number(a.sell_qty || 0); aAmt = Number(a.sell_amount || 0);
+                bQty = Number(b.sell_qty || 0); bAmt = Number(b.sell_amount || 0);
+            } else {
+                aQty = Number(a.holding_qty || 0); aAmt = Number(a.holding_amount || 0);
+            }
+            va = aQty !== 0 ? Math.abs(aAmt / aQty) : 0;
+            vb = bQty !== 0 ? Math.abs(bAmt / bQty) : 0;
+        }
         if (typeof va === 'string') {
             return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
         }
@@ -320,7 +358,7 @@ function updateSortHeaders() {
     });
 }
 
-// ─── Table rendering ───────────────────────────────────────────────────────────
+  // ─── Table rendering ───────────────────────────────────────────────────────────
 function renderTable() {
     const tbody = document.getElementById('holdings-table-body');
     const thead = document.getElementById('table-head');
@@ -339,17 +377,44 @@ function renderTable() {
         return;
     }
 
-    // Default flat table — Date, Symbol, Broker, Holding, Holding Amount, Avg Price
-    thead.innerHTML = `
-        <tr>
-          <th data-col="date">Date</th>
-          <th data-col="symbol">Symbol</th>
-          <th data-col="broker_id">Broker</th>
-          <th data-col="holding_qty" class="r">Holding Qty</th>
-          <th data-col="holding_amount" class="r">Holding Amount</th>
-          <th data-col="avg_price" class="r">Avg Price</th>
-        </tr>
-    `;
+    // Dynamic headers based on dataType
+    let headersHtml = '';
+    if (currentDataType === 'buy') {
+        headersHtml = `
+            <tr>
+              <th data-col="date">Date</th>
+              <th data-col="symbol">Symbol</th>
+              <th data-col="broker_id">Broker</th>
+              <th data-col="buy_qty" class="r">Buy Qty</th>
+              <th data-col="buy_amount" class="r">Buy Amount</th>
+              <th data-col="avg_price" class="r">Avg Price</th>
+            </tr>
+        `;
+    } else if (currentDataType === 'sell') {
+        headersHtml = `
+            <tr>
+              <th data-col="date">Date</th>
+              <th data-col="symbol">Symbol</th>
+              <th data-col="broker_id">Broker</th>
+              <th data-col="sell_qty" class="r">Sell Qty</th>
+              <th data-col="sell_amount" class="r">Sell Amount</th>
+              <th data-col="avg_price" class="r">Avg Price</th>
+            </tr>
+        `;
+    } else {
+        headersHtml = `
+            <tr>
+              <th data-col="date">Date</th>
+              <th data-col="symbol">Symbol</th>
+              <th data-col="broker_id">Broker</th>
+              <th data-col="holding_qty" class="r">Holding Qty</th>
+              <th data-col="holding_amount" class="r">Holding Amount</th>
+              <th data-col="avg_price" class="r">Avg Price</th>
+            </tr>
+        `;
+    }
+    thead.innerHTML = headersHtml;
+
     // Re-bind sort listeners after innerHTML rebuild
     thead.querySelectorAll('th[data-col]').forEach(th => {
         th.addEventListener('click', () => {
@@ -361,7 +426,9 @@ function renderTable() {
     });
     updateSortHeaders();
 
-    titleEl.textContent = 'Broker Holdings';
+    titleEl.textContent = currentDataType === 'buy' ? 'Broker Buy Transactions' :
+                          currentDataType === 'sell' ? 'Broker Sell Transactions' :
+                          'Broker Holdings';
 
     const start = (currentPage - 1) * ROWS_PER_PAGE;
     const pageRows = filteredRows.slice(start, start + ROWS_PER_PAGE);
@@ -369,20 +436,49 @@ function renderTable() {
     document.getElementById('record-count').textContent = `${filteredRows.length.toLocaleString('en-IN')} records`;
 
     tbody.innerHTML = pageRows.map(row => {
-        const holdClass = row.holding_qty > 0 ? 'pos' : row.holding_qty < 0 ? 'neg' : 'neutral';
-        const amtClass  = row.holding_amount > 0 ? 'pos' : row.holding_amount < 0 ? 'neg' : 'neutral';
-        // Avg price = net amount / net qty (only meaningful when holding_qty != 0)
-        const avgPrice = row.holding_qty !== 0 ? Math.abs(row.holding_amount / row.holding_qty) : null;
-        return `
-            <tr>
-              <td class="td-date">${row.date}</td>
-              <td class="td-symbol">${row.symbol}</td>
-              <td class="td-broker"><span class="bh-group-badge"><i class="fas fa-user"></i>${row.broker_id}</span></td>
-              <td class="r ${holdClass}" style="font-size:0.92rem; font-weight:700;">${row.holding_qty >= 0 ? '+' : ''}${row.holding_qty.toLocaleString('en-IN')}</td>
-              <td class="r ${amtClass}" style="font-weight:600;">${row.holding_amount >= 0 ? '+' : ''}${fmtAmt(row.holding_amount)}</td>
-              <td class="r" style="color:var(--text-secondary); font-size:0.82rem;">${avgPrice !== null ? 'Rs. ' + avgPrice.toFixed(2) : '<span style="opacity:0.4">—</span>'}</td>
-            </tr>
-        `;
+        if (currentDataType === 'buy') {
+            const qty = Number(row.buy_qty || 0);
+            const amt = Number(row.buy_amount || 0);
+            const avgPrice = qty !== 0 ? Math.abs(amt / qty) : null;
+            return `
+                <tr>
+                  <td class="td-date">${row.date}</td>
+                  <td class="td-symbol">${row.symbol}</td>
+                  <td class="td-broker"><span class="bh-group-badge"><i class="fas fa-user"></i>${row.broker_id}</span></td>
+                  <td class="r pos" style="font-size:0.92rem; font-weight:700;">+${qty.toLocaleString('en-IN')}</td>
+                  <td class="r pos" style="font-weight:600;">+${fmtAmt(amt)}</td>
+                  <td class="r" style="color:var(--text-secondary); font-size:0.82rem;">${avgPrice !== null ? 'Rs. ' + avgPrice.toFixed(2) : '<span style="opacity:0.4">—</span>'}</td>
+                </tr>
+            `;
+        } else if (currentDataType === 'sell') {
+            const qty = Number(row.sell_qty || 0);
+            const amt = Number(row.sell_amount || 0);
+            const avgPrice = qty !== 0 ? Math.abs(amt / qty) : null;
+            return `
+                <tr>
+                  <td class="td-date">${row.date}</td>
+                  <td class="td-symbol">${row.symbol}</td>
+                  <td class="td-broker"><span class="bh-group-badge"><i class="fas fa-user"></i>${row.broker_id}</span></td>
+                  <td class="r neg" style="font-size:0.92rem; font-weight:700;">-${qty.toLocaleString('en-IN')}</td>
+                  <td class="r neg" style="font-weight:600;">-${fmtAmt(amt)}</td>
+                  <td class="r" style="color:var(--text-secondary); font-size:0.82rem;">${avgPrice !== null ? 'Rs. ' + avgPrice.toFixed(2) : '<span style="opacity:0.4">—</span>'}</td>
+                </tr>
+            `;
+        } else {
+            const holdClass = row.holding_qty > 0 ? 'pos' : row.holding_qty < 0 ? 'neg' : 'neutral';
+            const amtClass  = row.holding_amount > 0 ? 'pos' : row.holding_amount < 0 ? 'neg' : 'neutral';
+            const avgPrice = row.holding_qty !== 0 ? Math.abs(row.holding_amount / row.holding_qty) : null;
+            return `
+                <tr>
+                  <td class="td-date">${row.date}</td>
+                  <td class="td-symbol">${row.symbol}</td>
+                  <td class="td-broker"><span class="bh-group-badge"><i class="fas fa-user"></i>${row.broker_id}</span></td>
+                  <td class="r ${holdClass}" style="font-size:0.92rem; font-weight:700;">${row.holding_qty >= 0 ? '+' : ''}${row.holding_qty.toLocaleString('en-IN')}</td>
+                  <td class="r ${amtClass}" style="font-weight:600;">${row.holding_amount >= 0 ? '+' : ''}${fmtAmt(row.holding_amount)}</td>
+                  <td class="r" style="color:var(--text-secondary); font-size:0.82rem;">${avgPrice !== null ? 'Rs. ' + avgPrice.toFixed(2) : '<span style="opacity:0.4">—</span>'}</td>
+                </tr>
+            `;
+        }
     }).join('');
 }
 
@@ -402,12 +498,16 @@ function renderGroupedTable(tbody, thead, titleEl) {
         }
         const g = dateMap[row.date];
         g.symbolCount++;
-        g.buy_qty     += row.buy_qty;
-        g.buy_amount  += row.buy_amount;
-        g.sell_qty    += row.sell_qty;
-        g.sell_amount += row.sell_amount;
-        g.holding_qty += row.holding_qty;
-        g.holding_amount += row.holding_amount;
+        if (currentDataType === 'buy') {
+            g.buy_qty     += Number(row.buy_qty || 0);
+            g.buy_amount  += Number(row.buy_amount || 0);
+        } else if (currentDataType === 'sell') {
+            g.sell_qty    += Number(row.sell_qty || 0);
+            g.sell_amount += Number(row.sell_amount || 0);
+        } else {
+            g.holding_qty += Number(row.holding_qty || 0);
+            g.holding_amount += Number(row.holding_amount || 0);
+        }
     }
     const grouped = Object.values(dateMap).sort((a, b) => {
         const dir = sortDir === 'asc' ? 1 : -1;
@@ -415,18 +515,45 @@ function renderGroupedTable(tbody, thead, titleEl) {
         return (a[sortCol] - b[sortCol]) * dir;
     });
 
-    titleEl.textContent = `Date-wise Summary — Broker ${lastParams.memberId}`;
+    titleEl.textContent = currentDataType === 'buy' ? `Date-wise Buy Summary — Broker ${lastParams.memberId}` :
+                          currentDataType === 'sell' ? `Date-wise Sell Summary — Broker ${lastParams.memberId}` :
+                          `Date-wise Summary — Broker ${lastParams.memberId}`;
     document.getElementById('record-count').textContent = `${grouped.length.toLocaleString('en-IN')} dates`;
 
-    thead.innerHTML = `
-        <tr>
-          <th data-col="date">Date</th>
-          <th class="r">Symbols</th>
-          <th data-col="holding_qty" class="r">Holding Qty</th>
-          <th data-col="holding_amount" class="r">Holding Amount</th>
-          <th class="r">Avg Price</th>
-        </tr>
-    `;
+    let headersHtml = '';
+    if (currentDataType === 'buy') {
+        headersHtml = `
+            <tr>
+              <th data-col="date">Date</th>
+              <th class="r">Symbols</th>
+              <th data-col="buy_qty" class="r">Buy Qty</th>
+              <th data-col="buy_amount" class="r">Buy Amount</th>
+              <th class="r">Avg Price</th>
+            </tr>
+        `;
+    } else if (currentDataType === 'sell') {
+        headersHtml = `
+            <tr>
+              <th data-col="date">Date</th>
+              <th class="r">Symbols</th>
+              <th data-col="sell_qty" class="r">Sell Qty</th>
+              <th data-col="sell_amount" class="r">Sell Amount</th>
+              <th class="r">Avg Price</th>
+            </tr>
+        `;
+    } else {
+        headersHtml = `
+            <tr>
+              <th data-col="date">Date</th>
+              <th class="r">Symbols</th>
+              <th data-col="holding_qty" class="r">Holding Qty</th>
+              <th data-col="holding_amount" class="r">Holding Amount</th>
+              <th class="r">Avg Price</th>
+            </tr>
+        `;
+    }
+    thead.innerHTML = headersHtml;
+
     thead.querySelectorAll('th[data-col]').forEach(th => {
         th.style.cursor = 'pointer';
         th.addEventListener('click', () => {
@@ -445,57 +572,50 @@ function renderGroupedTable(tbody, thead, titleEl) {
     updatePagination(grouped.length);
 
     tbody.innerHTML = pageRows.map(row => {
-        const holdClass = row.holding_qty > 0 ? 'pos' : row.holding_qty < 0 ? 'neg' : 'neutral';
-        const amtClass  = row.holding_amount > 0 ? 'pos' : row.holding_amount < 0 ? 'neg' : 'neutral';
-        const avgPrice  = row.holding_qty !== 0 ? Math.abs(row.holding_amount / row.holding_qty) : null;
-        return `
-            <tr>
-              <td class="td-date" style="font-weight:600;">${row.date}</td>
-              <td class="r"><span class="bh-group-badge">${row.symbolCount}</span></td>
-              <td class="r ${holdClass}" style="font-size:0.92rem; font-weight:700;">${row.holding_qty >= 0 ? '+' : ''}${row.holding_qty.toLocaleString('en-IN')}</td>
-              <td class="r ${amtClass}" style="font-weight:600;">${row.holding_amount >= 0 ? '+' : ''}${fmtAmt(row.holding_amount)}</td>
-              <td class="r" style="color:var(--text-secondary); font-size:0.82rem;">${avgPrice !== null ? 'Rs. ' + avgPrice.toFixed(2) : '<span style="opacity:0.4">—</span>'}</td>
-            </tr>
-        `;
+        if (currentDataType === 'buy') {
+            const qty = Number(row.buy_qty || 0);
+            const amt = Number(row.buy_amount || 0);
+            const avgPrice = qty !== 0 ? Math.abs(amt / qty) : null;
+            return `
+                <tr>
+                  <td class="td-date" style="font-weight:600;">${row.date}</td>
+                  <td class="r"><span class="bh-group-badge">${row.symbolCount}</span></td>
+                  <td class="r pos" style="font-size:0.92rem; font-weight:700;">+${qty.toLocaleString('en-IN')}</td>
+                  <td class="r pos" style="font-weight:600;">+${fmtAmt(amt)}</td>
+                  <td class="r" style="color:var(--text-secondary); font-size:0.82rem;">${avgPrice !== null ? 'Rs. ' + avgPrice.toFixed(2) : '<span style="opacity:0.4">—</span>'}</td>
+                </tr>
+            `;
+        } else if (currentDataType === 'sell') {
+            const qty = Number(row.sell_qty || 0);
+            const amt = Number(row.sell_amount || 0);
+            const avgPrice = qty !== 0 ? Math.abs(amt / qty) : null;
+            return `
+                <tr>
+                  <td class="td-date" style="font-weight:600;">${row.date}</td>
+                  <td class="r"><span class="bh-group-badge">${row.symbolCount}</span></td>
+                  <td class="r neg" style="font-size:0.92rem; font-weight:700;">-${qty.toLocaleString('en-IN')}</td>
+                  <td class="r neg" style="font-weight:600;">-${fmtAmt(amt)}</td>
+                  <td class="r" style="color:var(--text-secondary); font-size:0.82rem;">${avgPrice !== null ? 'Rs. ' + avgPrice.toFixed(2) : '<span style="opacity:0.4">—</span>'}</td>
+                </tr>
+            `;
+        } else {
+            const holdClass = row.holding_qty > 0 ? 'pos' : row.holding_qty < 0 ? 'neg' : 'neutral';
+            const amtClass  = row.holding_amount > 0 ? 'pos' : row.holding_amount < 0 ? 'neg' : 'neutral';
+            const avgPrice  = row.holding_qty !== 0 ? Math.abs(row.holding_amount / row.holding_qty) : null;
+            return `
+                <tr>
+                  <td class="td-date" style="font-weight:600;">${row.date}</td>
+                  <td class="r"><span class="bh-group-badge">${row.symbolCount}</span></td>
+                  <td class="r ${holdClass}" style="font-size:0.92rem; font-weight:700;">${row.holding_qty >= 0 ? '+' : ''}${row.holding_qty.toLocaleString('en-IN')}</td>
+                  <td class="r ${amtClass}" style="font-weight:600;">${row.holding_amount >= 0 ? '+' : ''}${fmtAmt(row.holding_amount)}</td>
+                  <td class="r" style="color:var(--text-secondary); font-size:0.82rem;">${avgPrice !== null ? 'Rs. ' + avgPrice.toFixed(2) : '<span style="opacity:0.4">—</span>'}</td>
+                </tr>
+            `;
+        }
     }).join('');
-
-    // Show pagebar
-    updatePagination(grouped.length);
 }
 
-// ─── Summary cards ─────────────────────────────────────────────────────────────
-function renderSummary(s) {
-    if (!s) { hideSummary(); return; }
-    const grid = document.getElementById('summary-grid');
-    grid.innerHTML = `
-        <div class="bh-stat-card" style="--card-accent:#4ade80">
-            <span class="bh-stat-label">Total Buy Qty</span>
-            <span class="bh-stat-value pos">${(s.buyQuantity||0).toLocaleString('en-IN')}</span>
-            <span class="bh-stat-sub">Rs. ${fmtAmt(s.buyAmount||0)}</span>
-        </div>
-        <div class="bh-stat-card" style="--card-accent:#f87171">
-            <span class="bh-stat-label">Total Sell Qty</span>
-            <span class="bh-stat-value neg">${(s.sellQuantity||0).toLocaleString('en-IN')}</span>
-            <span class="bh-stat-sub">Rs. ${fmtAmt(s.sellAmount||0)}</span>
-        </div>
-        <div class="bh-stat-card" style="--card-accent:${(s.holdingQuantity||0) >= 0 ? '#4ade80' : '#f87171'}">
-            <span class="bh-stat-label">Net Holding Qty</span>
-            <span class="bh-stat-value ${(s.holdingQuantity||0) >= 0 ? 'pos' : 'neg'}">${(s.holdingQuantity||0) >= 0 ? '+' : ''}${(s.holdingQuantity||0).toLocaleString('en-IN')}</span>
-            <span class="bh-stat-sub">Net Rs. ${fmtAmt(s.netAmount||0)}</span>
-        </div>
-        <div class="bh-stat-card" style="--card-accent:#818cf8">
-            <span class="bh-stat-label">Avg Prices</span>
-            <span class="bh-stat-value" style="font-size:1rem; gap:0.35rem; display:flex; flex-direction:column; margin-top:0.2rem;">
-                <span class="pos" style="font-size:0.9rem;">Buy: Rs. ${(s.averageBuyPrice||0).toFixed(2)}</span>
-                <span class="neg" style="font-size:0.9rem;">Sell: Rs. ${(s.averageSellPrice||0).toFixed(2)}</span>
-            </span>
-            <span class="bh-stat-sub">Weighted average per share</span>
-        </div>
-    `;
-}
-function hideSummary() {
-    document.getElementById('summary-grid').innerHTML = '';
-}
+
 
 // ─── Pagination ─────────────────────────────────────────────────────────────────
 function updatePagination(overrideTotal) {
@@ -556,15 +676,7 @@ function showLoadingState() {
             </div>
         </td></tr>
     `;
-    document.getElementById('summary-grid').innerHTML = `
-        ${[...Array(4)].map(() => `
-            <div class="bh-stat-card">
-                <div class="skel" style="width:80px; height:10px;"></div>
-                <div class="skel" style="width:120px; height:24px; margin-top:6px;"></div>
-                <div class="skel" style="width:100px; height:10px; margin-top:4px;"></div>
-            </div>
-        `).join('')}
-    `;
+
     document.getElementById('record-count').textContent = 'Loading...';
     document.getElementById('pagebar').style.display = 'none';
 }
