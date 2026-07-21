@@ -7,6 +7,7 @@ const StorageService = {
     // --- Watchlist (Express Backend) ---
     async getWatchlist() {
         try {
+            if (!window.auth?.getCachedWatchlist) return [];
             return await window.auth.getCachedWatchlist();
         } catch (err) {
             console.error('Watchlist Fetch Error:', err.message);
@@ -16,13 +17,14 @@ const StorageService = {
 
     async addToWatchlist({ symbol, target_buy = null, target_sell = null, notes = null }) {
         try {
+            if (!window.auth?.apiCall) return false;
             const response = await window.auth.apiCall('/api/watchlist', {
                 method: 'POST',
                 body: JSON.stringify({ symbol, target_buy, target_sell, notes })
             });
             if (!response.ok) throw new Error('Failed to add to watchlist');
             const data = await response.json();
-            await window.auth.refreshWatchlist();
+            if (window.auth.refreshWatchlist) await window.auth.refreshWatchlist();
             window.dispatchEvent(new CustomEvent('watchlistUpdated'));
             return data.success;
         } catch (err) {
@@ -33,13 +35,14 @@ const StorageService = {
 
     async updateWatchlistItem(id, updates) {
         try {
+            if (!window.auth?.apiCall) return false;
             const response = await window.auth.apiCall(`/api/watchlist/${id}`, {
                 method: 'PUT',
                 body: JSON.stringify(updates)
             });
             if (!response.ok) throw new Error('Failed to update watchlist item');
             const data = await response.json();
-            await window.auth.refreshWatchlist();
+            if (window.auth.refreshWatchlist) await window.auth.refreshWatchlist();
             window.dispatchEvent(new CustomEvent('watchlistUpdated'));
             return data.success;
         } catch (err) {
@@ -50,12 +53,13 @@ const StorageService = {
 
     async removeFromWatchlist(symbol) {
         try {
+            if (!window.auth?.apiCall) return false;
             const response = await window.auth.apiCall(`/api/watchlist/${symbol}`, {
                 method: 'DELETE'
             });
             if (!response.ok) throw new Error('Failed to remove from watchlist');
             const data = await response.json();
-            await window.auth.refreshWatchlist();
+            if (window.auth.refreshWatchlist) await window.auth.refreshWatchlist();
             window.dispatchEvent(new CustomEvent('watchlistUpdated'));
             return data.success;
         } catch (err) {
@@ -77,6 +81,7 @@ const StorageService = {
     // --- Trade Plans (Express Backend) ---
     async getTradePlans() {
         try {
+            if (!window.auth?.apiCall) return [];
             const response = await window.auth.apiCall('/api/trade-plans');
             if (!response.ok) throw new Error('Failed to fetch trade plans');
             return await response.json();
@@ -88,6 +93,7 @@ const StorageService = {
 
     async saveTradePlan(plan) {
         try {
+            if (!window.auth?.apiCall) return { success: false, error: 'Auth not initialized' };
             const response = await window.auth.apiCall('/api/trade-plans', {
                 method: 'POST',
                 body: JSON.stringify(plan)
@@ -103,6 +109,7 @@ const StorageService = {
 
     async deleteTradePlan(id) {
         try {
+            if (!window.auth?.apiCall) return false;
             const response = await window.auth.apiCall(`/api/trade-plans/${id}`, {
                 method: 'DELETE'
             });
@@ -116,6 +123,9 @@ const StorageService = {
     // --- Transactions — Single Source of Truth (Express Backend) ---
     async getTransactions() {
         try {
+            if (!window.auth?.getCachedTransactions) {
+                return { success: false, error: 'Auth not initialized', data: [] };
+            }
             return await window.auth.getCachedTransactions();
         } catch (err) {
             console.error('Transactions Fetch Error:', err.message);
@@ -125,13 +135,14 @@ const StorageService = {
 
     async addTransaction(tx) {
         try {
+            if (!window.auth?.apiCall) return { success: false, error: 'Auth not initialized' };
             const response = await window.auth.apiCall('/api/transactions', {
                 method: 'POST',
                 body: JSON.stringify(tx)
             });
             if (!response.ok) throw new Error('Failed to add transaction');
             const data = await response.json();
-            await window.auth.refreshTransactions();
+            if (window.auth.refreshTransactions) await window.auth.refreshTransactions();
             return data;
         } catch (err) {
             console.error('Add Transaction Error:', err.message);
@@ -141,12 +152,13 @@ const StorageService = {
 
     async deleteTransaction(id) {
         try {
+            if (!window.auth?.apiCall) return false;
             const response = await window.auth.apiCall(`/api/transactions/${id}`, {
                 method: 'DELETE'
             });
             if (!response.ok) throw new Error('Failed to delete transaction');
             const data = await response.json();
-            await window.auth.refreshTransactions();
+            if (window.auth.refreshTransactions) await window.auth.refreshTransactions();
             return data.success;
         } catch (err) {
             console.error('Delete Transaction Error:', err.message);
@@ -157,6 +169,7 @@ const StorageService = {
     // --- Notifications (Express Backend) ---
     async getNotifications() {
         try {
+            if (!window.auth?.apiCall) return [];
             const response = await window.auth.apiCall('/api/notifications');
             if (!response.ok) throw new Error('Failed to fetch notifications');
             return await response.json();
@@ -168,6 +181,7 @@ const StorageService = {
 
     async addNotification(notif) {
         try {
+            if (!window.auth?.apiCall) return false;
             const response = await window.auth.apiCall('/api/notifications', {
                 method: 'POST',
                 body: JSON.stringify(notif)
@@ -181,6 +195,7 @@ const StorageService = {
 
     async markNotificationsAsRead() {
         try {
+            if (!window.auth?.apiCall) return false;
             const response = await window.auth.apiCall('/api/notifications/mark-read', {
                 method: 'PUT'
             });
@@ -195,6 +210,7 @@ const StorageService = {
 
     async markNotificationAsRead(id) {
         try {
+            if (!window.auth?.apiCall) return false;
             const response = await window.auth.apiCall(`/api/notifications/${id}/mark-read`, {
                 method: 'PUT'
             });
@@ -209,6 +225,7 @@ const StorageService = {
 
     async deleteNotification(id) {
         try {
+            if (!window.auth?.apiCall) return false;
             const response = await window.auth.apiCall(`/api/notifications/${id}`, {
                 method: 'DELETE'
             });
@@ -224,6 +241,7 @@ const StorageService = {
     // --- Notification Settings (Express Backend) ---
     async getNotificationSettings() {
         try {
+            if (!window.auth?.apiCall) return { marketSummaryFrequency: 'never', emailEnabled: false, telegramEnabled: false, telegramConnected: false };
             const response = await window.auth.apiCall('/api/auth/notification-settings');
             if (!response.ok) throw new Error('Failed to fetch notification settings');
             const data = await response.json();
@@ -236,6 +254,7 @@ const StorageService = {
 
     async updateNotificationSettings(settings) {
         try {
+            if (!window.auth?.apiCall) return false;
             const response = await window.auth.apiCall('/api/auth/notification-settings', {
                 method: 'PUT',
                 body: JSON.stringify(settings)
@@ -251,6 +270,7 @@ const StorageService = {
 
     async getTelegramStatus() {
         try {
+            if (!window.auth?.apiCall) return false;
             const response = await window.auth.apiCall('/api/auth/telegram-status');
             if (!response.ok) throw new Error('Failed to fetch telegram status');
             const data = await response.json();
@@ -290,3 +310,4 @@ const StorageService = {
 };
 
 export default StorageService;
+
