@@ -19,6 +19,10 @@ let txCurrentPage = 1;
 const txItemsPerPage = 10;
 let chartsInitialized = false;
 
+// Holdings sort state — default: Symbol A→Z
+let sortState = { col: 'symbol', dir: 'asc' };
+
+
 
 
 // ─────────────────────────────────────────────
@@ -65,9 +69,10 @@ async function init() {
     document.getElementById('cancel-modal').onclick = () => modal.style.display = 'none';
     document.getElementById('save-holding-btn').onclick = handleSave;
 
-    ['input-qty', 'input-price'].forEach(id =>
-        document.getElementById(id).addEventListener('input', updateBuyPreview)
-    );
+    ['input-qty', 'input-price', 'input-source', 'input-date'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateBuyPreview);
+    });
 
     // Total Capital Config
     const capitalInput = document.getElementById('config-total-capital');
@@ -83,8 +88,9 @@ async function init() {
     const sellModal = document.getElementById('sell-modal-overlay');
     document.getElementById('close-sell-modal').onclick = () => sellModal.style.display = 'none';
     document.getElementById('confirm-sell-btn').onclick = handleSell;
-    document.getElementById('sell-input-qty').oninput = updateSellPreview;
+    document.getElementById('sell-input-qty').oninput   = updateSellPreview;
     document.getElementById('sell-input-price').oninput = updateSellPreview;
+    document.getElementById('sell-input-date').oninput  = updateSellPreview;
 
     // Layout & initial data
     globalState.setState({ activePage: 'portfolio' });
@@ -150,10 +156,56 @@ async function init() {
         observer.observe(chartsGrid);
     }
 
-    await refresh(true); // Pass true for initial load skeletons — fetches transactions + market data once
-    // Only refresh market data periodically (transactions are loaded once on page load)
+    initHoldingsSort();
+
+    await refresh(true);
     setInterval(refreshMarketOnly, 60000);
 }
+
+// ─────────────────────────────────────────────
+// HOLDINGS TABLE — SORT WIRING
+// ─────────────────────────────────────────────
+function initHoldingsSort() {
+    const header = document.getElementById('holdings-sort-header');
+    if (!header) return;
+
+    header.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const col = th.dataset.sort;
+            if (sortState.col === col) {
+                sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortState.col = col;
+                sortState.dir = col === 'symbol' ? 'asc' : 'desc'; // numbers default desc
+            }
+            updateSortHeaderUI();
+            renderHoldings();
+        });
+    });
+
+    updateSortHeaderUI();
+}
+
+function updateSortHeaderUI() {
+    const header = document.getElementById('holdings-sort-header');
+    if (!header) return;
+
+    header.querySelectorAll('th[data-sort]').forEach(th => {
+        const isActive = th.dataset.sort === sortState.col;
+        const iconEl   = th.querySelector('.sort-icon');
+
+        // Active col highlighting
+        th.classList.toggle('sort-active', isActive);
+        th.classList.toggle('sort-asc',  isActive && sortState.dir === 'asc');
+        th.classList.toggle('sort-desc', isActive && sortState.dir === 'desc');
+
+        // Icon
+        if (iconEl) {
+            iconEl.textContent = isActive ? (sortState.dir === 'asc' ? '↑' : '↓') : '⇅';
+        }
+    });
+}
+
 
 // ─────────────────────────────────────────────
 // DATA REFRESH
@@ -231,6 +283,36 @@ function showSkeletons() {
 // ─────────────────────────────────────────────
 // RENDER HOLDINGS TABLE
 // ─────────────────────────────────────────────
+function getSortValue(h, col) {
+    const stock = marketData.find(s => s.symbol.toUpperCase() === h.symbol.toUpperCase());
+    const ltp   = stock ? stock.price : h.wacc;
+    switch (col) {
+        case 'symbol':  return h.symbol.toUpperCase();
+        case 'qty':     return h.quantity;
+        case 'wacc':    return h.wacc;
+        case 'ltp':     return ltp;
+        case 'invested':return h.totalInvested;
+        case 'curval':  return ltp * h.quantity;
+        case 'daychg':  return stock ? (stock.change * h.quantity) : 0;
+        case 'pnl':     return (ltp * h.quantity) - h.totalInvested;
+        default:        return h.symbol.toUpperCase();
+    }
+}
+
+function getSortedHoldings() {
+    return [...computedHoldings].sort((a, b) => {
+        const va = getSortValue(a, sortState.col);
+        const vb = getSortValue(b, sortState.col);
+        let cmp = 0;
+        if (typeof va === 'string') {
+            cmp = va.localeCompare(vb);
+        } else {
+            cmp = va - vb;
+        }
+        return sortState.dir === 'asc' ? cmp : -cmp;
+    });
+}
+
 function renderHoldings() {
     const body        = document.getElementById('portfolio-list-body');
     const shimmer     = document.getElementById('holdings-shimmer-body');
@@ -254,7 +336,9 @@ function renderHoldings() {
     if (tableWrap) tableWrap.style.display = '';
     if (emptyCard) emptyCard.style.display  = 'none';
 
-    body.innerHTML = computedHoldings.map(h => {
+    const sorted = getSortedHoldings();
+
+    body.innerHTML = sorted.map(h => {
         const stock = marketData.find(s => s.symbol.toUpperCase() === h.symbol.toUpperCase());
         const ltp = stock ? stock.price : h.wacc;
         const curVal = ltp * h.quantity;
@@ -583,15 +667,41 @@ function renderTransactions() {
 // BUY MODAL — FEE PREVIEW
 // ─────────────────────────────────────────────
 function updateBuyPreview() {
-    const qty = parseFloat(document.getElementById('input-qty').value) || 0;
-    const price = parseFloat(document.getElementById('input-price').value) || 0;
-    const calc = FeeService.calculateBuy(price, qty);
+    const qty    = parseFloat(document.getElementById('input-qty').value) || 0;
+    const price  = parseFloat(document.getElementById('input-price').value) || 0;
+    const source = document.getElementById('input-source')?.value || 'Secondary';
+    const date   = document.getElementById('input-date')?.value || new Date().toISOString();
 
-    setText('preview-value', `Rs. ${fmt(calc.purchaseAmount)}`);
-    setText('preview-broker', `Rs. ${calc.brokerCommission.toFixed(2)}`);
-    setText('preview-sebon', `Rs. ${calc.sebonFee.toFixed(2)}`);
-    setText('preview-total-cost', `Rs. ${fmt(calc.totalCost)}`);
-    setText('preview-wacc', `Rs. ${calc.wacc.toFixed(2)}`);
+    const isSecondary = source === 'Secondary';
+    const calc = isSecondary
+        ? FeeService.calculateBuy(price, qty, date)
+        : FeeService.calculateBuyNoFees(price, qty);
+
+    if (isSecondary) {
+        // Show all fee rows with era label
+        document.getElementById('preview-broker-row').style.display = '';
+        document.getElementById('preview-sebon-row').style.display  = '';
+        document.getElementById('preview-dp-row').style.display     = '';
+        document.getElementById('preview-nofee-banner').style.display = 'none';
+
+        setText('preview-era-label', calc.eraLabel);
+        setText('preview-value',      `Rs. ${fmt(calc.purchaseAmount)}`);
+        setText('preview-broker',     `Rs. ${calc.brokerCommission.toFixed(2)}`);
+        setText('preview-sebon',      `Rs. ${calc.sebonFee.toFixed(2)}`);
+        setText('preview-total-cost', `Rs. ${fmt(calc.totalCost)}`);
+        setText('preview-wacc',       `Rs. ${calc.wacc.toFixed(2)}`);
+    } else {
+        // Non-secondary: hide all fee rows, show banner
+        document.getElementById('preview-broker-row').style.display = 'none';
+        document.getElementById('preview-sebon-row').style.display  = 'none';
+        document.getElementById('preview-dp-row').style.display     = 'none';
+        document.getElementById('preview-nofee-banner').style.display = '';
+
+        setText('preview-era-label', `No fees — ${source}`);
+        setText('preview-value',      `Rs. ${fmt(calc.purchaseAmount)}`);
+        setText('preview-total-cost', `Rs. ${fmt(calc.totalCost)}`);
+        setText('preview-wacc',       `Rs. ${calc.wacc.toFixed(2)}`);
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -622,19 +732,28 @@ function updateSellPreview() {
     const holding = computedHoldings.find(h => h.symbol === currentSellSymbol);
     if (!holding) return;
 
-    const qty = parseFloat(document.getElementById('sell-input-qty').value) || 0;
+    const qty   = parseFloat(document.getElementById('sell-input-qty').value) || 0;
     const price = parseFloat(document.getElementById('sell-input-price').value) || 0;
-    const calc = FeeService.calculateSell(price, qty, holding.wacc);
+    const sellDateVal = document.getElementById('sell-input-date').value || new Date().toISOString();
+
+    // Get remaining unconsumed buy lots in FIFO order
+    const availableBuyLots = PortfolioService.getAvailableBuyLots(currentSellSymbol, allTransactions);
+
+    const calc = FeeService.calculateSellFIFO(price, qty, holding.wacc, sellDateVal, availableBuyLots);
+
+    // Build hold-period pill for display
+    const holdBadgeColor = calc.cgtType === 'Long-Term' ? '#10b981' : (calc.cgtType === 'Flat' ? '#6366f1' : '#f59e0b');
+    const holdPillHtml = `<span style="background:${holdBadgeColor}22;color:${holdBadgeColor};border:1px solid ${holdBadgeColor}44;padding:1px 7px;border-radius:12px;font-size:0.68rem;font-weight:700;margin-left:6px;">${calc.holdDays} days · ${calc.cgtType}</span>`;
 
     document.getElementById('sell-fee-preview').innerHTML = `
         <div style="display:flex;align-items:center;gap:0.5rem;color:#f43f5e;margin-bottom:0.75rem;font-weight:600;">
-            <i class="fas fa-receipt"></i> Sell Calculation
+            <i class="fas fa-receipt"></i> Sell Calculation ${holdPillHtml}
         </div>
         <div class="fee-row"><span>Receivable (before tax)</span><span>Rs. ${fmt(calc.salesAmount - calc.brokerCommission - calc.sebonFee - calc.dpCharge)}</span></div>
         <div class="fee-row"><span>Broker Commission</span><span>Rs. ${calc.brokerCommission.toFixed(2)}</span></div>
         <div class="fee-row"><span>SEBON Fee</span><span>Rs. ${calc.sebonFee.toFixed(2)}</span></div>
         <div class="fee-row"><span>DP Charge</span><span>Rs. ${calc.dpCharge.toFixed(2)}</span></div>
-        <div class="fee-row" style="color:#f59e0b;"><span>CGT (7.5%)</span><span>Rs. ${calc.cgt.toFixed(2)}</span></div>
+        <div class="fee-row" style="color:#f59e0b;"><span>${calc.cgtLabel}</span><span>Rs. ${calc.cgt.toFixed(2)}</span></div>
         <hr style="border:none;border-top:1px solid rgba(244,63,94,0.2);margin:0.5rem 0;">
         <div class="fee-row" style="font-weight:700;font-size:0.95rem;color:${calc.totalProfit >= 0 ? '#10b981' : '#f43f5e'};">
             <span>Net Receivable</span><span>Rs. ${fmt(calc.netReceivable)}</span>
@@ -648,39 +767,42 @@ function updateSellPreview() {
 // SAVE BUY TRANSACTION
 // ─────────────────────────────────────────────
 async function handleSave() {
-    const sym = symbolSearch ? symbolSearch.getValue() : document.getElementById('input-symbol')?.value.toUpperCase().trim();
-    const qty = parseFloat(document.getElementById('input-qty').value);
-    const prc = parseFloat(document.getElementById('input-price').value);
-    const date = document.getElementById('input-date').value;
+    const sym    = symbolSearch ? symbolSearch.getValue() : document.getElementById('input-symbol')?.value.toUpperCase().trim();
+    const qty    = parseFloat(document.getElementById('input-qty').value);
+    const prc    = parseFloat(document.getElementById('input-price').value);
+    const date   = document.getElementById('input-date').value || new Date().toISOString();
     const source = document.getElementById('input-source').value;
 
     if (!sym) { alert('Please select a symbol from the dropdown.'); return; }
     if (isNaN(qty) || qty <= 0) { alert('Please enter a valid quantity.'); return; }
     if (isNaN(prc) || prc <= 0) { alert('Please enter a valid price.'); return; }
 
-    const calc = FeeService.calculateBuy(prc, qty);
+    const isSecondary = source === 'Secondary';
+    const calc = isSecondary
+        ? FeeService.calculateBuy(prc, qty, date)
+        : FeeService.calculateBuyNoFees(prc, qty);
 
     const res = await StorageService.addTransaction({
-        symbol: sym,
-        type: 'BUY',
-        quantity: qty,
-        price: prc,
-        source: source,
-        stop_loss: parseFloat(document.getElementById('input-stop-loss').value) || null,
+        symbol:            sym,
+        type:              'BUY',
+        quantity:          qty,
+        price:             prc,
+        source:            source,
+        stop_loss:         parseFloat(document.getElementById('input-stop-loss').value) || null,
         broker_commission: calc.brokerCommission,
-        sebon_fee: calc.sebonFee,
-        dp_charge: calc.dpCharge,
-        total_amount: calc.totalCost,
-        wacc: calc.wacc,
-        transaction_date: date || new Date().toISOString()
+        sebon_fee:         calc.sebonFee,
+        dp_charge:         calc.dpCharge,
+        total_amount:      calc.totalCost,
+        wacc:              calc.wacc,
+        transaction_date:  date
     });
 
     if (res.success) {
         document.getElementById('portfolio-modal-overlay').style.display = 'none';
         symbolSearch?.clear();
-        document.getElementById('input-qty').value = '';
-        document.getElementById('input-price').value = '';
-        document.getElementById('input-stop-loss').value = '';
+        document.getElementById('input-qty').value        = '';
+        document.getElementById('input-price').value      = '';
+        document.getElementById('input-stop-loss').value  = '';
         txCurrentPage = 1;
         await refresh();
     } else {
@@ -695,16 +817,19 @@ async function handleSell() {
     const holding = computedHoldings.find(h => h.symbol === currentSellSymbol);
     if (!holding) return;
 
-    const qty = parseFloat(document.getElementById('sell-input-qty').value);
+    const qty   = parseFloat(document.getElementById('sell-input-qty').value);
     const price = parseFloat(document.getElementById('sell-input-price').value);
-    const date = document.getElementById('sell-input-date').value;
+    const date  = document.getElementById('sell-input-date').value || new Date().toISOString();
 
     if (isNaN(qty) || qty <= 0 || qty > holding.quantity) {
         alert(`Cannot sell more than ${holding.quantity} units of ${currentSellSymbol}`);
         return;
     }
 
-    const calc = FeeService.calculateSell(price, qty, holding.wacc);
+    // Get remaining unconsumed buy lots in FIFO order
+    const availableBuyLots = PortfolioService.getAvailableBuyLots(currentSellSymbol, allTransactions);
+
+    const calc = FeeService.calculateSellFIFO(price, qty, holding.wacc, date, availableBuyLots);
 
     const res = await StorageService.addTransaction({
         symbol: currentSellSymbol,
@@ -717,7 +842,7 @@ async function handleSell() {
         capital_gain_tax: calc.cgt,
         profit_loss: calc.totalProfit,
         total_amount: calc.netReceivable,
-        transaction_date: date || new Date().toISOString()
+        transaction_date: date
     });
 
     if (res.success) {
@@ -771,8 +896,8 @@ function renderTaxReport() {
             </td>
             <td>${row.sellDate}</td>
             <td>
-                <span class="badge ${row.holdDays > 365 ? 'badge-success' : 'badge-warning'}" style="font-size:0.65rem;">
-                    ${row.holdDays} days (${row.holdDays > 365 ? 'LT' : 'ST'})
+                <span class="badge ${row.cgtType === 'Long-Term' ? 'badge-success' : (row.cgtType === 'Flat' ? 'badge-primary' : 'badge-warning')}" style="font-size:0.65rem;">
+                    ${row.holdDays} days (${row.cgtType})
                 </span>
             </td>
             <td>${row.qty}</td>
@@ -781,7 +906,10 @@ function renderTaxReport() {
             <td style="color:${row.pnl >= 0 ? '#10b981' : '#f43f5e'};font-weight:600;">
                 ${row.pnl >= 0 ? '+' : ''}${fmt(row.pnl)}
             </td>
-            <td style="color:#f59e0b;font-weight:600;">Rs. ${fmt(row.tax)}</td>
+            <td style="font-weight:600;">
+                <div style="color:#f59e0b;">Rs. ${fmt(row.tax)}</div>
+                <div style="font-size:0.65rem;color:var(--text-secondary);margin-top:2px;">${row.cgtLabel.replace('CGT ', '')}</div>
+            </td>
         </tr>
     `).join('');
 }
@@ -1101,7 +1229,7 @@ function computeHoldingsWithRisk(transactions) {
 
 function calculateRealizedData(transactions) {
     const sells = transactions.filter(t => t.type?.toUpperCase() === 'SELL').sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
-    const buys = transactions.filter(t => t.type?.toUpperCase() === 'BUY').sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
+    const buys  = transactions.filter(t => t.type?.toUpperCase() === 'BUY').sort((a, b) => new Date(a.transaction_date) - new Date(b.transaction_date));
 
     // Deep copy buys to track remaining quantities for FIFO
     let buyPool = buys.map(b => ({ ...b, remaining: b.quantity }));
@@ -1111,41 +1239,42 @@ function calculateRealizedData(transactions) {
     sells.forEach(sell => {
         let qtyToMatch = sell.quantity;
 
-        // Find matching buys for this sell
+        // Find matching buys for this sell (FIFO)
         for (let buy of buyPool) {
             if (qtyToMatch <= 0) break;
             if (buy.symbol !== sell.symbol || buy.remaining <= 0) continue;
 
             const matchedQty = Math.min(qtyToMatch, buy.remaining);
-            const holdDays = Math.floor((new Date(sell.transaction_date) - new Date(buy.transaction_date)) / (1000 * 60 * 60 * 24));
 
-            // Tax rate: 5% if > 365 days, 7.5% if <= 365 days
-            const isLongTerm = holdDays > 365;
-            const taxRate = isLongTerm ? 0.05 : 0.075;
+            // Era-aware CGT rate based on actual buy & sell dates
+            const cgtInfo = FeeService.getCGTRate(sell.transaction_date, buy.transaction_date);
 
             // Cost calculation (Buy Price includes fees)
             const buyCostPerUnit = buy.total_amount / buy.quantity;
-            const totalCost = buyCostPerUnit * matchedQty;
+            const totalCost      = buyCostPerUnit * matchedQty;
 
             // Sale calculation (Net Receivable - Proportional Purchase Cost)
             const profit = sell.total_amount * (matchedQty / sell.quantity) - totalCost;
-            const tax = profit > 0 ? profit * taxRate : 0;
+            const tax    = profit > 0 ? profit * cgtInfo.rate : 0;
 
             totalRealizedPnL += profit;
 
             reportData.push({
-                symbol: sell.symbol,
+                symbol:   sell.symbol,
                 sellDate: new Date(sell.transaction_date).toLocaleDateString(),
-                holdDays,
-                qty: matchedQty,
+                holdDays: cgtInfo.holdDays,
+                cgtType:  cgtInfo.type,
+                cgtRate:  cgtInfo.rate,
+                cgtLabel: cgtInfo.label,
+                qty:      matchedQty,
                 sellPrice: sell.price,
-                wacc: buyCostPerUnit,
-                pnl: profit,
-                tax: tax
+                wacc:     buyCostPerUnit,
+                pnl:      profit,
+                tax:      tax
             });
 
             buy.remaining -= matchedQty;
-            qtyToMatch -= matchedQty;
+            qtyToMatch    -= matchedQty;
         }
     });
 
