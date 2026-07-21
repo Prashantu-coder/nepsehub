@@ -312,15 +312,15 @@
             <div id="holdings-table-wrap" class="table-container glass">
               <table class="data-table" id="holdings-table">
                 <thead>
-                  <tr>
-                    <th>Symbol</th>
-                    <th>Qty</th>
-                    <th>WACC</th>
-                    <th>LTP</th>
-                    <th>Invested</th>
-                    <th>Current Value</th>
-                    <th>Today Change</th>
-                    <th>P&amp;L</th>
+                  <tr id="holdings-sort-header">
+                    <th data-sort="symbol" class="sortable-col sort-active sort-asc" style="cursor:pointer;user-select:none;white-space:nowrap;">Symbol <span class="sort-icon">↑</span></th>
+                    <th data-sort="qty" class="sortable-col" style="cursor:pointer;user-select:none;white-space:nowrap;">Qty <span class="sort-icon">⇅</span></th>
+                    <th data-sort="wacc" class="sortable-col" style="cursor:pointer;user-select:none;white-space:nowrap;">WACC <span class="sort-icon">⇅</span></th>
+                    <th data-sort="ltp" class="sortable-col" style="cursor:pointer;user-select:none;white-space:nowrap;">LTP <span class="sort-icon">⇅</span></th>
+                    <th data-sort="invested" class="sortable-col" style="cursor:pointer;user-select:none;white-space:nowrap;">Invested <span class="sort-icon">⇅</span></th>
+                    <th data-sort="curval" class="sortable-col" style="cursor:pointer;user-select:none;white-space:nowrap;">Current Value <span class="sort-icon">⇅</span></th>
+                    <th data-sort="daychg" class="sortable-col" style="cursor:pointer;user-select:none;white-space:nowrap;">Today Change <span class="sort-icon">⇅</span></th>
+                    <th data-sort="pnl" class="sortable-col" style="cursor:pointer;user-select:none;white-space:nowrap;">P&amp;L <span class="sort-icon">⇅</span></th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -846,7 +846,7 @@
                       color: var(--text-secondary);
                       margin-top: 0.25rem;
                     ">
-                  Based on FIFO method and Nepal CGT rates (5% > 1yr, 7.5% <= 1yr) </p>
+                  Based on FIFO method &amp; Nepal CGT: Pre-2021 flat 5% · 2021–2026: 7.5% ST / 5% LT · Jul 17 2026+: 10% ST / 7.5% LT</p>
               </div>
               <button class="btn btn-secondary" id="export-tax-csv">
                 <i class="fas fa-file-export"></i> Export CSV
@@ -959,31 +959,61 @@
         </select>
       </div>
 
-      <!-- Fee Calculation Preview (Matching Screenshot) -->
+      <!-- Fee Calculation Preview -->
       <div class="fee-preview-box">
         <div style="
               display: flex;
               align-items: center;
-              gap: 0.5rem;
-              color: var(--primary);
+              justify-content: space-between;
               margin-bottom: 0.75rem;
+            ">
+          <div style="display:flex;align-items:center;gap:0.5rem;color:var(--primary);font-weight:600;">
+            <i class="fas fa-calculator"></i> Fee Calculation Preview
+          </div>
+          <span id="preview-era-label" style="
+                font-size: 0.65rem;
+                font-weight: 700;
+                color: var(--text-secondary);
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                padding: 2px 8px;
+                border-radius: 20px;
+                text-transform: uppercase;
+                letter-spacing: 0.4px;
+              ">Current Rates (2024+)</span>
+        </div>
+
+        <!-- No-fee banner (shown for IPO / Bonus / FPO / Right Share) -->
+        <div id="preview-nofee-banner" style="
+              display: none;
+              align-items: center;
+              gap: 0.5rem;
+              background: rgba(99,102,241,0.08);
+              border: 1px solid rgba(99,102,241,0.25);
+              border-radius: 10px;
+              padding: 0.55rem 0.85rem;
+              margin-bottom: 0.75rem;
+              font-size: 0.78rem;
+              color: #a5b4fc;
               font-weight: 600;
             ">
-          <i class="fas fa-calculator"></i> Fee Calculation Preview
+          <i class="fas fa-info-circle"></i>
+          No broker, SEBON, or DP fees — only face/issue price is recorded as cost.
         </div>
+
         <div class="fee-row">
           <span>Transaction Value</span>
           <span id="preview-value">Rs. 0.00</span>
         </div>
-        <div class="fee-row">
+        <div class="fee-row" id="preview-broker-row">
           <span>Broker Commission</span>
           <span id="preview-broker">Rs. 0.00</span>
         </div>
-        <div class="fee-row">
+        <div class="fee-row" id="preview-sebon-row">
           <span>SEBON Fee (0.015%)</span>
           <span id="preview-sebon">Rs. 0.00</span>
         </div>
-        <div class="fee-row">
+        <div class="fee-row" id="preview-dp-row">
           <span>DP Charge</span>
           <span>Rs. 25.00</span>
         </div>
@@ -997,10 +1027,11 @@
           <span id="preview-total-cost">Rs. 0.00</span>
         </div>
         <div class="fee-row" style="color: var(--text-secondary); font-size: 0.75rem">
-          <span>Cost per Share</span>
+          <span>Cost per Share (WACC)</span>
           <span id="preview-wacc">Rs. 0.00</span>
         </div>
       </div>
+
 
       <div style="display: flex; gap: 1rem; margin-top: 2rem">
         <button class="btn btn-secondary" id="cancel-modal" style="flex: 1">
