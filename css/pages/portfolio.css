@@ -580,3 +580,33 @@
     width: 384px;
   }
 }
+
+/* ── Table Sorting Styles ── */
+.sortable-col {
+  position: relative;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sortable-col:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.sortable-col.sort-active {
+  color: var(--primary) !important;
+  font-weight: 700;
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+.sort-icon {
+  margin-left: 4px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  display: inline-block;
+}
+
+.sortable-col.sort-active .sort-icon {
+  opacity: 1;
+  color: var(--primary);
+  font-weight: bold;
+}
