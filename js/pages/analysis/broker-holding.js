@@ -258,7 +258,7 @@ async function fetchHoldings() {
         if (symbol)   params.append('symbol', symbol);
         if (memberId) params.append('memberId', memberId);
         
-        params.append('limit', '100');
+        params.append('limit', '50');
         params.append('page', '1');
 
         const url = `${API_BASE}/api/brokerHolding?${params.toString()}`;
