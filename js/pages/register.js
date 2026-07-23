@@ -37,9 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Username validation - no spaces or special chars
+  // Username validation - allow only alphabetic characters and spaces
   usernameInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+    e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '');
   });
 
   registerForm.addEventListener('submit', async (e) => {
