@@ -1,0 +1,296 @@
+/* Stock Comparison Matrix Styles */
+
+.compare-selector-card {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Compare Search & Autocomplete */
+.compare-search-wrapper input {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.compare-search-wrapper input:focus {
+    outline: none;
+    border-color: var(--primary) !important;
+    background: rgba(0, 0, 0, 0.35) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.compare-autocomplete-list {
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(20px);
+}
+
+.autocomplete-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background 0.2s ease;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover {
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.autocomplete-item .symbol {
+    font-weight: 700;
+    color: white;
+}
+
+.autocomplete-item .name {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.autocomplete-item .price {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Compare tags */
+.compare-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(99, 102, 241, 0.1));
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    animation: tagFadeIn 0.3s ease;
+}
+
+@keyframes tagFadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.compare-tag .remove-btn {
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.2s;
+    font-size: 0.75rem;
+}
+
+.compare-tag .remove-btn:hover {
+    color: #f43f5e;
+}
+
+/* Period toggles */
+.chart-period-toggles .period-btn {
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.2s ease;
+}
+
+.chart-period-toggles .period-btn.active {
+    background: var(--primary) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.chart-period-toggles .period-btn:hover:not(.active) {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Table Style */
+.compare-table {
+    font-family: 'Outfit', sans-serif;
+}
+
+.compare-table th {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1.25rem 1rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.compare-table tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background-color 0.2s;
+}
+
+.compare-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.01);
+}
+
+.compare-table tr:last-child {
+    border-bottom: none;
+}
+
+.compare-table td {
+    padding: 1.1rem 1rem;
+    font-size: 0.95rem;
+    color: white;
+    vertical-align: middle;
+}
+
+.compare-table td:first-child,
+.compare-table th:first-child {
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.1);
+    width: 200px;
+    position: sticky;
+    left: 0;
+    z-index: 5;
+}
+
+/* Stock Header Column card styling */
+.compare-stock-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.compare-stock-header .sym {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: white;
+}
+
+.compare-stock-header .name {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.compare-stock-header .sector-badge {
+    display: inline-block;
+    align-self: flex-start;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+}
+
+/* Metric highlights */
+.metric-highest {
+    background: rgba(16, 185, 129, 0.08) !important;
+    border-left: 3px solid #10b981 !important;
+    color: #10b981 !important;
+    font-weight: 700;
+}
+
+.metric-lowest {
+    background: rgba(244, 63, 94, 0.08) !important;
+    border-left: 3px solid #f43f5e !important;
+    color: #f43f5e !important;
+    font-weight: 700;
+}
+
+/* Action buttons in compare row */
+.compare-action-btns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.compare-action-btns .btn-sm {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(255, 255, 255, 0.03);
+    color: white;
+}
+
+.compare-action-btns .btn-sm:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.compare-action-btns .btn-sm.details-btn:hover {
+    background: white;
+    color: black;
+    border-color: white;
+}
+
+/* Shimmer Loading Animation */
+.compare-shimmer {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    height: 1.2rem;
+    border-radius: 4px;
+    width: 60%;
+    display: inline-block;
+}
+
+/* Mobile Responsiveness: Convert to Cards */
+@media screen and (max-width: 768px) {
+    .compare-table {
+        display: block;
+        width: 100%;
+    }
+    
+    .compare-table thead {
+        display: none; /* Hide header rows */
+    }
+    
+    .compare-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        width: 100%;
+        padding: 0.5rem;
+    }
+    
+    /* We will render each stock column as a card on mobile.
+       Since our table structure is usually:
+       tr (LTP) -> td (LTP label), td (Stock A value), td (Stock B value)...
+       This standard structure is hard to CSS-transpose directly into beautiful cards unless we restructure dynamically in JS.
+       Let's handle the transpose in JavaScript for mobile or style it such that the table is scrollable, or transform it.
+       Wait! We can let the table scroll horizontally on mobile with a nice sticky left column, or we can build the DOM
+       differently on mobile.
+       Let's implement a responsive side-scrolling table first with sticky header and column, which is standard, and we can also
+       make it clear and accessible.
+       Let's check: in compare.html:
+       `<div class="compare-grid-scroll" style="overflow-x: auto;">`
+       Wrapping the table in a scrollable div works beautifully for wide comparisons!
+       But let's also support custom mobile styles: if we want to transpose, we can do it in JS. Let's make sure our JS render logic is adaptive, or we style the scrolling grid to be super responsive.
+       Let's see if we should style individual card items if we build them as blocks.
+    */
+    
+    .compare-table td:first-child, 
+    .compare-table th:first-child {
+        position: sticky;
+        left: 0;
+        background: #0b0f19;
+        z-index: 10;
+        box-shadow: 4px 0 10px rgba(0, 0, 0, 0.4);
+    }
+}
